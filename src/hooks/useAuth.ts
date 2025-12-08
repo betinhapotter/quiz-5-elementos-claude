@@ -17,12 +17,22 @@ export function useAuth() {
 
         if (error) {
           console.error('Error getting user:', error);
+          setUser(null);
+          setLoading(false);
+          return;
         }
 
-        console.log('Current user:', user ? 'Authenticated' : 'Not authenticated');
-        setUser(user);
+        // Valida se o usuário tem email
+        if (user && user.email) {
+          console.log('Current user authenticated:', user.email);
+          setUser(user);
+        } else {
+          console.log('No authenticated user found');
+          setUser(null);
+        }
       } catch (err) {
         console.error('Unexpected error in getUser:', err);
+        setUser(null);
       } finally {
         setLoading(false);
       }
@@ -33,8 +43,14 @@ export function useAuth() {
     // Escuta mudanças de autenticação
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
-        console.log('Auth state changed:', event, session?.user ? 'User logged in' : 'No user');
-        setUser(session?.user ?? null);
+        console.log('Auth state changed:', event, session?.user?.email || 'No user');
+
+        // Só define como autenticado se tiver session E user com email
+        if (session?.user?.email) {
+          setUser(session.user);
+        } else {
+          setUser(null);
+        }
         setLoading(false);
       }
     );
