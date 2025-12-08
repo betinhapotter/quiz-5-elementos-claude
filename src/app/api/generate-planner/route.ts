@@ -13,9 +13,14 @@ interface GeneratePlannerBody {
 }
 
 export async function POST(request: NextRequest) {
+  console.log('=== Generate Planner API Called ===');
+
   try {
     // Verifica se a API key do Gemini está configurada
-    if (!process.env.GEMINI_API_KEY) {
+    const apiKey = process.env.GEMINI_API_KEY;
+    console.log('GEMINI_API_KEY configured:', !!apiKey);
+
+    if (!apiKey) {
       console.error('GEMINI_API_KEY não está configurada');
       return NextResponse.json(
         { error: 'Serviço de IA não configurado. Entre em contato com o suporte.' },
@@ -24,10 +29,13 @@ export async function POST(request: NextRequest) {
     }
 
     const body: GeneratePlannerBody = await request.json();
+    console.log('Request body:', { lowestElement: body.lowestElement, hasScores: !!body.scores });
+
     const { lowestElement, scores, secondLowestElement, pattern } = body;
 
     // Validação
     if (!lowestElement || !scores) {
+      console.error('Dados inválidos:', { lowestElement, scores });
       return NextResponse.json(
         { error: 'Dados inválidos' },
         { status: 400 }
@@ -108,11 +116,19 @@ FORMATO DE RESPOSTA (use EXATAMENTE esta estrutura):
 `;
 
     // Chama o Gemini
+    console.log('Calling Gemini API...');
     const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
-    
+
+    console.log('Generating content...');
     const result = await model.generateContent(prompt);
+
+    console.log('Getting response...');
     const response = await result.response;
+
+    console.log('Extracting text...');
     const plannerContent = response.text();
+
+    console.log('Planner generated successfully, length:', plannerContent.length);
 
     return NextResponse.json({
       success: true,
@@ -122,9 +138,17 @@ FORMATO DE RESPOSTA (use EXATAMENTE esta estrutura):
     });
 
   } catch (error) {
-    console.error('Erro ao gerar planner:', error);
+    console.error('=== ERRO DETALHADO AO GERAR PLANNER ===');
+    console.error('Error type:', error instanceof Error ? error.constructor.name : typeof error);
+    console.error('Error message:', error instanceof Error ? error.message : String(error));
+    console.error('Error stack:', error instanceof Error ? error.stack : 'No stack trace');
+    console.error('Full error object:', JSON.stringify(error, null, 2));
+
     return NextResponse.json(
-      { error: 'Erro ao gerar planner. Tente novamente.' },
+      {
+        error: 'Erro ao gerar planner. Tente novamente.',
+        details: error instanceof Error ? error.message : 'Erro desconhecido'
+      },
       { status: 500 }
     );
   }

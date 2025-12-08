@@ -41,11 +41,15 @@ export default function PlannerScreen({ onBack }: PlannerScreenProps) {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || 'Erro ao gerar planner');
+        const errorMsg = data.details ? `${data.error}: ${data.details}` : data.error;
+        console.error('API Error:', data);
+        throw new Error(errorMsg || 'Erro ao gerar planner');
       }
 
+      console.log('Planner received successfully');
       setPlanner(data.planner);
     } catch (err) {
+      console.error('Planner generation error:', err);
       setError(err instanceof Error ? err.message : 'Erro desconhecido');
     } finally {
       setIsLoading(false);
