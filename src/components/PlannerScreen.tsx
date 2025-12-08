@@ -1,8 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { motion } from 'framer-motion';
-import { Download, RefreshCw, Sparkles, ArrowLeft } from 'lucide-react';
+import { Download, RefreshCw, Sparkles, ArrowLeft, FileText } from 'lucide-react';
 import { useQuizStore } from '@/hooks/useQuizStore';
 import { elementsInfo, Element } from '@/types/quiz';
 
@@ -15,6 +15,7 @@ export default function PlannerScreen({ onBack }: PlannerScreenProps) {
   const [planner, setPlanner] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const plannerRef = useRef<HTMLDivElement>(null);
 
   if (!result) return null;
 
@@ -53,6 +54,66 @@ export default function PlannerScreen({ onBack }: PlannerScreenProps) {
       setError(err instanceof Error ? err.message : 'Erro desconhecido');
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const downloadMarkdown = () => {
+    if (!planner) return;
+    const blob = new Blob([planner], { type: 'text/markdown' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `planner-${result.lowestElement}-30-dias.md`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const downloadPDF = async () => {
+    if (!plannerRef.current || !planner) return;
+
+    try {
+      // Importa dinamicamente apenas quando necessário
+      const html2canvas = (await import('html2canvas')).default;
+      const { jsPDF } = await import('jspdf');
+
+      // Cria canvas do conteúdo
+      const canvas = await html2canvas(plannerRef.current, {
+        scale: 2,
+        useCORS: true,
+        logging: false,
+      });
+
+      // Cria PDF
+      const imgData = canvas.toDataURL('image/png');
+      const pdf = new jsPDF({
+        orientation: 'portrait',
+        unit: 'mm',
+        format: 'a4',
+      });
+
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = pdf.internal.pageSize.getHeight();
+      const imgWidth = canvas.width;
+      const imgHeight = canvas.height;
+      const ratio = Math.min(pdfWidth / imgWidth, pdfHeight / imgHeight);
+      const imgX = (pdfWidth - imgWidth * ratio) / 2;
+      const imgY = 0;
+
+      // Calcula quantas páginas são necessárias
+      const totalPages = Math.ceil((imgHeight * ratio) / pdfHeight);
+
+      for (let page = 0; page < totalPages; page++) {
+        if (page > 0) {
+          pdf.addPage();
+        }
+        const yOffset = -page * pdfHeight;
+        pdf.addImage(imgData, 'PNG', imgX, imgY + yOffset, imgWidth * ratio, imgHeight * ratio);
+      }
+
+      pdf.save(`planner-${result.lowestElement}-30-dias.pdf`);
+    } catch (error) {
+      console.error('Erro ao gerar PDF:', error);
+      alert('Erro ao gerar PDF. Tente novamente.');
     }
   };
 
@@ -184,85 +245,130 @@ export default function PlannerScreen({ onBack }: PlannerScreenProps) {
                 <RefreshCw className="w-4 h-4" />
                 Gerar novamente
               </button>
-              
+
               <button
-                onClick={() => {
-                  const blob = new Blob([planner], { type: 'text/markdown' });
-                  const url = URL.createObjectURL(blob);
-                  const a = document.createElement('a');
-                  a.href = url;
-                  a.download = `planner-${result.lowestElement}-30-dias.md`;
-                  a.click();
-                }}
+                onClick={downloadPDF}
+                className="btn-primary flex items-center gap-2"
+              >
+                <FileText className="w-4 h-4" />
+                Baixar PDF
+              </button>
+
+              <button
+                onClick={downloadMarkdown}
                 className="btn-secondary flex items-center gap-2"
               >
                 <Download className="w-4 h-4" />
-                Baixar Planner
+                Baixar Markdown
               </button>
             </div>
 
             {/* Conteúdo do Planner */}
-            <div className="bg-white rounded-2xl shadow-lg border border-warmGray-100 p-6 sm:p-8">
+            <div
+              ref={plannerRef}
+              className="bg-white rounded-2xl shadow-lg border border-warmGray-100 p-6 sm:p-8"
+            >
               <article className="prose prose-warmGray max-w-none">
-                {/* Renderiza o markdown de forma simples */}
-                {planner.split('\n').map((line, index) => {
-                  // Títulos
-                  if (line.startsWith('# ')) {
-                    return (
-                      <h1 key={index} className="font-display text-2xl font-bold text-warmGray-900 mt-8 mb-4 first:mt-0">
-                        {line.replace('# ', '')}
-                      </h1>
-                    );
-                  }
-                  if (line.startsWith('## ')) {
-                    return (
-                      <h2 key={index} className="font-display text-xl font-bold text-warmGray-800 mt-6 mb-3 border-b border-warmGray-200 pb-2">
-                        {line.replace('## ', '')}
-                      </h2>
-                    );
-                  }
-                  if (line.startsWith('### ')) {
-                    return (
-                      <h3 key={index} className="font-semibold text-warmGray-700 mt-4 mb-2">
-                        {line.replace('### ', '')}
-                      </h3>
-                    );
-                  }
-                  // Negrito
-                  if (line.startsWith('**') && line.endsWith('**')) {
-                    return (
-                      <p key={index} className="font-semibold text-warmGray-900 mt-3">
-                        {line.replace(/\*\*/g, '')}
-                      </p>
-                    );
-                  }
-                  // Itálico
-                  if (line.startsWith('*') && line.endsWith('*') && !line.startsWith('**')) {
-                    return (
-                      <p key={index} className="italic text-warmGray-600 text-sm">
-                        {line.replace(/\*/g, '')}
-                      </p>
-                    );
-                  }
-                  // Lista
-                  if (line.startsWith('- ')) {
-                    return (
-                      <li key={index} className="text-warmGray-700 ml-4">
-                        {line.replace('- ', '')}
-                      </li>
-                    );
-                  }
-                  // Parágrafo normal
-                  if (line.trim()) {
-                    return (
-                      <p key={index} className="text-warmGray-700">
-                        {line}
-                      </p>
-                    );
-                  }
-                  // Linha vazia
-                  return <div key={index} className="h-2" />;
-                })}
+                {/* Renderiza o markdown com margens consistentes */}
+                {(() => {
+                  const lines = planner.split('\n');
+                  const elements: JSX.Element[] = [];
+                  let listItems: string[] = [];
+                  let listKey = 0;
+
+                  const flushList = () => {
+                    if (listItems.length > 0) {
+                      elements.push(
+                        <ul key={`list-${listKey++}`} className="list-disc ml-6 my-4 space-y-1">
+                          {listItems.map((item, idx) => (
+                            <li key={idx} className="text-warmGray-700">
+                              {item}
+                            </li>
+                          ))}
+                        </ul>
+                      );
+                      listItems = [];
+                    }
+                  };
+
+                  lines.forEach((line, index) => {
+                    // Títulos H1
+                    if (line.startsWith('# ')) {
+                      flushList();
+                      elements.push(
+                        <h1 key={`h1-${index}`} className="font-display text-2xl font-bold text-warmGray-900 mt-8 mb-4 first:mt-0">
+                          {line.replace('# ', '')}
+                        </h1>
+                      );
+                    }
+                    // Títulos H2
+                    else if (line.startsWith('## ')) {
+                      flushList();
+                      elements.push(
+                        <h2 key={`h2-${index}`} className="font-display text-xl font-bold text-warmGray-800 mt-6 mb-3 border-b border-warmGray-200 pb-2">
+                          {line.replace('## ', '')}
+                        </h2>
+                      );
+                    }
+                    // Títulos H3
+                    else if (line.startsWith('### ')) {
+                      flushList();
+                      elements.push(
+                        <h3 key={`h3-${index}`} className="font-semibold text-warmGray-700 mt-4 mb-2">
+                          {line.replace('### ', '')}
+                        </h3>
+                      );
+                    }
+                    // Lista
+                    else if (line.startsWith('- ')) {
+                      listItems.push(line.replace('- ', ''));
+                    }
+                    // Negrito (linha inteira)
+                    else if (line.startsWith('**') && line.endsWith('**')) {
+                      flushList();
+                      elements.push(
+                        <p key={`bold-${index}`} className="font-semibold text-warmGray-900 mt-3 mb-1">
+                          {line.replace(/\*\*/g, '')}
+                        </p>
+                      );
+                    }
+                    // Itálico (linha inteira)
+                    else if (line.startsWith('*') && line.endsWith('*') && !line.startsWith('**')) {
+                      flushList();
+                      elements.push(
+                        <p key={`italic-${index}`} className="italic text-warmGray-600 text-sm mt-1 mb-2">
+                          {line.replace(/\*/g, '')}
+                        </p>
+                      );
+                    }
+                    // Parágrafo normal
+                    else if (line.trim()) {
+                      flushList();
+                      // Renderiza texto com negrito inline
+                      const parts = line.split(/(\*\*.*?\*\*)/g);
+                      elements.push(
+                        <p key={`p-${index}`} className="text-warmGray-700 my-2">
+                          {parts.map((part, i) =>
+                            part.startsWith('**') && part.endsWith('**') ? (
+                              <strong key={i}>{part.replace(/\*\*/g, '')}</strong>
+                            ) : (
+                              part
+                            )
+                          )}
+                        </p>
+                      );
+                    }
+                    // Linha vazia
+                    else {
+                      flushList();
+                    }
+                  });
+
+                  // Flush any remaining list items
+                  flushList();
+
+                  return elements;
+                })()}
               </article>
             </div>
 
