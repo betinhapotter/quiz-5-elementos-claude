@@ -117,7 +117,7 @@ FORMATO DE RESPOSTA (use EXATAMENTE esta estrutura):
 
     // Chama o Gemini
     console.log('Calling Gemini API...');
-    const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+    const model = genAI.getGenerativeModel({ model: 'gemini-pro' });
 
     console.log('Generating content...');
     const result = await model.generateContent(prompt);
