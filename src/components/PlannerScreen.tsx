@@ -11,6 +11,9 @@ interface PlannerScreenProps {
 }
 
 export default function PlannerScreen({ onBack }: PlannerScreenProps) {
+  console.log('🔥🔥🔥 PLANNER SCREEN V2.0 CARREGADO! 🔥🔥🔥');
+  console.log('Se você vê esta mensagem, o novo código ESTÁ rodando!');
+
   const { result } = useQuizStore();
   const [planner, setPlanner] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -160,10 +163,10 @@ export default function PlannerScreen({ onBack }: PlannerScreenProps) {
             <span className="text-5xl">{elementInfo.icon}</span>
             <div>
               <h1 className="font-display text-2xl sm:text-3xl font-bold">
-                Planner de 30 Dias
+                Planner de 30 Dias V2.0 ✨
               </h1>
               <p className="opacity-90">
-                Elemento {elementInfo.name} • Gerado por IA
+                Elemento {elementInfo.name} • Gerado por IA • NOVA VERSÃO
               </p>
             </div>
           </div>
