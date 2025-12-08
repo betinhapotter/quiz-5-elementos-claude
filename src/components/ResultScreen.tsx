@@ -1,8 +1,9 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
-import { ArrowRight, Instagram, RefreshCw, Sparkles, Download, Loader2, FileText } from 'lucide-react';
+import { Instagram, RefreshCw, Sparkles, Loader2, ExternalLink } from 'lucide-react';
 import { useQuizStore } from '@/hooks/useQuizStore';
 import { useAuth } from '@/hooks/useAuth';
 import { createClient } from '@/lib/supabase/client';
@@ -10,16 +11,14 @@ import { elementsInfo, Element } from '@/types/quiz';
 import { generateResultExplanation, getResultSeverity } from '@/lib/quiz-logic';
 
 export default function ResultScreen() {
-  const { result, resetQuiz, userData, answers } = useQuizStore();
+  const router = useRouter();
+  const { result, resetQuiz, userData, answers, setPlanner } = useQuizStore();
   const { user } = useAuth();
   const supabase = createClient();
   
   const [isGeneratingPlanner, setIsGeneratingPlanner] = useState(false);
-  const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
-  const [planner, setPlanner] = useState<string | null>(null);
   const [savedToDb, setSavedToDb] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const plannerRef = useRef<HTMLDivElement>(null);
 
   // Salva resultado no banco quando carrega
   useEffect(() => {
@@ -55,7 +54,7 @@ export default function ResultScreen() {
 
   const handleGeneratePlanner = async () => {
     if (!result) return;
-    
+
     setIsGeneratingPlanner(true);
     setError(null);
 
@@ -74,6 +73,8 @@ export default function ResultScreen() {
       if (!response.ok) throw new Error('Falha ao gerar planner');
 
       const data = await response.json();
+
+      // Salva no Zustand store
       setPlanner(data.planner);
 
       // Salva o planner no banco
@@ -84,70 +85,14 @@ export default function ResultScreen() {
           content: data.planner,
         });
       }
+
+      // Redireciona para a página dedicada do planner
+      router.push('/planner');
     } catch (err) {
       setError('Erro ao gerar seu planner. Tente novamente.');
       console.error(err);
     } finally {
       setIsGeneratingPlanner(false);
-    }
-  };
-
-  const downloadMarkdown = () => {
-    if (!planner) return;
-    const blob = new Blob([planner], { type: 'text/markdown' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `planner-${result?.lowestElement}-30-dias.md`;
-    a.click();
-    URL.revokeObjectURL(url);
-  };
-
-  const downloadPDF = async () => {
-    if (!plannerRef.current || !planner) return;
-
-    setIsGeneratingPDF(true);
-    console.log('🚀 Gerando PDF...');
-
-    try {
-      const html2canvas = (await import('html2canvas')).default;
-      const { jsPDF } = await import('jspdf');
-
-      const canvas = await html2canvas(plannerRef.current, {
-        scale: 2,
-        useCORS: true,
-        logging: false,
-      });
-
-      const imgData = canvas.toDataURL('image/png');
-      const pdf = new jsPDF({
-        orientation: 'portrait',
-        unit: 'mm',
-        format: 'a4',
-      });
-
-      const pdfWidth = pdf.internal.pageSize.getWidth();
-      const pdfHeight = pdf.internal.pageSize.getHeight();
-      const imgWidth = canvas.width;
-      const imgHeight = canvas.height;
-      const ratio = Math.min(pdfWidth / imgWidth, pdfHeight / imgHeight);
-      const imgX = (pdfWidth - imgWidth * ratio) / 2;
-
-      const totalPages = Math.ceil((imgHeight * ratio) / pdfHeight);
-
-      for (let page = 0; page < totalPages; page++) {
-        if (page > 0) pdf.addPage();
-        const yOffset = -page * pdfHeight;
-        pdf.addImage(imgData, 'PNG', imgX, yOffset, imgWidth * ratio, imgHeight * ratio);
-      }
-
-      pdf.save(`planner-${result?.lowestElement}-30-dias.pdf`);
-      console.log('✅ PDF salvo!');
-    } catch (error) {
-      console.error('❌ Erro ao gerar PDF:', error);
-      alert('Erro ao gerar PDF. Veja o console.');
-    } finally {
-      setIsGeneratingPDF(false);
     }
   };
 
@@ -363,140 +308,57 @@ export default function ResultScreen() {
           transition={{ delay: 0.8 }}
           className="mb-10"
         >
-          {!planner ? (
-            <div className="bg-gradient-to-br from-warmGray-900 to-warmGray-800 rounded-2xl p-8 text-white text-center">
-              <h2 className="font-display text-2xl sm:text-3xl font-bold mb-4">
-                🤖 Seu Planner de 30 Dias Personalizado
-              </h2>
-              <p className="text-warmGray-300 mb-6 max-w-lg mx-auto">
-                Nossa IA vai criar um plano de <strong>30 dias</strong> com exercícios práticos
-                específicos para realinhar o elemento <strong>{elementInfo.name}</strong> no seu relacionamento.
-              </p>
+          <div className="bg-gradient-to-br from-warmGray-900 to-warmGray-800 rounded-2xl p-8 text-white text-center">
+            <h2 className="font-display text-2xl sm:text-3xl font-bold mb-4">
+              🤖 Seu Planner de 30 Dias Personalizado
+            </h2>
+            <p className="text-warmGray-300 mb-6 max-w-lg mx-auto">
+              Nossa IA vai criar um plano de <strong>30 dias</strong> com exercícios práticos
+              específicos para realinhar o elemento <strong>{elementInfo.name}</strong> no seu relacionamento.
+            </p>
 
-              <ul className="text-left max-w-md mx-auto mb-6 space-y-2">
-                <li className="flex items-center gap-2 text-warmGray-300">
-                  <span className="text-green-400">✓</span>
-                  Exercícios diários de 5-15 minutos
-                </li>
-                <li className="flex items-center gap-2 text-warmGray-300">
-                  <span className="text-green-400">✓</span>
-                  Progressão gradual ao longo das 4 semanas
-                </li>
-                <li className="flex items-center gap-2 text-warmGray-300">
-                  <span className="text-green-400">✓</span>
-                  Gerado por IA com base nas SUAS respostas
-                </li>
-              </ul>
+            <ul className="text-left max-w-md mx-auto mb-6 space-y-2">
+              <li className="flex items-center gap-2 text-warmGray-300">
+                <span className="text-green-400">✓</span>
+                Exercícios diários de 5-15 minutos
+              </li>
+              <li className="flex items-center gap-2 text-warmGray-300">
+                <span className="text-green-400">✓</span>
+                Progressão gradual ao longo das 4 semanas
+              </li>
+              <li className="flex items-center gap-2 text-warmGray-300">
+                <span className="text-green-400">✓</span>
+                Gerado por IA com base nas SUAS respostas
+              </li>
+              <li className="flex items-center gap-2 text-warmGray-300">
+                <span className="text-green-400">✓</span>
+                Abre em página dedicada e visual
+              </li>
+            </ul>
 
-              <button
-                onClick={handleGeneratePlanner}
-                disabled={isGeneratingPlanner}
-                className="btn-primary bg-fogo hover:bg-fogo-dark text-lg px-8 py-4 disabled:opacity-50"
-              >
-                {isGeneratingPlanner ? (
-                  <>
-                    <Loader2 className="w-5 h-5 mr-2 inline animate-spin" />
-                    Gerando seu planner...
-                  </>
-                ) : (
-                  <>
-                    <Sparkles className="w-5 h-5 mr-2 inline" />
-                    Gerar Meu Planner Grátis
-                  </>
-                )}
-              </button>
-
-              {error && (
-                <p className="mt-4 text-red-300 text-sm">{error}</p>
+            <button
+              onClick={handleGeneratePlanner}
+              disabled={isGeneratingPlanner}
+              className="btn-primary bg-fogo hover:bg-fogo-dark text-lg px-8 py-4 disabled:opacity-50 inline-flex items-center gap-2"
+            >
+              {isGeneratingPlanner ? (
+                <>
+                  <Loader2 className="w-5 h-5 animate-spin" />
+                  Gerando seu planner...
+                </>
+              ) : (
+                <>
+                  <Sparkles className="w-5 h-5" />
+                  Gerar Meu Planner Grátis
+                  <ExternalLink className="w-4 h-4" />
+                </>
               )}
-            </div>
-          ) : (
-            <div className="bg-white rounded-2xl shadow-lg border border-warmGray-200 overflow-hidden">
-              {/* Banner V2 */}
-              <div className="bg-gradient-to-r from-green-600 to-green-700 p-4 text-white">
-                <div className="flex items-center gap-3">
-                  <span className="text-2xl">✅</span>
-                  <div>
-                    <h3 className="font-bold">VERSÃO 2.0 FUNCIONANDO!</h3>
-                    <p className="text-sm opacity-90">Margens corrigidas • PDF funcionando</p>
-                  </div>
-                </div>
-              </div>
+            </button>
 
-              <div className="bg-gradient-to-r from-fogo to-fogo-dark p-6 text-white">
-                <h2 className="font-display text-2xl font-bold flex items-center gap-2">
-                  <Sparkles className="w-6 h-6" />
-                  Seu Planner de 30 Dias
-                </h2>
-                <p className="text-white/80 mt-1">
-                  Gerado especialmente para realinhar o elemento {elementInfo.name}
-                </p>
-              </div>
-
-              {/* Botões */}
-              <div className="border-b border-warmGray-200 p-4 bg-warmGray-50 flex flex-wrap gap-3">
-                <button onClick={handleGeneratePlanner} className="btn-secondary flex items-center gap-2">
-                  <RefreshCw className="w-4 h-4" />
-                  Gerar Novo
-                </button>
-
-                <button
-                  onClick={downloadPDF}
-                  disabled={isGeneratingPDF}
-                  className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-xl font-semibold flex items-center gap-2 disabled:opacity-50"
-                >
-                  {isGeneratingPDF ? (
-                    <>
-                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                      Gerando...
-                    </>
-                  ) : (
-                    <>
-                      <FileText className="w-4 h-4" />
-                      Baixar PDF
-                    </>
-                  )}
-                </button>
-
-                <button onClick={downloadMarkdown} className="btn-secondary flex items-center gap-2">
-                  <Download className="w-4 h-4" />
-                  Baixar MD
-                </button>
-              </div>
-
-              {/* Conteúdo do Planner */}
-              <div ref={plannerRef} className="p-6 sm:p-8">
-                <div style={{ margin: 0, padding: 0 }}>
-                  {planner.split('\n').map((line, i) => {
-                    const baseStyle = { marginLeft: 0, marginRight: 0, paddingLeft: 0, paddingRight: 0 };
-
-                    if (line.startsWith('# ')) {
-                      return <h1 key={i} style={{...baseStyle, marginTop: i === 0 ? 0 : '2rem', marginBottom: '1rem'}} className="text-2xl font-bold">{line.slice(2)}</h1>;
-                    }
-                    if (line.startsWith('## ')) {
-                      return <h2 key={i} style={{...baseStyle, marginTop: '1.5rem', marginBottom: '0.75rem'}} className="text-xl font-bold border-b pb-2">{line.slice(3)}</h2>;
-                    }
-                    if (line.startsWith('### ')) {
-                      return <h3 key={i} style={{...baseStyle, marginTop: '1rem', marginBottom: '0.5rem'}} className="text-lg font-semibold">{line.slice(4)}</h3>;
-                    }
-                    if (line.startsWith('- ')) {
-                      return <li key={i} style={{...baseStyle, marginLeft: '1.5rem'}} className="my-1">{line.slice(2)}</li>;
-                    }
-                    if (line.startsWith('**') && line.endsWith('**')) {
-                      return <p key={i} style={{...baseStyle, marginTop: '0.5rem', marginBottom: '0.25rem'}} className="font-bold">{line.slice(2, -2)}</p>;
-                    }
-                    if (line.startsWith('*') && line.endsWith('*') && !line.startsWith('**')) {
-                      return <p key={i} style={baseStyle} className="italic text-sm text-gray-600">{line.slice(1, -1)}</p>;
-                    }
-                    if (line.trim()) {
-                      return <p key={i} style={{...baseStyle, marginTop: '0.5rem', marginBottom: '0.5rem'}}>{line}</p>;
-                    }
-                    return <div key={i} style={{ height: '0.5rem' }} />;
-                  })}
-                </div>
-              </div>
-            </div>
-          )}
+            {error && (
+              <p className="mt-4 text-red-300 text-sm">{error}</p>
+            )}
+          </div>
         </motion.section>
 
         {/* Footer / Ações secundárias */}

@@ -4,6 +4,10 @@ import { questions } from '@/data/questions';
 import { calculateResult } from '@/lib/quiz-logic';
 
 interface QuizStore extends QuizState {
+  // Planner state
+  planner: string | null;
+  setPlanner: (planner: string) => void;
+
   // Actions
   startQuiz: () => void;
   answerQuestion: (answer: Answer) => void;
@@ -28,6 +32,12 @@ const initialState: QuizState = {
 
 export const useQuizStore = create<QuizStore>((set, get) => ({
   ...initialState,
+  planner: null,
+
+  // Planner actions
+  setPlanner: (planner: string) => {
+    set({ planner });
+  },
 
   // Iniciar o quiz
   startQuiz: () => {
