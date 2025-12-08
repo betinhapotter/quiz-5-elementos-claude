@@ -14,6 +14,7 @@ export default function PlannerScreen({ onBack }: PlannerScreenProps) {
   const { result } = useQuizStore();
   const [planner, setPlanner] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const plannerRef = useRef<HTMLDivElement>(null);
 
@@ -69,21 +70,32 @@ export default function PlannerScreen({ onBack }: PlannerScreenProps) {
   };
 
   const downloadPDF = async () => {
-    if (!plannerRef.current || !planner) return;
+    if (!plannerRef.current || !planner) {
+      console.log('PDF: plannerRef ou planner não disponível');
+      return;
+    }
+
+    setIsGeneratingPDF(true);
+    console.log('Iniciando geração do PDF...');
 
     try {
       // Importa dinamicamente apenas quando necessário
+      console.log('Importando bibliotecas...');
       const html2canvas = (await import('html2canvas')).default;
       const { jsPDF } = await import('jspdf');
+      console.log('Bibliotecas importadas com sucesso');
 
       // Cria canvas do conteúdo
+      console.log('Criando canvas...');
       const canvas = await html2canvas(plannerRef.current, {
         scale: 2,
         useCORS: true,
         logging: false,
       });
+      console.log('Canvas criado:', canvas.width, 'x', canvas.height);
 
       // Cria PDF
+      console.log('Gerando PDF...');
       const imgData = canvas.toDataURL('image/png');
       const pdf = new jsPDF({
         orientation: 'portrait',
@@ -101,6 +113,7 @@ export default function PlannerScreen({ onBack }: PlannerScreenProps) {
 
       // Calcula quantas páginas são necessárias
       const totalPages = Math.ceil((imgHeight * ratio) / pdfHeight);
+      console.log('Total de páginas:', totalPages);
 
       for (let page = 0; page < totalPages; page++) {
         if (page > 0) {
@@ -110,10 +123,14 @@ export default function PlannerScreen({ onBack }: PlannerScreenProps) {
         pdf.addImage(imgData, 'PNG', imgX, imgY + yOffset, imgWidth * ratio, imgHeight * ratio);
       }
 
+      console.log('Salvando PDF...');
       pdf.save(`planner-${result.lowestElement}-30-dias.pdf`);
+      console.log('PDF salvo com sucesso!');
     } catch (error) {
       console.error('Erro ao gerar PDF:', error);
-      alert('Erro ao gerar PDF. Tente novamente.');
+      alert('Erro ao gerar PDF. Verifique o console para mais detalhes.');
+    } finally {
+      setIsGeneratingPDF(false);
     }
   };
 
@@ -248,10 +265,20 @@ export default function PlannerScreen({ onBack }: PlannerScreenProps) {
 
               <button
                 onClick={downloadPDF}
+                disabled={isGeneratingPDF}
                 className="btn-primary flex items-center gap-2"
               >
-                <FileText className="w-4 h-4" />
-                Baixar PDF
+                {isGeneratingPDF ? (
+                  <>
+                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                    Gerando PDF...
+                  </>
+                ) : (
+                  <>
+                    <FileText className="w-4 h-4" />
+                    Baixar PDF
+                  </>
+                )}
               </button>
 
               <button
@@ -268,7 +295,7 @@ export default function PlannerScreen({ onBack }: PlannerScreenProps) {
               ref={plannerRef}
               className="bg-white rounded-2xl shadow-lg border border-warmGray-100 p-6 sm:p-8"
             >
-              <article className="prose prose-warmGray max-w-none">
+              <article className="max-w-none" style={{ marginLeft: 0, marginRight: 0, paddingLeft: 0, paddingRight: 0 }}>
                 {/* Renderiza o markdown com margens consistentes */}
                 {(() => {
                   const lines = planner.split('\n');
@@ -279,9 +306,9 @@ export default function PlannerScreen({ onBack }: PlannerScreenProps) {
                   const flushList = () => {
                     if (listItems.length > 0) {
                       elements.push(
-                        <ul key={`list-${listKey++}`} className="list-disc ml-6 my-4 space-y-1">
+                        <ul key={`list-${listKey++}`} style={{ marginTop: '1rem', marginBottom: '1rem', marginLeft: '1.5rem', marginRight: 0, paddingLeft: 0 }} className="list-disc space-y-1">
                           {listItems.map((item, idx) => (
-                            <li key={idx} className="text-warmGray-700">
+                            <li key={idx} style={{ marginLeft: 0, marginRight: 0 }} className="text-warmGray-700">
                               {item}
                             </li>
                           ))}
@@ -296,7 +323,7 @@ export default function PlannerScreen({ onBack }: PlannerScreenProps) {
                     if (line.startsWith('# ')) {
                       flushList();
                       elements.push(
-                        <h1 key={`h1-${index}`} className="font-display text-2xl font-bold text-warmGray-900 mt-8 mb-4 first:mt-0">
+                        <h1 key={`h1-${index}`} style={{ marginTop: index === 0 ? 0 : '2rem', marginBottom: '1rem', marginLeft: 0, marginRight: 0 }} className="font-display text-2xl font-bold text-warmGray-900">
                           {line.replace('# ', '')}
                         </h1>
                       );
@@ -305,7 +332,7 @@ export default function PlannerScreen({ onBack }: PlannerScreenProps) {
                     else if (line.startsWith('## ')) {
                       flushList();
                       elements.push(
-                        <h2 key={`h2-${index}`} className="font-display text-xl font-bold text-warmGray-800 mt-6 mb-3 border-b border-warmGray-200 pb-2">
+                        <h2 key={`h2-${index}`} style={{ marginTop: '1.5rem', marginBottom: '0.75rem', marginLeft: 0, marginRight: 0, paddingBottom: '0.5rem' }} className="font-display text-xl font-bold text-warmGray-800 border-b border-warmGray-200">
                           {line.replace('## ', '')}
                         </h2>
                       );
@@ -314,7 +341,7 @@ export default function PlannerScreen({ onBack }: PlannerScreenProps) {
                     else if (line.startsWith('### ')) {
                       flushList();
                       elements.push(
-                        <h3 key={`h3-${index}`} className="font-semibold text-warmGray-700 mt-4 mb-2">
+                        <h3 key={`h3-${index}`} style={{ marginTop: '1rem', marginBottom: '0.5rem', marginLeft: 0, marginRight: 0 }} className="font-semibold text-warmGray-700">
                           {line.replace('### ', '')}
                         </h3>
                       );
@@ -327,7 +354,7 @@ export default function PlannerScreen({ onBack }: PlannerScreenProps) {
                     else if (line.startsWith('**') && line.endsWith('**')) {
                       flushList();
                       elements.push(
-                        <p key={`bold-${index}`} className="font-semibold text-warmGray-900 mt-3 mb-1">
+                        <p key={`bold-${index}`} style={{ marginTop: '0.75rem', marginBottom: '0.25rem', marginLeft: 0, marginRight: 0 }} className="font-semibold text-warmGray-900">
                           {line.replace(/\*\*/g, '')}
                         </p>
                       );
@@ -336,7 +363,7 @@ export default function PlannerScreen({ onBack }: PlannerScreenProps) {
                     else if (line.startsWith('*') && line.endsWith('*') && !line.startsWith('**')) {
                       flushList();
                       elements.push(
-                        <p key={`italic-${index}`} className="italic text-warmGray-600 text-sm mt-1 mb-2">
+                        <p key={`italic-${index}`} style={{ marginTop: '0.25rem', marginBottom: '0.5rem', marginLeft: 0, marginRight: 0 }} className="italic text-warmGray-600 text-sm">
                           {line.replace(/\*/g, '')}
                         </p>
                       );
@@ -347,7 +374,7 @@ export default function PlannerScreen({ onBack }: PlannerScreenProps) {
                       // Renderiza texto com negrito inline
                       const parts = line.split(/(\*\*.*?\*\*)/g);
                       elements.push(
-                        <p key={`p-${index}`} className="text-warmGray-700 my-2">
+                        <p key={`p-${index}`} style={{ marginTop: '0.5rem', marginBottom: '0.5rem', marginLeft: 0, marginRight: 0 }} className="text-warmGray-700">
                           {parts.map((part, i) =>
                             part.startsWith('**') && part.endsWith('**') ? (
                               <strong key={i}>{part.replace(/\*\*/g, '')}</strong>
