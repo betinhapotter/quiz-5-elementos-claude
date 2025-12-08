@@ -1,5 +1,7 @@
 # Guia de Deploy - Quiz 5 Elementos
 
+> ⚠️ **PROBLEMA COM LOGIN?** Se o login redireciona para localhost, leia: [CONFIGURACAO-URGENTE.md](CONFIGURACAO-URGENTE.md)
+
 ## Variáveis de Ambiente Necessárias
 
 Para fazer o deploy na Vercel, você precisa configurar as seguintes variáveis de ambiente:
