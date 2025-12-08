@@ -36,8 +36,8 @@ export default function LandingScreen() {
           className="text-center"
         >
           {/* Badge */}
-          <span className="inline-block rounded-full bg-fogo/10 px-4 py-1.5 text-sm font-medium text-fogo-dark mb-6">
-            Teste gratuito • 3 minutos
+          <span className="inline-block rounded-full bg-green-500 px-4 py-1.5 text-sm font-medium text-white mb-6">
+            ✅ VERSÃO 2.0 ATUALIZADA • Teste gratuito • 3 minutos
           </span>
 
           {/* Headline principal */}
