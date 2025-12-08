@@ -48,21 +48,58 @@ export default function PlannerPage() {
     if (!plannerRef.current) return;
 
     setIsGeneratingPDF(true);
+    console.log('Gerando PDF com fontes grandes...');
 
     try {
       const html2canvas = (await import('html2canvas')).default;
       const { jsPDF } = await import('jspdf');
 
-      const originalFontSize = plannerRef.current.style.fontSize;
-      plannerRef.current.style.fontSize = '16px';
+      // Salva estilos originais
+      const element = plannerRef.current;
+      const originalStyles = {
+        fontSize: element.style.fontSize,
+        padding: element.style.padding,
+        maxWidth: element.style.maxWidth,
+      };
 
-      const canvas = await html2canvas(plannerRef.current, {
-        scale: 3,
-        useCORS: true,
-        logging: false,
+      // Aumenta MUITO as fontes e remove margens para o PDF
+      element.style.fontSize = '24px'; // Aumentado de 16px para 24px
+      element.style.padding = '20px';
+      element.style.maxWidth = '100%';
+
+      // Aumenta fontes de todos os elementos filhos
+      const allElements = element.querySelectorAll('h1, h2, h3, p, li');
+      const originalChildStyles = new Map();
+
+      allElements.forEach((el) => {
+        const htmlEl = el as HTMLElement;
+        originalChildStyles.set(htmlEl, htmlEl.style.fontSize);
+
+        if (el.tagName === 'H1') htmlEl.style.fontSize = '42px';
+        if (el.tagName === 'H2') htmlEl.style.fontSize = '34px';
+        if (el.tagName === 'H3') htmlEl.style.fontSize = '28px';
+        if (el.tagName === 'P') htmlEl.style.fontSize = '20px';
+        if (el.tagName === 'LI') htmlEl.style.fontSize = '20px';
       });
 
-      plannerRef.current.style.fontSize = originalFontSize;
+      const canvas = await html2canvas(element, {
+        scale: 2,
+        useCORS: true,
+        logging: false,
+        width: element.scrollWidth,
+        height: element.scrollHeight,
+      });
+
+      // Restaura estilos originais
+      element.style.fontSize = originalStyles.fontSize;
+      element.style.padding = originalStyles.padding;
+      element.style.maxWidth = originalStyles.maxWidth;
+
+      allElements.forEach((el) => {
+        const htmlEl = el as HTMLElement;
+        const original = originalChildStyles.get(htmlEl);
+        if (original) htmlEl.style.fontSize = original;
+      });
 
       const imgData = canvas.toDataURL('image/png');
       const pdf = new jsPDF({
@@ -73,20 +110,42 @@ export default function PlannerPage() {
 
       const pdfWidth = pdf.internal.pageSize.getWidth();
       const pdfHeight = pdf.internal.pageSize.getHeight();
-      const ratio = Math.min(pdfWidth / canvas.width, pdfHeight / canvas.height);
-      const imgX = (pdfWidth - canvas.width * ratio) / 2;
-      const totalPages = Math.ceil((canvas.height * ratio) / pdfHeight);
+
+      // Margens do PDF
+      const marginLeft = 10; // Margem esquerda de 10mm
+      const marginRight = 10;
+      const usableWidth = pdfWidth - marginLeft - marginRight;
+
+      // Calcula proporção
+      const imgWidth = canvas.width;
+      const imgHeight = canvas.height;
+      const ratio = usableWidth / imgWidth;
+      const scaledHeight = imgHeight * ratio;
+
+      const totalPages = Math.ceil(scaledHeight / pdfHeight);
+      console.log(`PDF terá ${totalPages} páginas`);
 
       for (let page = 0; page < totalPages; page++) {
         if (page > 0) pdf.addPage();
-        const yOffset = -page * pdfHeight;
-        pdf.addImage(imgData, 'PNG', imgX, yOffset, canvas.width * ratio, canvas.height * ratio);
+        const yOffset = -page * (pdfHeight / ratio);
+        pdf.addImage(
+          imgData,
+          'PNG',
+          marginLeft,
+          page === 0 ? 10 : 0, // Margem top apenas na primeira página
+          usableWidth,
+          scaledHeight,
+          undefined,
+          'FAST',
+          0
+        );
       }
 
       pdf.save(`planner-${result.lowestElement}-30-dias.pdf`);
+      console.log('PDF gerado com sucesso!');
     } catch (error) {
       console.error('Erro ao gerar PDF:', error);
-      alert('Erro ao gerar PDF.');
+      alert('Erro ao gerar PDF. Veja o console.');
     } finally {
       setIsGeneratingPDF(false);
     }
