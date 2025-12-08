@@ -14,6 +14,15 @@ interface GeneratePlannerBody {
 
 export async function POST(request: NextRequest) {
   try {
+    // Verifica se a API key do Gemini está configurada
+    if (!process.env.GEMINI_API_KEY) {
+      console.error('GEMINI_API_KEY não está configurada');
+      return NextResponse.json(
+        { error: 'Serviço de IA não configurado. Entre em contato com o suporte.' },
+        { status: 500 }
+      );
+    }
+
     const body: GeneratePlannerBody = await request.json();
     const { lowestElement, scores, secondLowestElement, pattern } = body;
 
