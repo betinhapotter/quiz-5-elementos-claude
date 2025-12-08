@@ -253,6 +253,11 @@ export default function PlannerScreen({ onBack }: PlannerScreenProps) {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
           >
+            {/* Debug: Indicador de versão */}
+            <div className="bg-blue-100 border border-blue-300 rounded-lg p-3 mb-4 text-sm text-blue-800">
+              ✅ <strong>Versão atualizada v2.0</strong> - Margens corrigidas + Exportação PDF
+            </div>
+
             {/* Ações */}
             <div className="flex flex-wrap gap-3 mb-6">
               <button
