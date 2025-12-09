@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useQuizStore } from '@/hooks/useQuizStore';
 import { elementsInfo } from '@/types/quiz';
-import { supabase } from '@/lib/supabase/client'';
+import { supabase } from '@/lib/supabase/client';
 
 export default function EmailCaptureScreen() {
   const [email, setEmail] = useState('');
