@@ -1,65 +1,51 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { GoogleGenerativeAI } from '@google/generative-ai';
-import { Element, ElementScores, elementsInfo } from '@/types/quiz';
 
-// Inicializa o cliente do Gemini
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
-
-interface GeneratePlannerBody {
-  lowestElement: Element;
-  scores: ElementScores;
-  secondLowestElement?: Element;
-  pattern?: string;
-}
+const elementsInfo = {
+  terra: { name: 'Terra', icon: '🌍', meaning: 'Segurança e Estrutura' },
+  agua: { name: 'Água', icon: '💧', meaning: 'Emoção e Intimidade' },
+  ar: { name: 'Ar', icon: '🌬️', meaning: 'Comunicação' },
+  fogo: { name: 'Fogo', icon: '🔥', meaning: 'Paixão e Desejo' },
+  eter: { name: 'Éter', icon: '✨', meaning: 'Propósito Compartilhado' }
+};
 
 export async function POST(request: NextRequest) {
-  console.log('=== Generate Planner API Called ===');
-
   try {
-    // Verifica se a API key do Gemini está configurada
     const apiKey = process.env.GEMINI_API_KEY;
-    console.log('GEMINI_API_KEY configured:', !!apiKey);
-
     if (!apiKey) {
-      console.error('GEMINI_API_KEY não está configurada');
+      console.error('GEMINI_API_KEY não configurada');
       return NextResponse.json(
-        { error: 'Serviço de IA não configurado. Entre em contato com o suporte.' },
+        { error: 'Serviço de IA não configurado' },
         { status: 500 }
       );
     }
 
-    const body: GeneratePlannerBody = await request.json();
-    console.log('Request body:', { lowestElement: body.lowestElement, hasScores: !!body.scores });
+    const { lowestElement, scores, secondLowestElement, pattern } = await request.json();
 
-    const { lowestElement, scores, secondLowestElement, pattern } = body;
-
-    // Validação
     if (!lowestElement || !scores) {
-      console.error('Dados inválidos:', { lowestElement, scores });
       return NextResponse.json(
         { error: 'Dados inválidos' },
         { status: 400 }
       );
     }
 
-    const elementInfo = elementsInfo[lowestElement];
-    const secondElementInfo = secondLowestElement 
-      ? elementsInfo[secondLowestElement] 
+    const elementInfo = elementsInfo[lowestElement as keyof typeof elementsInfo];
+    const secondElementInfo = secondLowestElement
+      ? elementsInfo[secondLowestElement as keyof typeof elementsInfo]
       : null;
 
-    // Monta o prompt para o Gemini
     const prompt = `
-Você é Jaya Roberta, terapeuta integrativa especializada em relacionamentos e sexualidade humana, 
+Você é Jaya Roberta, terapeuta integrativa especializada em relacionamentos e sexualidade humana,
 com 8 anos de experiência transformando casais. Você desenvolveu o Método dos 5 Elementos.
 
 O usuário completou o Quiz dos 5 Elementos e estes são os resultados:
 
 SCORES (de 2 a 8 cada):
-- Terra: ${scores.terra}/8 (${scores.terra <= 4 ? 'BAIXO' : scores.terra <= 6 ? 'MÉDIO' : 'BOM'})
-- Água: ${scores.agua}/8 (${scores.agua <= 4 ? 'BAIXO' : scores.agua <= 6 ? 'MÉDIO' : 'BOM'})
-- Ar: ${scores.ar}/8 (${scores.ar <= 4 ? 'BAIXO' : scores.ar <= 6 ? 'MÉDIO' : 'BOM'})
-- Fogo: ${scores.fogo}/8 (${scores.fogo <= 4 ? 'BAIXO' : scores.fogo <= 6 ? 'MÉDIO' : 'BOM'})
-- Éter: ${scores.eter}/8 (${scores.eter <= 4 ? 'BAIXO' : scores.eter <= 6 ? 'MÉDIO' : 'BOM'})
+- Terra: ${scores.terra}/8
+- Água: ${scores.agua}/8
+- Ar: ${scores.ar}/8
+- Fogo: ${scores.fogo}/8
+- Éter: ${scores.eter}/8
 
 ELEMENTO MAIS DESALINHADO: ${elementInfo.name.toUpperCase()} (${elementInfo.icon})
 - Score: ${scores[lowestElement]}/8
@@ -67,7 +53,7 @@ ELEMENTO MAIS DESALINHADO: ${elementInfo.name.toUpperCase()} (${elementInfo.icon
 
 ${secondElementInfo ? `
 SEGUNDO ELEMENTO EM RISCO: ${secondElementInfo.name.toUpperCase()} (${secondElementInfo.icon})
-- Score: ${scores[secondLowestElement!]}/8
+- Score: ${scores[secondLowestElement]}/8
 ` : ''}
 
 ${pattern ? `PADRÃO IDENTIFICADO: ${pattern}` : ''}
@@ -115,23 +101,12 @@ FORMATO DE RESPOSTA (use EXATAMENTE esta estrutura):
 [Uma mensagem de encorajamento de 2-3 frases]
 `;
 
-    // Chama o Gemini
-    console.log('Calling Gemini API...');
-    // Permite configurar o modelo via variável de ambiente, padrão: gemini-1.5-flash
-    const modelName = process.env.GEMINI_MODEL || 'gemini-1.5-flash';
-    console.log('Using model:', modelName);
-    const model = genAI.getGenerativeModel({ model: modelName });
+    const genAI = new GoogleGenerativeAI(apiKey);
+    const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash-exp' });
 
-    console.log('Generating content...');
     const result = await model.generateContent(prompt);
-
-    console.log('Getting response...');
     const response = await result.response;
-
-    console.log('Extracting text...');
     const plannerContent = response.text();
-
-    console.log('Planner generated successfully, length:', plannerContent.length);
 
     return NextResponse.json({
       success: true,
@@ -140,17 +115,12 @@ FORMATO DE RESPOSTA (use EXATAMENTE esta estrutura):
       generatedAt: new Date().toISOString(),
     });
 
-  } catch (error) {
-    console.error('=== ERRO DETALHADO AO GERAR PLANNER ===');
-    console.error('Error type:', error instanceof Error ? error.constructor.name : typeof error);
-    console.error('Error message:', error instanceof Error ? error.message : String(error));
-    console.error('Error stack:', error instanceof Error ? error.stack : 'No stack trace');
-    console.error('Full error object:', JSON.stringify(error, null, 2));
-
+  } catch (error: any) {
+    console.error('Erro ao gerar planner:', error);
     return NextResponse.json(
       {
-        error: 'Erro ao gerar planner. Tente novamente.',
-        details: error instanceof Error ? error.message : 'Erro desconhecido'
+        error: 'Erro ao gerar planner',
+        details: error.message
       },
       { status: 500 }
     );

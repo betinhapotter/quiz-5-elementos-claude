@@ -6,20 +6,17 @@ Quiz interativo para diagnóstico de relacionamentos baseado no Método dos 5 El
 
 - **Frontend:** Next.js 14, React, Tailwind CSS, Framer Motion
 - **State Management:** Zustand
-- **Database:** Supabase
-- **Auth:** Supabase Auth (Google OAuth)
-- **IA:** Google Gemini
+- **Email:** Resend
 - **Deploy:** Vercel
 
 ## Features
 
-- ✅ **Login com Google** via Supabase Auth
 - ✅ Quiz de 10 perguntas (2 por elemento)
 - ✅ Cálculo automático de scores
 - ✅ Identificação do elemento desalinhado
 - ✅ Detecção de padrões perigosos (combinações de elementos baixos)
-- ✅ **Planner de 30 dias gerado por IA** (Google Gemini)
-- ✅ **Salvamento de resultados** no banco de dados
+- ✅ Captura de email antes do resultado
+- ✅ Envio automático de email com diagnóstico
 - ✅ Design responsivo (mobile-first)
 - ✅ Animações suaves
 
@@ -39,23 +36,7 @@ npm install
 cp .env.example .env.local
 ```
 
-Edite `.env.local` com suas credenciais:
-
-```env
-# Supabase
-NEXT_PUBLIC_SUPABASE_URL=sua-url-supabase
-NEXT_PUBLIC_SUPABASE_ANON_KEY=sua-chave-supabase
-
-# Google Gemini
-GEMINI_API_KEY=sua-chave-gemini
-
-# App
-NEXT_PUBLIC_APP_URL=http://localhost:3000
-```
-
-**Para obter as credenciais:**
-- Supabase: [supabase.com/dashboard](https://supabase.com/dashboard) > Settings > API
-- Gemini API: [Google AI Studio](https://makersuite.google.com/app/apikey)
+Edite `.env.local` com suas credenciais.
 
 ### 3. Execute localmente
 
@@ -124,22 +105,9 @@ src/
 
 ### Vercel (recomendado)
 
-**⚠️ IMPORTANTE:** Antes de fazer o deploy, leia o [Guia de Deploy](DEPLOY.md) completo.
-
-Passos rápidos:
 1. Conecte o repositório no Vercel
-2. Configure as variáveis de ambiente (veja [DEPLOY.md](DEPLOY.md))
-3. Configure as URLs de callback no Supabase
-4. Configure o Google OAuth
-5. Deploy automático a cada push
-
-**Variáveis de ambiente necessárias:**
-- `NEXT_PUBLIC_SUPABASE_URL`
-- `NEXT_PUBLIC_SUPABASE_ANON_KEY`
-- `GEMINI_API_KEY`
-- `NEXT_PUBLIC_APP_URL`
-
-Veja o [Guia de Deploy](DEPLOY.md) para instruções detalhadas.
+2. Configure as variáveis de ambiente
+3. Deploy automático a cada push
 
 ## Licença
 

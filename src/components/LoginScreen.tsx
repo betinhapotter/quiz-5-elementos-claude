@@ -11,22 +11,16 @@ export default function LoginScreen({ onSkip }: { onSkip?: () => void }) {
   const supabase = createClient();
 
   const handleGoogleLogin = async () => {
-    console.log('Login button clicked');
     setIsLoading(true);
     setError(null);
 
     try {
-      const redirectUrl = `${window.location.origin}/auth/callback`;
-      console.log('Redirect URL:', redirectUrl);
-
-      const { data, error } = await supabase.auth.signInWithOAuth({
+      const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: redirectUrl,
+          redirectTo: `${window.location.origin}/`,
         },
       });
-
-      console.log('SignInWithOAuth result:', { data, error });
 
       if (error) {
         setError('Erro ao fazer login. Tente novamente.');

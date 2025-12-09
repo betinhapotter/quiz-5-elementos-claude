@@ -8,22 +8,10 @@ import QuizScreen from '@/components/QuizScreen';
 import CalculatingScreen from '@/components/CalculatingScreen';
 import EmailCaptureScreen from '@/components/EmailCaptureScreen';
 import ResultScreen from '@/components/ResultScreen';
-import ConfigErrorScreen from '@/components/ConfigErrorScreen';
 
 export default function Home() {
-  // Verifica se as variáveis de ambiente estão configuradas
-  const supabaseConfigured =
-    process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-
-  if (!supabaseConfigured) {
-    return <ConfigErrorScreen />;
-  }
-
   const { user, loading, isAuthenticated } = useAuth();
   const currentStep = useQuizStore((state) => state.currentStep);
-
-  // Debug: Log auth state
-  console.log('Auth state:', { user: !!user, loading, isAuthenticated });
 
   // Loading state
   if (loading) {
@@ -43,13 +31,10 @@ export default function Home() {
     );
   }
 
-  // IMPORTANTE: Só permite acesso se tiver usuário E email verificado
-  if (!isAuthenticated || !user || !user.email) {
-    console.log('Not authenticated, showing login screen');
+  // Se não está autenticado, mostra tela de login
+  if (!isAuthenticated) {
     return <LoginScreen />;
   }
-
-  console.log('User authenticated:', user.email);
 
   // Fluxo normal do quiz para usuários autenticados
   return (

@@ -5,6 +5,7 @@ import { motion } from 'framer-motion';
 import { Download, RefreshCw, Sparkles, ArrowLeft, FileText } from 'lucide-react';
 import { useQuizStore } from '@/hooks/useQuizStore';
 import { elementsInfo, Element } from '@/types/quiz';
+import { API_ENDPOINTS, callAPI } from '@/lib/api';
 
 interface PlannerScreenV2Props {
   onBack: () => void;
@@ -29,22 +30,12 @@ export default function PlannerScreenV2({ onBack }: PlannerScreenV2Props) {
     setError(null);
 
     try {
-      const response = await fetch('/api/generate-planner', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          lowestElement: result.lowestElement,
-          scores: result.scores,
-          secondLowestElement: result.secondLowestElement,
-          pattern: result.pattern,
-        }),
+      const data = await callAPI(API_ENDPOINTS.generatePlanner, {
+        lowestElement: result.lowestElement,
+        scores: result.scores,
+        secondLowestElement: result.secondLowestElement,
+        pattern: result.pattern,
       });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || 'Erro ao gerar planner');
-      }
 
       setPlanner(data.planner);
     } catch (err) {

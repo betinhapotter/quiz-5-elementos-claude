@@ -1,9 +1,8 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
-import { Instagram, RefreshCw, Sparkles, Loader2, ExternalLink } from 'lucide-react';
+import { ArrowRight, Instagram, RefreshCw, Sparkles, Download, Loader2 } from 'lucide-react';
 import { useQuizStore } from '@/hooks/useQuizStore';
 import { useAuth } from '@/hooks/useAuth';
 import { createClient } from '@/lib/supabase/client';
@@ -11,12 +10,12 @@ import { elementsInfo, Element } from '@/types/quiz';
 import { generateResultExplanation, getResultSeverity } from '@/lib/quiz-logic';
 
 export default function ResultScreen() {
-  const router = useRouter();
-  const { result, resetQuiz, userData, answers, setPlanner } = useQuizStore();
+  const { result, resetQuiz, userData, answers } = useQuizStore();
   const { user } = useAuth();
   const supabase = createClient();
   
   const [isGeneratingPlanner, setIsGeneratingPlanner] = useState(false);
+  const [planner, setPlanner] = useState<string | null>(null);
   const [savedToDb, setSavedToDb] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -54,40 +53,101 @@ export default function ResultScreen() {
 
   const handleGeneratePlanner = async () => {
     if (!result) return;
-
+    
     setIsGeneratingPlanner(true);
     setError(null);
 
     try {
-      const response = await fetch('/api/generate-planner', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          lowestElement: result.lowestElement,
-          scores: result.scores,
-          secondLowestElement: result.secondLowestElement,
-          pattern: result.pattern,
-        }),
-      });
+      // Chama Gemini diretamente do cliente
+      const { GoogleGenerativeAI } = await import('@google/generative-ai');
+      const genAI = new GoogleGenerativeAI('AIzaSyABbe6paXIz6h1B-2zT3o-AGpQa1UVgKck');
+      const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
 
-      if (!response.ok) throw new Error('Falha ao gerar planner');
+      const elementInfo = elementsInfo[result.lowestElement];
+      const secondElementInfo = result.secondLowestElement 
+        ? elementsInfo[result.secondLowestElement] 
+        : null;
 
-      const data = await response.json();
+      const prompt = `
+Você é Jaya Roberta, terapeuta integrativa especializada em relacionamentos e sexualidade humana, 
+com 8 anos de experiência transformando casais. Você desenvolveu o Método dos 5 Elementos.
 
-      // Salva no Zustand store
-      setPlanner(data.planner);
+O usuário completou o Quiz dos 5 Elementos e estes são os resultados:
+
+SCORES (de 2 a 8 cada):
+- Terra: ${result.scores.terra}/8 (${result.scores.terra <= 4 ? 'BAIXO' : result.scores.terra <= 6 ? 'MÉDIO' : 'BOM'})
+- Água: ${result.scores.agua}/8 (${result.scores.agua <= 4 ? 'BAIXO' : result.scores.agua <= 6 ? 'MÉDIO' : 'BOM'})
+- Ar: ${result.scores.ar}/8 (${result.scores.ar <= 4 ? 'BAIXO' : result.scores.ar <= 6 ? 'MÉDIO' : 'BOM'})
+- Fogo: ${result.scores.fogo}/8 (${result.scores.fogo <= 4 ? 'BAIXO' : result.scores.fogo <= 6 ? 'MÉDIO' : 'BOM'})
+- Éter: ${result.scores.eter}/8 (${result.scores.eter <= 4 ? 'BAIXO' : result.scores.eter <= 6 ? 'MÉDIO' : 'BOM'})
+
+ELEMENTO MAIS DESALINHADO: ${elementInfo.name.toUpperCase()} (${elementInfo.icon})
+- Score: ${result.scores[result.lowestElement]}/8
+- Significa: ${elementInfo.meaning}
+
+${secondElementInfo ? `
+SEGUNDO ELEMENTO EM RISCO: ${secondElementInfo.name.toUpperCase()} (${secondElementInfo.icon})
+` : ''}
+
+${result.pattern ? `PADRÃO IDENTIFICADO: ${result.pattern}` : ''}
+
+CRIE UM PLANNER DE 30 DIAS para este casal, seguindo estas regras:
+
+1. FOCO PRINCIPAL no elemento ${elementInfo.name} (o mais desalinhado)
+2. Cada dia deve ter 1 EXERCÍCIO PRÁTICO de 5-15 minutos
+3. Progressão:
+   - Semana 1: Exercícios INDIVIDUAIS (sem pressionar o parceiro)
+   - Semana 2: Exercícios LEVES a dois
+   - Semana 3: Exercícios de CONEXÃO mais profundos
+   - Semana 4: RITUAIS de consolidação
+4. Tom: DIRETO, prático, sem jargão new age
+5. Cada exercício deve ter:
+   - Nome criativo
+   - Duração (5-15 min)
+   - Por que funciona (1 frase)
+   - Passo a passo claro
+
+FORMATO DE RESPOSTA (use EXATAMENTE esta estrutura):
+
+# PLANNER DE 30 DIAS - ELEMENTO ${elementInfo.name.toUpperCase()}
+
+## Semana 1: Reconexão Individual
+### Dia 1
+**[Nome do Exercício]** (X minutos)
+*Por que funciona:* [explicação curta]
+- Passo 1
+- Passo 2
+- Passo 3
+
+[Continue para os dias 2-7]
+
+## Semana 2: Primeiros Passos a Dois
+[Dias 8-14]
+
+## Semana 3: Aprofundando a Conexão
+[Dias 15-21]
+
+## Semana 4: Consolidando Rituais
+[Dias 22-30]
+
+## Mensagem Final
+[Uma mensagem de encorajamento de 2-3 frases]
+`;
+
+      const genResult = await model.generateContent(prompt);
+      const response = await genResult.response;
+      const plannerContent = response.text();
+      
+      setPlanner(plannerContent);
 
       // Salva o planner no banco
       if (user) {
         await supabase.from('planners').insert({
           user_id: user.id,
           element_focus: result.lowestElement,
-          content: data.planner,
+          content: plannerContent,
         });
       }
-
-      // Redireciona para a página dedicada do planner
-      router.push('/planner');
     } catch (err) {
       setError('Erro ao gerar seu planner. Tente novamente.');
       console.error(err);
@@ -308,57 +368,99 @@ export default function ResultScreen() {
           transition={{ delay: 0.8 }}
           className="mb-10"
         >
-          <div className="bg-gradient-to-br from-warmGray-900 to-warmGray-800 rounded-2xl p-8 text-white text-center">
-            <h2 className="font-display text-2xl sm:text-3xl font-bold mb-4">
-              🤖 Seu Planner de 30 Dias Personalizado
-            </h2>
-            <p className="text-warmGray-300 mb-6 max-w-lg mx-auto">
-              Nossa IA vai criar um plano de <strong>30 dias</strong> com exercícios práticos
-              específicos para realinhar o elemento <strong>{elementInfo.name}</strong> no seu relacionamento.
-            </p>
+          {!planner ? (
+            <div className="bg-gradient-to-br from-warmGray-900 to-warmGray-800 rounded-2xl p-8 text-white text-center">
+              <h2 className="font-display text-2xl sm:text-3xl font-bold mb-4">
+                🤖 Seu Planner de 30 Dias Personalizado
+              </h2>
+              <p className="text-warmGray-300 mb-6 max-w-lg mx-auto">
+                Nossa IA vai criar um plano de <strong>30 dias</strong> com exercícios práticos
+                específicos para realinhar o elemento <strong>{elementInfo.name}</strong> no seu relacionamento.
+              </p>
 
-            <ul className="text-left max-w-md mx-auto mb-6 space-y-2">
-              <li className="flex items-center gap-2 text-warmGray-300">
-                <span className="text-green-400">✓</span>
-                Exercícios diários de 5-15 minutos
-              </li>
-              <li className="flex items-center gap-2 text-warmGray-300">
-                <span className="text-green-400">✓</span>
-                Progressão gradual ao longo das 4 semanas
-              </li>
-              <li className="flex items-center gap-2 text-warmGray-300">
-                <span className="text-green-400">✓</span>
-                Gerado por IA com base nas SUAS respostas
-              </li>
-              <li className="flex items-center gap-2 text-warmGray-300">
-                <span className="text-green-400">✓</span>
-                Abre em página dedicada e visual
-              </li>
-            </ul>
+              <ul className="text-left max-w-md mx-auto mb-6 space-y-2">
+                <li className="flex items-center gap-2 text-warmGray-300">
+                  <span className="text-green-400">✓</span>
+                  Exercícios diários de 5-15 minutos
+                </li>
+                <li className="flex items-center gap-2 text-warmGray-300">
+                  <span className="text-green-400">✓</span>
+                  Progressão gradual ao longo das 4 semanas
+                </li>
+                <li className="flex items-center gap-2 text-warmGray-300">
+                  <span className="text-green-400">✓</span>
+                  Gerado por IA com base nas SUAS respostas
+                </li>
+              </ul>
 
-            <button
-              onClick={handleGeneratePlanner}
-              disabled={isGeneratingPlanner}
-              className="btn-primary bg-fogo hover:bg-fogo-dark text-lg px-8 py-4 disabled:opacity-50 inline-flex items-center gap-2"
-            >
-              {isGeneratingPlanner ? (
-                <>
-                  <Loader2 className="w-5 h-5 animate-spin" />
-                  Gerando seu planner...
-                </>
-              ) : (
-                <>
-                  <Sparkles className="w-5 h-5" />
-                  Gerar Meu Planner Grátis
-                  <ExternalLink className="w-4 h-4" />
-                </>
+              <button
+                onClick={handleGeneratePlanner}
+                disabled={isGeneratingPlanner}
+                className="btn-primary bg-fogo hover:bg-fogo-dark text-lg px-8 py-4 disabled:opacity-50"
+              >
+                {isGeneratingPlanner ? (
+                  <>
+                    <Loader2 className="w-5 h-5 mr-2 inline animate-spin" />
+                    Gerando seu planner...
+                  </>
+                ) : (
+                  <>
+                    <Sparkles className="w-5 h-5 mr-2 inline" />
+                    Gerar Meu Planner Grátis
+                  </>
+                )}
+              </button>
+
+              {error && (
+                <p className="mt-4 text-red-300 text-sm">{error}</p>
               )}
-            </button>
+            </div>
+          ) : (
+            <div className="bg-white rounded-2xl shadow-lg border border-warmGray-200 overflow-hidden">
+              <div className="bg-gradient-to-r from-fogo to-fogo-dark p-6 text-white">
+                <h2 className="font-display text-2xl font-bold flex items-center gap-2">
+                  <Sparkles className="w-6 h-6" />
+                  Seu Planner de 30 Dias
+                </h2>
+                <p className="text-white/80 mt-1">
+                  Gerado especialmente para realinhar o elemento {elementInfo.name}
+                </p>
+              </div>
+              
+              <div className="p-6 sm:p-8">
+                <div 
+                  className="prose prose-warmGray max-w-none"
+                  dangerouslySetInnerHTML={{ 
+                    __html: planner
+                      .replace(/^# /gm, '<h1 class="text-2xl font-bold mt-8 mb-4 first:mt-0">')
+                      .replace(/^## /gm, '<h2 class="text-xl font-bold mt-6 mb-3 text-fogo-dark">')
+                      .replace(/^### /gm, '<h3 class="text-lg font-semibold mt-4 mb-2">')
+                      .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
+                      .replace(/\*([^*]+)\*/g, '<em class="text-warmGray-600">$1</em>')
+                      .replace(/^- /gm, '<li class="ml-4">')
+                      .replace(/\n/g, '<br />')
+                  }}
+                />
+              </div>
 
-            {error && (
-              <p className="mt-4 text-red-300 text-sm">{error}</p>
-            )}
-          </div>
+              <div className="border-t border-warmGray-200 p-6 bg-warmGray-50 flex flex-wrap gap-4 justify-center">
+                <button
+                  onClick={() => {
+                    const blob = new Blob([planner], { type: 'text/markdown' });
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `planner-30-dias-${result.lowestElement}.md`;
+                    a.click();
+                  }}
+                  className="btn-secondary flex items-center gap-2"
+                >
+                  <Download className="w-4 h-4" />
+                  Baixar Planner
+                </button>
+              </div>
+            </div>
+          )}
         </motion.section>
 
         {/* Footer / Ações secundárias */}

@@ -34,10 +34,8 @@ export const useQuizStore = create<QuizStore>((set, get) => ({
   ...initialState,
   planner: null,
 
-  // Planner actions
-  setPlanner: (planner: string) => {
-    set({ planner });
-  },
+  // Planner setter
+  setPlanner: (planner: string) => set({ planner }),
 
   // Iniciar o quiz
   startQuiz: () => {
