@@ -26,6 +26,7 @@ export function calculateScores(answers: Answer[]): ElementScores {
 
   return scores;
 }
+
 /**
  * Verifica se o relacionamento está equilibrado (todos elementos >= 6)
  */
@@ -33,6 +34,7 @@ export function isRelationshipBalanced(scores: ElementScores): boolean {
   const elements: Element[] = ['terra', 'agua', 'ar', 'fogo', 'eter'];
   return elements.every((element) => scores[element] >= 6);
 }
+
 /**
  * Identifica o elemento com menor pontuação (mais desalinhado)
  */
@@ -144,7 +146,7 @@ export function generateResultExplanation(result: QuizResult): {
   whyNotHeard: string;
   firstSteps: string[];
 } {
-// Se o relacionamento está equilibrado, retorna mensagem positiva
+  // Se o relacionamento está equilibrado, retorna mensagem positiva
   if (result.isBalanced) {
     return {
       title: 'Relacionamento Equilibrado! 🎉',
@@ -159,7 +161,7 @@ export function generateResultExplanation(result: QuizResult): {
       ],
     };
   }
-{
+
   const elementInfo = elementsInfo[result.lowestElement];
 
   const explanations: Record<Element, {
@@ -195,7 +197,7 @@ export function generateResultExplanation(result: QuizResult): {
       title: `Elemento AR desalinhado`,
       subtitle: `${elementInfo.icon} A comunicação está travada`,
       explanation: `O elemento Ar representa a troca verbal: diálogo, escuta, clareza. Quando está desalinhado, vocês falam línguas diferentes. Um pede conexão, o outro lê como cobrança. A mensagem nunca chega como foi enviada.`,
-      whyNotHeard: `Quando o AR está desalinhado, é EXATAMENTE isso: vocês falam lí­nguas diferentes. Um fala, o outro ouve como ataque. Um pede conexão, o outro lê como cobranã§a. O ar não circula — sufoca.`,
+      whyNotHeard: `Quando o AR está desalinhado, é EXATAMENTE isso: vocês falam línguas diferentes. Um fala, o outro ouve como ataque. Um pede conexão, o outro lê como cobrança. O ar não circula — sufoca.`,
       firstSteps: [
         'Respondam aos pedidos de conexão (mesmo que seja "agora não posso, mas às 20h sim")',
         'Durante conflitos, façam pausas de 20 min quando esquentar demais',
