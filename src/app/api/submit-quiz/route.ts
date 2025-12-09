@@ -227,7 +227,7 @@ function generateEmailContent(element: Element, name?: string): string {
       <div class="footer">
         <p>Um abraço,<br><strong>Jaya Roberta</strong></p>
         <p>Terapeuta Integrativa | Relacionamentos & Sexualidade</p>
-        <p><a href="https://instagram.com/jayaroberta">@jayaroberta</a></p>
+        <p><a href="https://www.instagram.com/jaya.terapia/">@jaya.terapia</a></p>
       </div>
     </body>
     </html>

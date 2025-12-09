@@ -94,10 +94,10 @@ export default function LandingScreen() {
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-8 text-center">
             <div className="flex items-center gap-2">
               <div className="w-10 h-10 rounded-full bg-warmGray-200 flex items-center justify-center">
-                <span className="text-lg">🔬</span>
+                <span className="text-lg">💑</span>
               </div>
               <span className="text-sm text-warmGray-600">
-                Baseado em pesquisa de <strong>John Gottman</strong>
+                <strong>+500 casais</strong> já fizeram esse diagnóstico
               </span>
             </div>
             <div className="flex items-center gap-2">

@@ -402,13 +402,13 @@ FORMATO DE RESPOSTA (use EXATAMENTE esta estrutura):
           </button>
 
           <a
-            href="https://instagram.com/jayaroberta"
+            href="https://www.instagram.com/jaya.terapia/"
             target="_blank"
             rel="noopener noreferrer"
             className="btn-secondary flex items-center gap-2"
           >
             <Instagram className="w-4 h-4" />
-            Seguir @jayaroberta
+            Seguir @jaya.terapia
           </a>
         </motion.div>
 
