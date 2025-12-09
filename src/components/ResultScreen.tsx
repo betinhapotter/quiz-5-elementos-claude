@@ -100,12 +100,12 @@ export default function ResultScreen() {
 
       // Aumenta temporariamente os tamanhos das fontes
       const allElements = element.querySelectorAll('*');
-      const originalStyles: { element: Element; fontSize: string }[] = [];
+      const originalStyles: { domElement: HTMLElement; fontSize: string }[] = [];
 
       allElements.forEach((el) => {
         const htmlEl = el as HTMLElement;
         const currentFontSize = window.getComputedStyle(htmlEl).fontSize;
-        originalStyles.push({ element: el, fontSize: currentFontSize });
+        originalStyles.push({ domElement: htmlEl, fontSize: currentFontSize });
 
         if (htmlEl.tagName === 'H1') htmlEl.style.fontSize = '42px';
         if (htmlEl.tagName === 'H2') htmlEl.style.fontSize = '34px';
@@ -121,8 +121,8 @@ export default function ResultScreen() {
       });
 
       // Restaura os tamanhos originais
-      originalStyles.forEach(({ element, fontSize }) => {
-        (element as HTMLElement).style.fontSize = fontSize;
+      originalStyles.forEach(({ domElement, fontSize }) => {
+        domElement.style.fontSize = fontSize;
       });
 
       const imgData = canvas.toDataURL('image/png');
