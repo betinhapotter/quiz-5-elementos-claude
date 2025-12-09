@@ -42,6 +42,7 @@ export interface QuizResult {
   disasterType: DisasterType;
   secondLowestElement?: Element;
   pattern?: string;
+  isBalanced?: boolean;
 }
 
 // Dados do usuário

@@ -34,7 +34,66 @@ export default function ResultScreen() {
         ? elementsInfo[result.secondLowestElement]
         : null;
 
-      const prompt = `
+      const isBalanced = result.isBalanced;
+
+      // Prompt diferente para relacionamento equilibrado
+      const prompt = isBalanced ? `
+Você é Jaya Roberta, terapeuta integrativa especializada em relacionamentos e sexualidade humana,
+com 8 anos de experiência transformando casais. Você desenvolveu o Método dos 5 Elementos.
+
+O usuário completou o Quiz dos 5 Elementos e o resultado mostra um RELACIONAMENTO EQUILIBRADO!
+
+SCORES (de 2 a 8 cada):
+- Terra: ${result.scores.terra}/8 (SAUDÁVEL)
+- Água: ${result.scores.agua}/8 (SAUDÁVEL)
+- Ar: ${result.scores.ar}/8 (SAUDÁVEL)
+- Fogo: ${result.scores.fogo}/8 (SAUDÁVEL)
+- Éter: ${result.scores.eter}/8 (SAUDÁVEL)
+
+Todos os elementos estão com score >= 6, indicando equilíbrio!
+
+CRIE UM PLANNER DE MANUTENÇÃO DE 30 DIAS para este casal, seguindo estas regras:
+
+1. FOCO em MANTER e APROFUNDAR o equilíbrio existente
+2. Cada dia deve ter 1 EXERCÍCIO PRÁTICO de 5-15 minutos
+3. Progressão:
+   - Semana 1: Celebração e gratidão pelo que já funciona
+   - Semana 2: Aprofundando a intimidade emocional
+   - Semana 3: Aventuras e novidades juntos
+   - Semana 4: Rituais de manutenção para o futuro
+4. Tom: POSITIVO, celebratório, mas ainda prático
+5. Cada exercício deve ter:
+   - Nome criativo
+   - Duração (5-15 min)
+   - Por que funciona (1 frase)
+   - Passo a passo claro
+
+FORMATO DE RESPOSTA (use EXATAMENTE esta estrutura):
+
+# PLANNER DE MANUTENÇÃO - 30 DIAS
+
+## Semana 1: Celebrando o Equilíbrio
+### Dia 1
+**[Nome do Exercício]** (X minutos)
+*Por que funciona:* [explicação curta]
+- Passo 1
+- Passo 2
+- Passo 3
+
+[Continue para os dias 2-7]
+
+## Semana 2: Aprofundando a Conexão
+[Dias 8-14]
+
+## Semana 3: Novas Aventuras Juntos
+[Dias 15-21]
+
+## Semana 4: Rituais Para o Futuro
+[Dias 22-30]
+
+## Mensagem Final
+[Uma mensagem de celebração de 2-3 frases]
+` : `
 Você é Jaya Roberta, terapeuta integrativa especializada em relacionamentos e sexualidade humana,
 com 8 anos de experiência transformando casais. Você desenvolveu o Método dos 5 Elementos.
 
@@ -131,6 +190,7 @@ FORMATO DE RESPOSTA (use EXATAMENTE esta estrutura):
   const elementInfo = elementsInfo[result.lowestElement];
   const explanation = generateResultExplanation(result);
   const severity = getResultSeverity(result);
+  const isBalanced = result.isBalanced;
 
   // Cores por elemento
   const elementColors: Record<Element, string> = {
@@ -141,11 +201,16 @@ FORMATO DE RESPOSTA (use EXATAMENTE esta estrutura):
     eter: 'from-eter to-eter-dark',
   };
 
+  // Cor do header: verde se equilibrado, cor do elemento se não
+  const headerColor = isBalanced 
+    ? 'from-green-500 to-green-700' 
+    : elementColors[result.lowestElement];
+
   return (
     <div className="min-h-screen bg-cream">
       {/* Hero do resultado */}
       <div
-        className={`bg-gradient-to-br ${elementColors[result.lowestElement]} text-white py-12 sm:py-16`}
+        className={`bg-gradient-to-br ${headerColor} text-white py-12 sm:py-16`}
       >
         <div className="container-quiz text-center">
           <motion.div
@@ -154,7 +219,7 @@ FORMATO DE RESPOSTA (use EXATAMENTE esta estrutura):
             transition={{ duration: 0.5 }}
           >
             <span className="text-6xl sm:text-8xl block mb-4">
-              {elementInfo.icon}
+              {isBalanced ? '🎉' : elementInfo.icon}
             </span>
 
             <h1 className="font-display text-3xl sm:text-4xl font-bold mb-2">
@@ -163,8 +228,8 @@ FORMATO DE RESPOSTA (use EXATAMENTE esta estrutura):
 
             <p className="text-xl opacity-90">{explanation.subtitle}</p>
 
-            {/* Severidade */}
-            {severity === 'critica' && (
+            {/* Severidade - só mostra se não equilibrado e crítico */}
+            {!isBalanced && severity === 'critica' && (
               <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
@@ -188,16 +253,16 @@ FORMATO DE RESPOSTA (use EXATAMENTE esta estrutura):
           className="mb-10"
         >
           <h2 className="font-display text-2xl font-bold text-warmGray-900 mb-4">
-            O Que Isso Significa
+            {isBalanced ? 'O Que Isso Significa' : 'O Que Isso Significa'}
           </h2>
-          <div className="bg-white rounded-xl p-6 shadow-sm border border-warmGray-100">
+          <div className={`bg-white rounded-xl p-6 shadow-sm border ${isBalanced ? 'border-green-200' : 'border-warmGray-100'}`}>
             <p className="text-warmGray-700 leading-relaxed">
               {explanation.explanation}
             </p>
           </div>
         </motion.section>
 
-        {/* Por que não se sentem ouvidos */}
+        {/* Por que (não) se sentem ouvidos */}
         <motion.section
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -205,17 +270,19 @@ FORMATO DE RESPOSTA (use EXATAMENTE esta estrutura):
           className="mb-10"
         >
           <h2 className="font-display text-2xl font-bold text-warmGray-900 mb-4">
-            Por Que Vocês Falam Mas Não Se Sentem Ouvidos
+            {isBalanced 
+              ? 'Por Que Vocês ESTÃO Se Ouvindo' 
+              : 'Por Que Vocês Falam Mas Não Se Sentem Ouvidos'}
           </h2>
-          <div className="bg-warmGray-50 rounded-xl p-6 border-l-4 border-fogo">
+          <div className={`rounded-xl p-6 border-l-4 ${isBalanced ? 'bg-green-50 border-green-500' : 'bg-warmGray-50 border-fogo'}`}>
             <p className="text-warmGray-700 leading-relaxed">
               {explanation.whyNotHeard}
             </p>
           </div>
         </motion.section>
 
-        {/* Padrão identificado (se houver) */}
-        {result.pattern && (
+        {/* Padrão identificado (se houver e não equilibrado) */}
+        {!isBalanced && result.pattern && (
           <motion.section
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -242,7 +309,7 @@ FORMATO DE RESPOSTA (use EXATAMENTE esta estrutura):
           </motion.section>
         )}
 
-        {/* Primeiros passos */}
+        {/* Primeiros passos / Como manter */}
         <motion.section
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -250,7 +317,7 @@ FORMATO DE RESPOSTA (use EXATAMENTE esta estrutura):
           className="mb-10"
         >
           <h2 className="font-display text-2xl font-bold text-warmGray-900 mb-4">
-            Primeiros Passos Para Realinhar
+            {isBalanced ? 'Como Manter o Equilíbrio' : 'Primeiros Passos Para Realinhar'}
           </h2>
           <div className="space-y-3">
             {explanation.firstSteps.map((step, index) => (
@@ -259,11 +326,14 @@ FORMATO DE RESPOSTA (use EXATAMENTE esta estrutura):
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: 0.5 + index * 0.1 }}
-                className="flex items-start gap-4 bg-white rounded-xl p-4 shadow-sm border border-warmGray-100"
+                className={`flex items-start gap-4 bg-white rounded-xl p-4 shadow-sm border ${isBalanced ? 'border-green-100' : 'border-warmGray-100'}`}
               >
                 <span
-                  className={`flex-shrink-0 w-8 h-8 rounded-full bg-${elementInfo.color}/10
-                             text-${elementInfo.color}-dark font-bold flex items-center justify-center`}
+                  className={`flex-shrink-0 w-8 h-8 rounded-full font-bold flex items-center justify-center ${
+                    isBalanced 
+                      ? 'bg-green-100 text-green-700' 
+                      : `bg-${elementInfo.color}/10 text-${elementInfo.color}-dark`
+                  }`}
                 >
                   {index + 1}
                 </span>
@@ -291,6 +361,7 @@ FORMATO DE RESPOSTA (use EXATAMENTE esta estrutura):
                 const percentage = (score / maxScore) * 100;
                 const info = elementsInfo[element];
                 const isLowest = element === result.lowestElement;
+                const isHealthy = score >= 6;
 
                 return (
                   <div key={element}>
@@ -298,7 +369,12 @@ FORMATO DE RESPOSTA (use EXATAMENTE esta estrutura):
                       <span className="flex items-center gap-2 text-sm font-medium text-warmGray-700">
                         <span>{info.icon}</span>
                         <span>{info.name}</span>
-                        {isLowest && (
+                        {isBalanced && isHealthy && (
+                          <span className="text-xs bg-green-100 text-green-600 px-2 py-0.5 rounded-full">
+                            ✓ Saudável
+                          </span>
+                        )}
+                        {!isBalanced && isLowest && (
                           <span className="text-xs bg-red-100 text-red-600 px-2 py-0.5 rounded-full">
                             Desalinhado
                           </span>
@@ -314,13 +390,15 @@ FORMATO DE RESPOSTA (use EXATAMENTE esta estrutura):
                         animate={{ width: `${percentage}%` }}
                         transition={{ duration: 0.8, delay: 0.7 }}
                         className={`h-full rounded-full ${
-                          isLowest
-                            ? 'bg-red-400'
-                            : percentage >= 75
-                              ? 'bg-green-400'
-                              : percentage >= 50
-                                ? 'bg-yellow-400'
-                                : 'bg-orange-400'
+                          isBalanced
+                            ? 'bg-green-400'
+                            : isLowest
+                              ? 'bg-red-400'
+                              : percentage >= 75
+                                ? 'bg-green-400'
+                                : percentage >= 50
+                                  ? 'bg-yellow-400'
+                                  : 'bg-orange-400'
                         }`}
                       />
                     </div>
@@ -338,26 +416,37 @@ FORMATO DE RESPOSTA (use EXATAMENTE esta estrutura):
           transition={{ delay: 0.8 }}
           className="mb-10"
         >
-          <div className="bg-gradient-to-br from-warmGray-900 to-warmGray-800 rounded-2xl p-8 text-white text-center">
+          <div className={`rounded-2xl p-8 text-white text-center ${
+            isBalanced 
+              ? 'bg-gradient-to-br from-green-600 to-green-800' 
+              : 'bg-gradient-to-br from-warmGray-900 to-warmGray-800'
+          }`}>
             <h2 className="font-display text-2xl sm:text-3xl font-bold mb-4">
-              🤖 Seu Planner de 30 Dias Personalizado
+              {isBalanced 
+                ? '🌟 Seu Planner de Manutenção - 30 Dias' 
+                : '🤖 Seu Planner de 30 Dias Personalizado'}
             </h2>
             <p className="text-warmGray-300 mb-6 max-w-lg mx-auto">
-              Nossa IA vai criar um plano de <strong>30 dias</strong> com exercícios práticos
-              específicos para realinhar o elemento <strong>{elementInfo.name}</strong> no seu relacionamento.
+              {isBalanced ? (
+                <>Nossa IA vai criar um plano de <strong>30 dias</strong> com exercícios para 
+                <strong> manter e aprofundar</strong> o equilíbrio do seu relacionamento.</>
+              ) : (
+                <>Nossa IA vai criar um plano de <strong>30 dias</strong> com exercícios práticos
+                específicos para realinhar o elemento <strong>{elementInfo.name}</strong> no seu relacionamento.</>
+              )}
             </p>
 
             <ul className="text-left max-w-md mx-auto mb-6 space-y-2">
               <li className="flex items-center gap-2 text-warmGray-300">
-                <span className="text-green-400">✓</span>
+                <span className="text-green-400">✔</span>
                 Exercícios diários de 5-15 minutos
               </li>
               <li className="flex items-center gap-2 text-warmGray-300">
-                <span className="text-green-400">✓</span>
+                <span className="text-green-400">✔</span>
                 Progressão gradual ao longo das 4 semanas
               </li>
               <li className="flex items-center gap-2 text-warmGray-300">
-                <span className="text-green-400">✓</span>
+                <span className="text-green-400">✔</span>
                 Gerado por IA com base nas SUAS respostas
               </li>
             </ul>
@@ -365,7 +454,11 @@ FORMATO DE RESPOSTA (use EXATAMENTE esta estrutura):
             <button
               onClick={handleGeneratePlanner}
               disabled={isGeneratingPlanner}
-              className="btn-primary bg-fogo hover:bg-fogo-dark text-lg px-8 py-4 disabled:opacity-50"
+              className={`btn-primary text-lg px-8 py-4 disabled:opacity-50 ${
+                isBalanced 
+                  ? 'bg-white text-green-700 hover:bg-green-50' 
+                  : 'bg-fogo hover:bg-fogo-dark'
+              }`}
             >
               {isGeneratingPlanner ? (
                 <>
@@ -375,7 +468,7 @@ FORMATO DE RESPOSTA (use EXATAMENTE esta estrutura):
               ) : (
                 <>
                   <Sparkles className="w-5 h-5 mr-2 inline" />
-                  Gerar Meu Planner Grátis
+                  {isBalanced ? 'Gerar Planner de Manutenção' : 'Gerar Meu Planner Grátis'}
                 </>
               )}
             </button>

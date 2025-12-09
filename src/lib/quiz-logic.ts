@@ -26,7 +26,13 @@ export function calculateScores(answers: Answer[]): ElementScores {
 
   return scores;
 }
-
+/**
+ * Verifica se o relacionamento está equilibrado (todos elementos >= 6)
+ */
+export function isRelationshipBalanced(scores: ElementScores): boolean {
+  const elements: Element[] = ['terra', 'agua', 'ar', 'fogo', 'eter'];
+  return elements.every((element) => scores[element] >= 6);
+}
 /**
  * Identifica o elemento com menor pontuação (mais desalinhado)
  */
@@ -108,6 +114,7 @@ export function identifyPattern(
  */
 export function calculateResult(answers: Answer[]): QuizResult {
   const scores = calculateScores(answers);
+  const balanced = isRelationshipBalanced(scores);
   const { element: lowestElement, score: lowestScore } = findLowestElement(scores);
   const secondLowest = findSecondLowestElement(scores, lowestElement);
   const pattern = identifyPattern(
@@ -123,6 +130,7 @@ export function calculateResult(answers: Answer[]): QuizResult {
     disasterType: elementToDisaster[lowestElement],
     secondLowestElement: secondLowest?.element,
     pattern,
+    isBalanced: balanced,
   };
 }
 
@@ -135,7 +143,23 @@ export function generateResultExplanation(result: QuizResult): {
   explanation: string;
   whyNotHeard: string;
   firstSteps: string[];
-} {
+} 
+// Se o relacionamento está equilibrado, retorna mensagem positiva
+  if (result.isBalanced) {
+    return {
+      title: 'Relacionamento Equilibrado! 🎉',
+      subtitle: '✨ Todos os 5 elementos estão alinhados',
+      explanation: 'Parabéns! Seu relacionamento demonstra equilíbrio em todas as áreas fundamentais. Vocês construíram uma base sólida de confiança (Terra), mantêm conexão emocional profunda (Água), comunicam-se com clareza (Ar), preservam a paixão e admiração mútua (Fogo) e compartilham propósito e visão de futuro (Éter). Isso é raro e valioso!',
+      whyNotHeard: 'Na verdade, vocês ESTÃO se ouvindo! O equilíbrio dos elementos indica que existe escuta ativa, empatia e respeito mútuo na comunicação de vocês. Continuem nutrindo essa conexão.',
+      firstSteps: [
+        'Celebrem juntos essa conquista — reconheçam o trabalho que fizeram para chegar aqui',
+        'Mantenham os rituais de conexão que já funcionam para vocês',
+        'Explorem novas aventuras juntos para manter a relação viva e crescendo',
+        'Compartilhem esse equilíbrio: sejam exemplo e apoio para outros casais',
+      ],
+    };
+  }
+{
   const elementInfo = elementsInfo[result.lowestElement];
 
   const explanations: Record<Element, {
@@ -208,7 +232,10 @@ export function generateResultExplanation(result: QuizResult): {
 /**
  * Determina a severidade do resultado (para personalização do tom)
  */
-export function getResultSeverity(result: QuizResult): 'critica' | 'alta' | 'moderada' | 'leve' {
+export function getResultSeverity(result: QuizResult): 'equilibrado' | 'critica' | 'alta' | 'moderada' | 'leve' {
+  // Se está equilibrado, retorna 'equilibrado'
+  if (result.isBalanced) return 'equilibrado';
+
   const { lowestScore, secondLowestElement, scores } = result;
 
   // Score crítico no elemento principal
