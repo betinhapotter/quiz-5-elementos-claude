@@ -11,8 +11,7 @@ export default function EmailCaptureScreen() {
   const [isLoading, setIsLoading] = useState(false);
 
   const result = useQuizStore((state) => state.result);
-  const setUserData = useQuizStore((state) => state.setUserData);
-  const setCurrentStep = useQuizStore((state) => state.setCurrentStep);
+  const submitEmail = useQuizStore((state) => state.submitEmail);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -46,8 +45,8 @@ export default function EmailCaptureScreen() {
       }
 
       // Atualizar store e ir para resultado
-      setUserData({ email, createdAt: new Date() });
-      setCurrentStep('result');
+      // Atualizar store e ir para resultado
+		submitEmail(email);
     } catch (err) {
       console.error('Erro:', err);
       setError('Ocorreu um erro. Tente novamente.');
