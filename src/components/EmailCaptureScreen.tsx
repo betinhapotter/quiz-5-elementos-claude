@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useQuizStore } from '@/hooks/useQuizStore';
 import { elementsInfo } from '@/types/quiz';
-import { supabase } from '@/lib/supabase/client';
+import { createClient } from '@/lib/supabase/client';
 
 export default function EmailCaptureScreen() {
   const [email, setEmail] = useState('');
@@ -28,8 +28,9 @@ export default function EmailCaptureScreen() {
     setIsLoading(true);
 
     try {
-      // Salvar no Supabase
-      const { error: supabaseError } = await supabase
+  // Salvar no Supabase
+  const supabase = createClient();
+  const { error: supabaseError } = await supabase
         .from('quiz_leads')
         .insert({
           email,
