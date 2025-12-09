@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { ArrowRight, Instagram, RefreshCw, Sparkles, Download, Loader2 } from 'lucide-react';
 import { useQuizStore } from '@/hooks/useQuizStore';
@@ -19,6 +19,8 @@ export default function ResultScreen() {
   const [planner, setPlanner] = useState<string | null>(null);
   const [savedToDb, setSavedToDb] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
+  const plannerRef = useRef<HTMLDivElement>(null);
 
   // Salva resultado no banco quando carrega
   useEffect(() => {
@@ -54,7 +56,7 @@ export default function ResultScreen() {
 
   const handleGeneratePlanner = async () => {
     if (!result) return;
-    
+
     setIsGeneratingPlanner(true);
     setError(null);
 
@@ -82,6 +84,73 @@ export default function ResultScreen() {
       console.error(err);
     } finally {
       setIsGeneratingPlanner(false);
+    }
+  };
+
+  const handleDownloadPDF = async () => {
+    if (!plannerRef.current || !result) return;
+
+    setIsGeneratingPDF(true);
+
+    try {
+      const html2canvas = (await import('html2canvas')).default;
+      const jsPDF = (await import('jspdf')).jsPDF;
+
+      const element = plannerRef.current;
+
+      // Aumenta temporariamente os tamanhos das fontes
+      const allElements = element.querySelectorAll('*');
+      const originalStyles: { element: Element; fontSize: string }[] = [];
+
+      allElements.forEach((el) => {
+        const htmlEl = el as HTMLElement;
+        const currentFontSize = window.getComputedStyle(htmlEl).fontSize;
+        originalStyles.push({ element: el, fontSize: currentFontSize });
+
+        if (htmlEl.tagName === 'H1') htmlEl.style.fontSize = '42px';
+        if (htmlEl.tagName === 'H2') htmlEl.style.fontSize = '34px';
+        if (htmlEl.tagName === 'H3') htmlEl.style.fontSize = '28px';
+        if (htmlEl.tagName === 'P') htmlEl.style.fontSize = '20px';
+        if (htmlEl.tagName === 'LI') htmlEl.style.fontSize = '20px';
+      });
+
+      const canvas = await html2canvas(element, {
+        scale: 3,
+        useCORS: true,
+        logging: false,
+      });
+
+      // Restaura os tamanhos originais
+      originalStyles.forEach(({ element, fontSize }) => {
+        (element as HTMLElement).style.fontSize = fontSize;
+      });
+
+      const imgData = canvas.toDataURL('image/png');
+      const pdf = new jsPDF('p', 'mm', 'a4');
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = pdf.internal.pageSize.getHeight();
+      const imgWidth = pdfWidth - 20; // 10mm margens
+      const imgHeight = (canvas.height * imgWidth) / canvas.width;
+
+      let heightLeft = imgHeight;
+      let position = 10;
+
+      pdf.addImage(imgData, 'PNG', 10, position, imgWidth, imgHeight);
+      heightLeft -= pdfHeight;
+
+      while (heightLeft > 0) {
+        position = heightLeft - imgHeight + 10;
+        pdf.addPage();
+        pdf.addImage(imgData, 'PNG', 10, position, imgWidth, imgHeight);
+        heightLeft -= pdfHeight;
+      }
+
+      pdf.save(`planner-30-dias-${result.lowestElement}.pdf`);
+    } catch (err) {
+      console.error('Erro ao gerar PDF:', err);
+      alert('Erro ao gerar PDF. Tente novamente.');
+    } finally {
+      setIsGeneratingPDF(false);
     }
   };
 
@@ -357,22 +426,90 @@ export default function ResultScreen() {
               </div>
               
               <div className="p-6 sm:p-8">
-                <div 
-                  className="prose prose-warmGray max-w-none"
-                  dangerouslySetInnerHTML={{ 
-                    __html: planner
-                      .replace(/^# /gm, '<h1 class="text-2xl font-bold mt-8 mb-4 first:mt-0">')
-                      .replace(/^## /gm, '<h2 class="text-xl font-bold mt-6 mb-3 text-fogo-dark">')
-                      .replace(/^### /gm, '<h3 class="text-lg font-semibold mt-4 mb-2">')
-                      .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
-                      .replace(/\*([^*]+)\*/g, '<em class="text-warmGray-600">$1</em>')
-                      .replace(/^- /gm, '<li class="ml-4">')
-                      .replace(/\n/g, '<br />')
-                  }}
-                />
+                <div
+                  ref={plannerRef}
+                  className="max-w-none"
+                  style={{ marginLeft: 0, marginRight: 0 }}
+                >
+                  {planner.split('\n').map((line, index) => {
+                    const trimmed = line.trim();
+
+                    // H1
+                    if (trimmed.startsWith('# ')) {
+                      return (
+                        <h1 key={index} className="text-2xl font-bold mt-8 mb-4 first:mt-0" style={{ marginLeft: 0, marginRight: 0 }}>
+                          {trimmed.substring(2)}
+                        </h1>
+                      );
+                    }
+
+                    // H2
+                    if (trimmed.startsWith('## ')) {
+                      return (
+                        <h2 key={index} className="text-xl font-bold mt-6 mb-3 text-fogo-dark" style={{ marginLeft: 0, marginRight: 0 }}>
+                          {trimmed.substring(3)}
+                        </h2>
+                      );
+                    }
+
+                    // H3
+                    if (trimmed.startsWith('### ')) {
+                      return (
+                        <h3 key={index} className="text-lg font-semibold mt-4 mb-2" style={{ marginLeft: 0, marginRight: 0 }}>
+                          {trimmed.substring(4)}
+                        </h3>
+                      );
+                    }
+
+                    // Lista
+                    if (trimmed.startsWith('- ')) {
+                      return (
+                        <li key={index} className="ml-4 mb-1" style={{ marginLeft: '1rem', marginRight: 0 }}>
+                          {trimmed.substring(2).replace(/\*\*([^*]+)\*\*/g, '$1').replace(/\*([^*]+)\*/g, '$1')}
+                        </li>
+                      );
+                    }
+
+                    // Linha vazia
+                    if (!trimmed) {
+                      return <br key={index} />;
+                    }
+
+                    // Parágrafo normal
+                    return (
+                      <p
+                        key={index}
+                        className="mb-2"
+                        style={{ marginLeft: 0, marginRight: 0 }}
+                        dangerouslySetInnerHTML={{
+                          __html: trimmed
+                            .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
+                            .replace(/\*([^*]+)\*/g, '<em>$1</em>')
+                        }}
+                      />
+                    );
+                  })}
+                </div>
               </div>
 
               <div className="border-t border-warmGray-200 p-6 bg-warmGray-50 flex flex-wrap gap-4 justify-center">
+                <button
+                  onClick={handleDownloadPDF}
+                  disabled={isGeneratingPDF}
+                  className="btn-primary bg-blue-600 hover:bg-blue-700 flex items-center gap-2 disabled:opacity-50"
+                >
+                  {isGeneratingPDF ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      Gerando PDF...
+                    </>
+                  ) : (
+                    <>
+                      <Download className="w-4 h-4" />
+                      Baixar PDF
+                    </>
+                  )}
+                </button>
                 <button
                   onClick={() => {
                     const blob = new Blob([planner], { type: 'text/markdown' });
@@ -385,7 +522,7 @@ export default function ResultScreen() {
                   className="btn-secondary flex items-center gap-2"
                 >
                   <Download className="w-4 h-4" />
-                  Baixar Planner
+                  Baixar MD
                 </button>
               </div>
             </div>
