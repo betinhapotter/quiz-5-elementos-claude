@@ -12,16 +12,36 @@ export function useAuth() {
   useEffect(() => {
     // Verifica usuário atual
     const getUser = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      setUser(user);
-      setLoading(false);
+      try {
+        const { data: { session }, error } = await supabase.auth.getSession();
+
+        console.log('🔐 Auth Check:', {
+          hasSession: !!session,
+          hasUser: !!session?.user,
+          userEmail: session?.user?.email,
+          error: error?.message
+        });
+
+        // Só considera autenticado se tiver sessão E usuário válido
+        if (session?.user) {
+          setUser(session.user);
+        } else {
+          setUser(null);
+        }
+      } catch (err) {
+        console.error('❌ Auth error:', err);
+        setUser(null);
+      } finally {
+        setLoading(false);
+      }
     };
 
     getUser();
 
     // Escuta mudanças de autenticação
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (_event, session) => {
+      (event, session) => {
+        console.log('🔄 Auth state changed:', event, !!session);
         setUser(session?.user ?? null);
         setLoading(false);
       }
