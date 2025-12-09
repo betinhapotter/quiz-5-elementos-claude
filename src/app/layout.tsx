@@ -27,6 +27,7 @@ export const metadata: Metadata = {
     'Jaya Roberta',
   ],
   authors: [{ name: 'Jaya Roberta' }],
+  metadataBase: new URL('https://quiz-5-elementos-claude.vercel.app'),
   openGraph: {
     title: 'Por Que Vocês Falam Mas Ninguém Se Sente Ouvido?',
     description:
@@ -34,6 +35,21 @@ export const metadata: Metadata = {
     type: 'website',
     locale: 'pt_BR',
     siteName: 'Quiz dos 5 Elementos',
+    images: [
+      {
+        url: '/og-image.png',
+        width: 1200,
+        height: 630,
+        alt: 'Quiz dos 5 Elementos - Jaya Roberta',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Por Que Vocês Falam Mas Ninguém Se Sente Ouvido?',
+    description:
+      'Descubra em 3 minutos qual elemento está desalinhado no seu relacionamento.',
+    images: ['/og-image.png'],
   },
 };
 
