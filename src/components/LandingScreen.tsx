@@ -25,10 +25,10 @@ export default function LandingScreen() {
           </span>
 
           {/* Headline principal */}
-          <h1 className="font-display text-3xl sm:text-4xl md:text-5xl font-bold text-warmGray-900 leading-tight mb-4">
-            Por Que Vocês Falam
+          <h1 className="font-display text-3xl sm:text-4xl md:text-5xl font-bold leading-tight mb-4">
+            <span className="text-gradient">Por Que Vocês Falam</span>
             <br />
-            <span className="text-gradient">Mas Ninguém Se Sente Ouvido?</span>
+            <span className="text-gradient">Mas Ninguém Se Ouve?</span>
           </h1>
 
           {/* Subtítulo */}
