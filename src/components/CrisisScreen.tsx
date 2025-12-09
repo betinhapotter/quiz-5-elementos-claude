@@ -1,18 +1,19 @@
 'use client';
 
-import { QuizResult } from '@/types/quiz';
+import { useQuizStore } from '@/hooks/useQuizStore';
 
-interface CrisisScreenProps {
-  result: QuizResult;
-  onScheduleSession: () => void;
-}
-
-export default function CrisisScreen({ result, onScheduleSession }: CrisisScreenProps) {
-  const whatsappNumber = '5561991692353'; // Substituir pelo número real da Jaya
+export default function CrisisScreen() {
+  const result = useQuizStore((state) => state.result);
+  
+  const whatsappNumber = '5561992634557'; // Substituir pelo número real da Jaya
   const whatsappMessage = encodeURIComponent(
     'Olá Jaya! Fiz o Quiz dos 5 Elementos e meu resultado indicou que todos os elementos estão em crise. Gostaria de agendar uma Sessão de Emergência.'
   );
   const whatsappLink = `https://wa.me/${whatsappNumber}?text=${whatsappMessage}`;
+
+  if (!result) {
+    return null;
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-red-950 via-gray-900 to-gray-950 text-white">

@@ -1,23 +1,20 @@
 'use client';
 
 import { useState } from 'react';
-import { QuizResult, elementsInfo } from '@/types/quiz';
+import { useQuizStore } from '@/hooks/useQuizStore';
+import { elementsInfo } from '@/types/quiz';
+import { supabase } from '@/lib/supabase';
 
-interface EmailCaptureScreenProps {
-  result: QuizResult;
-  onSubmit: (email: string) => void;
-  isLoading?: boolean;
-}
-
-export default function EmailCaptureScreen({
-  result,
-  onSubmit,
-  isLoading = false,
-}: EmailCaptureScreenProps) {
+export default function EmailCaptureScreen() {
   const [email, setEmail] = useState('');
   const [error, setError] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const result = useQuizStore((state) => state.result);
+  const setUserData = useQuizStore((state) => state.setUserData);
+  const setCurrentStep = useQuizStore((state) => state.setCurrentStep);
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
 
@@ -28,8 +25,39 @@ export default function EmailCaptureScreen({
       return;
     }
 
-    onSubmit(email);
+    setIsLoading(true);
+
+    try {
+      // Salvar no Supabase
+      const { error: supabaseError } = await supabase
+        .from('quiz_leads')
+        .insert({
+          email,
+          lowest_element: result?.isInCrisis 
+            ? 'crise' 
+            : (result?.isBalanced ? 'equilibrado' : result?.lowestElement),
+          scores: result?.scores,
+          created_at: new Date().toISOString(),
+        });
+
+      if (supabaseError) {
+        console.error('Erro ao salvar lead:', supabaseError);
+      }
+
+      // Atualizar store e ir para resultado
+      setUserData({ email, createdAt: new Date() });
+      setCurrentStep('result');
+    } catch (err) {
+      console.error('Erro:', err);
+      setError('Ocorreu um erro. Tente novamente.');
+    } finally {
+      setIsLoading(false);
+    }
   };
+
+  if (!result) {
+    return null;
+  }
 
   // Detecta se está em crise (todos elementos <= 3)
   const isInCrisis = result.isInCrisis;

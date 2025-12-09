@@ -49,7 +49,7 @@ export default function Home() {
       {currentStep === 'calculating' && <CalculatingScreen />}
       {currentStep === 'email-capture' && <EmailCaptureScreen />}
       {currentStep === 'result' && (
-        result?.isInCrisis ? <CrisisScreen /> : <ResultScreen />
+		result?.isInCrisis ? <CrisisScreen /> : <ResultScreen />
 )}
     </div>
   );
