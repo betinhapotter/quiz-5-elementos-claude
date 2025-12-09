@@ -16,6 +16,7 @@ export default function EmailCaptureScreen() {
   if (!result) return null;
 
   const elementInfo = elementsInfo[result.lowestElement];
+  const isBalanced = result.isBalanced;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -35,7 +36,7 @@ export default function EmailCaptureScreen() {
       // Salva o lead no Supabase
       const { error: dbError } = await supabase.from('leads').insert({
         email: email,
-        lowest_element: result.lowestElement,
+        lowest_element: isBalanced ? 'equilibrado' : result.lowestElement,
         lowest_score: result.lowestScore,
         source: 'quiz-5-elementos',
       });
@@ -60,14 +61,14 @@ export default function EmailCaptureScreen() {
           transition={{ duration: 0.5 }}
           className="text-center"
         >
-          {/* Reveal do elemento */}
+          {/* Ícone - muda conforme resultado */}
           <motion.div
             initial={{ scale: 0.8, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             transition={{ duration: 0.5, delay: 0.2 }}
             className="mb-6"
           >
-            <span className="text-7xl">{elementInfo.icon}</span>
+            <span className="text-7xl">{isBalanced ? '🎉' : elementInfo.icon}</span>
           </motion.div>
 
           {/* Resultado parcial (gancho) */}
@@ -76,20 +77,39 @@ export default function EmailCaptureScreen() {
             animate={{ opacity: 1 }}
             transition={{ delay: 0.4 }}
           >
-            <h1 className="font-display text-2xl sm:text-3xl font-bold text-warmGray-900 mb-2">
-              Seu elemento desalinhado é:
-            </h1>
+            {isBalanced ? (
+              <>
+                <h1 className="font-display text-2xl sm:text-3xl font-bold text-warmGray-900 mb-2">
+                  Parabéns!
+                </h1>
 
-            <h2 className="font-display text-4xl sm:text-5xl font-bold mb-4">
-              <span className={`text-${elementInfo.color}`}>
-                {elementInfo.name.toUpperCase()}
-              </span>
-            </h2>
+                <h2 className="font-display text-3xl sm:text-4xl font-bold mb-4 text-green-600">
+                  Relacionamento Equilibrado!
+                </h2>
 
-            <p className="text-warmGray-600 mb-8 max-w-md mx-auto">
-              {elementInfo.shortMeaning} — isso explica por que vocês
-              falam mas não se sentem ouvidos.
-            </p>
+                <p className="text-warmGray-600 mb-8 max-w-md mx-auto">
+                  Todos os 5 elementos estão alinhados — isso é raro e valioso! 
+                  Vocês construíram uma base sólida juntos.
+                </p>
+              </>
+            ) : (
+              <>
+                <h1 className="font-display text-2xl sm:text-3xl font-bold text-warmGray-900 mb-2">
+                  Seu elemento desalinhado é:
+                </h1>
+
+                <h2 className="font-display text-4xl sm:text-5xl font-bold mb-4">
+                  <span className={`text-${elementInfo.color}`}>
+                    {elementInfo.name.toUpperCase()}
+                  </span>
+                </h2>
+
+                <p className="text-warmGray-600 mb-8 max-w-md mx-auto">
+                  {elementInfo.shortMeaning} — isso explica por que vocês
+                  falam mas não se sentem ouvidos.
+                </p>
+              </>
+            )}
           </motion.div>
 
           {/* Formulário de email */}
@@ -97,25 +117,50 @@ export default function EmailCaptureScreen() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.6 }}
-            className="bg-white rounded-2xl shadow-lg border border-warmGray-100 p-6 sm:p-8 max-w-md mx-auto"
+            className={`rounded-2xl shadow-lg border p-6 sm:p-8 max-w-md mx-auto ${
+              isBalanced 
+                ? 'bg-green-50 border-green-200' 
+                : 'bg-white border-warmGray-100'
+            }`}
           >
             <div className="text-left mb-6">
               <h3 className="font-semibold text-warmGray-900 text-lg mb-2">
-                Para receber sua análise completa:
+                {isBalanced 
+                  ? 'Para receber seu plano de manutenção:' 
+                  : 'Para receber sua análise completa:'}
               </h3>
               <ul className="space-y-2 text-sm text-warmGray-600">
-                <li className="flex items-start gap-2">
-                  <span className="text-green-500 mt-0.5">✓</span>
-                  O que esse desalinhamento significa na prática
-                </li>
-                <li className="flex items-start gap-2">
-                  <span className="text-green-500 mt-0.5">✓</span>
-                  Por que vocês "falam mas não se entendem"
-                </li>
-                <li className="flex items-start gap-2">
-                  <span className="text-green-500 mt-0.5">✓</span>
-                  3 primeiros passos para realinhar
-                </li>
+                {isBalanced ? (
+                  <>
+                    <li className="flex items-start gap-2">
+                      <span className="text-green-500 mt-0.5">✓</span>
+                      O que significa ter todos elementos alinhados
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="text-green-500 mt-0.5">✓</span>
+                      Como vocês chegaram nesse equilíbrio
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="text-green-500 mt-0.5">✓</span>
+                      Dicas para manter e aprofundar a conexão
+                    </li>
+                  </>
+                ) : (
+                  <>
+                    <li className="flex items-start gap-2">
+                      <span className="text-green-500 mt-0.5">✓</span>
+                      O que esse desalinhamento significa na prática
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="text-green-500 mt-0.5">✓</span>
+                      Por que vocês "falam mas não se entendem"
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="text-green-500 mt-0.5">✓</span>
+                      3 primeiros passos para realinhar
+                    </li>
+                  </>
+                )}
               </ul>
             </div>
 
@@ -139,13 +184,17 @@ export default function EmailCaptureScreen() {
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="btn-primary w-full"
+                className={`btn-primary w-full ${
+                  isBalanced ? 'bg-green-600 hover:bg-green-700' : ''
+                }`}
               >
                 {isSubmitting ? (
                   <span className="flex items-center gap-2">
                     <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                     Enviando...
                   </span>
+                ) : isBalanced ? (
+                  'Ver Meu Resultado Completo 🎉'
                 ) : (
                   'Ver Meu Resultado Completo'
                 )}
