@@ -33,8 +33,68 @@ export default function ResultScreen() {
       const secondElementInfo = result.secondLowestElement
         ? elementsInfo[result.secondLowestElement]
         : null;
+      
+      const isBalanced = result.isBalanced || false;
 
-      const prompt = `
+      // Prompt diferente para relacionamento equilibrado
+      const prompt = isBalanced ? `
+Você é Jaya Roberta, terapeuta integrativa especializada em relacionamentos e sexualidade humana,
+com 8 anos de experiência transformando casais. Você desenvolveu o Método dos 5 Elementos.
+
+O usuário completou o Quiz dos 5 Elementos e o relacionamento está EQUILIBRADO!
+
+SCORES (de 2 a 8 cada):
+- Terra: ${result.scores.terra}/8 (BOM)
+- Água: ${result.scores.agua}/8 (BOM)
+- Ar: ${result.scores.ar}/8 (BOM)
+- Fogo: ${result.scores.fogo}/8 (BOM)
+- Éter: ${result.scores.eter}/8 (BOM)
+
+PARABÉNS! Todos os 5 elementos estão alinhados. Este é um relacionamento saudável.
+
+CRIE UM PLANNER DE MANUTENÇÃO DE 30 DIAS para este casal, seguindo estas regras:
+
+1. FOCO: Manter e fortalecer TODOS os 5 elementos
+2. Cada dia deve ter 1 EXERCÍCIO PRÁTICO de 5-15 minutos
+3. Progressão:
+   - Semana 1: Exercícios de CELEBRAÇÃO e gratidão
+   - Semana 2: Exercícios de APROFUNDAMENTO da conexão
+   - Semana 3: Exercícios de AVENTURA e novidade
+   - Semana 4: RITUAIS de manutenção para o futuro
+4. Tom: CELEBRATÓRIO, prático, inspirador
+5. Alterne entre os 5 elementos ao longo dos dias
+6. Cada exercício deve ter:
+   - Nome criativo
+   - Duração (5-15 min)
+   - Por que funciona (1 frase)
+   - Passo a passo claro
+
+FORMATO DE RESPOSTA (use EXATAMENTE esta estrutura):
+
+# PLANNER DE MANUTENÇÃO - 30 DIAS DE CONEXÃO
+
+## Semana 1: Celebração e Gratidão
+### Dia 1
+**[Nome do Exercício]** (X minutos) - Elemento: [Terra/Água/Ar/Fogo/Éter]
+*Por que funciona:* [explicação curta]
+- Passo 1
+- Passo 2
+- Passo 3
+
+[Continue para os dias 2-7]
+
+## Semana 2: Aprofundando a Conexão
+[Dias 8-14]
+
+## Semana 3: Aventura e Novidade
+[Dias 15-21]
+
+## Semana 4: Rituais de Manutenção
+[Dias 22-30]
+
+## Mensagem Final
+[Uma mensagem celebrando a conquista e encorajando a manutenção]
+` : `
 Você é Jaya Roberta, terapeuta integrativa especializada em relacionamentos e sexualidade humana,
 com 8 anos de experiência transformando casais. Você desenvolveu o Método dos 5 Elementos.
 
@@ -122,7 +182,7 @@ FORMATO DE RESPOSTA (use EXATAMENTE esta estrutura):
     return (
       <PlannerScreen
         planner={planner}
-        element={result.lowestElement}
+        element={result.isBalanced ? 'eter' : result.lowestElement}
         onBack={() => setShowPlannerScreen(false)}
       />
     );
@@ -131,6 +191,7 @@ FORMATO DE RESPOSTA (use EXATAMENTE esta estrutura):
   const elementInfo = elementsInfo[result.lowestElement];
   const explanation = generateResultExplanation(result);
   const severity = getResultSeverity(result);
+  const isBalanced = result.isBalanced || false;
 
   // Cores por elemento
   const elementColors: Record<Element, string> = {
@@ -141,11 +202,19 @@ FORMATO DE RESPOSTA (use EXATAMENTE esta estrutura):
     eter: 'from-eter to-eter-dark',
   };
 
+  // Cor especial para equilibrado (verde)
+  const headerColor = isBalanced 
+    ? 'from-green-500 to-green-700' 
+    : elementColors[result.lowestElement];
+
+  // Ícone especial para equilibrado
+  const displayIcon = isBalanced ? '🎉' : elementInfo.icon;
+
   return (
     <div className="min-h-screen bg-cream">
       {/* Hero do resultado */}
       <div
-        className={`bg-gradient-to-br ${elementColors[result.lowestElement]} text-white py-12 sm:py-16`}
+        className={`bg-gradient-to-br ${headerColor} text-white py-12 sm:py-16`}
       >
         <div className="container-quiz text-center">
           <motion.div
@@ -154,7 +223,7 @@ FORMATO DE RESPOSTA (use EXATAMENTE esta estrutura):
             transition={{ duration: 0.5 }}
           >
             <span className="text-6xl sm:text-8xl block mb-4">
-              {elementInfo.icon}
+              {displayIcon}
             </span>
 
             <h1 className="font-display text-3xl sm:text-4xl font-bold mb-2">
@@ -172,6 +241,16 @@ FORMATO DE RESPOSTA (use EXATAMENTE esta estrutura):
                 className="mt-4 inline-block bg-white/20 rounded-full px-4 py-2 text-sm"
               >
                 ⚠️ Nível crítico identificado — atenção necessária
+              </motion.div>
+            )}
+            {severity === 'equilibrado' && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.3 }}
+                className="mt-4 inline-block bg-white/20 rounded-full px-4 py-2 text-sm"
+              >
+                ✨ Vocês estão no caminho certo!
               </motion.div>
             )}
           </motion.div>
@@ -205,9 +284,11 @@ FORMATO DE RESPOSTA (use EXATAMENTE esta estrutura):
           className="mb-10"
         >
           <h2 className="font-display text-2xl font-bold text-warmGray-900 mb-4">
-            Por Que Vocês Falam Mas Não Se Sentem Ouvidos
+            {isBalanced 
+              ? 'Por Que Vocês ESTÃO Se Ouvindo' 
+              : 'Por Que Vocês Falam Mas Não Se Sentem Ouvidos'}
           </h2>
-          <div className="bg-warmGray-50 rounded-xl p-6 border-l-4 border-fogo">
+          <div className={`rounded-xl p-6 border-l-4 ${isBalanced ? 'bg-green-50 border-green-500' : 'bg-warmGray-50 border-fogo'}`}>
             <p className="text-warmGray-700 leading-relaxed">
               {explanation.whyNotHeard}
             </p>
@@ -215,7 +296,7 @@ FORMATO DE RESPOSTA (use EXATAMENTE esta estrutura):
         </motion.section>
 
         {/* Padrão identificado (se houver) */}
-        {result.pattern && (
+        {result.pattern && !isBalanced && (
           <motion.section
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -250,7 +331,7 @@ FORMATO DE RESPOSTA (use EXATAMENTE esta estrutura):
           className="mb-10"
         >
           <h2 className="font-display text-2xl font-bold text-warmGray-900 mb-4">
-            Primeiros Passos Para Realinhar
+            {isBalanced ? 'Como Manter o Equilíbrio' : 'Primeiros Passos Para Realinhar'}
           </h2>
           <div className="space-y-3">
             {explanation.firstSteps.map((step, index) => (
@@ -262,8 +343,7 @@ FORMATO DE RESPOSTA (use EXATAMENTE esta estrutura):
                 className="flex items-start gap-4 bg-white rounded-xl p-4 shadow-sm border border-warmGray-100"
               >
                 <span
-                  className={`flex-shrink-0 w-8 h-8 rounded-full bg-${elementInfo.color}/10
-                             text-${elementInfo.color}-dark font-bold flex items-center justify-center`}
+                  className={`flex-shrink-0 w-8 h-8 rounded-full ${isBalanced ? 'bg-green-100 text-green-700' : `bg-${elementInfo.color}/10 text-${elementInfo.color}-dark`} font-bold flex items-center justify-center`}
                 >
                   {index + 1}
                 </span>
@@ -290,7 +370,7 @@ FORMATO DE RESPOSTA (use EXATAMENTE esta estrutura):
                 const maxScore = 8;
                 const percentage = (score / maxScore) * 100;
                 const info = elementsInfo[element];
-                const isLowest = element === result.lowestElement;
+                const isLowest = element === result.lowestElement && !isBalanced;
 
                 return (
                   <div key={element}>
@@ -301,6 +381,11 @@ FORMATO DE RESPOSTA (use EXATAMENTE esta estrutura):
                         {isLowest && (
                           <span className="text-xs bg-red-100 text-red-600 px-2 py-0.5 rounded-full">
                             Desalinhado
+                          </span>
+                        )}
+                        {isBalanced && percentage >= 75 && (
+                          <span className="text-xs bg-green-100 text-green-600 px-2 py-0.5 rounded-full">
+                            ✓ Saudável
                           </span>
                         )}
                       </span>
@@ -338,13 +423,15 @@ FORMATO DE RESPOSTA (use EXATAMENTE esta estrutura):
           transition={{ delay: 0.8 }}
           className="mb-10"
         >
-          <div className="bg-gradient-to-br from-warmGray-900 to-warmGray-800 rounded-2xl p-8 text-white text-center">
+          <div className={`rounded-2xl p-8 text-white text-center ${isBalanced ? 'bg-gradient-to-br from-green-600 to-green-800' : 'bg-gradient-to-br from-warmGray-900 to-warmGray-800'}`}>
             <h2 className="font-display text-2xl sm:text-3xl font-bold mb-4">
-              🤖 Seu Planner de 30 Dias Personalizado
+              🤖 {isBalanced ? 'Planner de Manutenção - 30 Dias' : 'Seu Planner de 30 Dias Personalizado'}
             </h2>
             <p className="text-warmGray-300 mb-6 max-w-lg mx-auto">
-              Nossa IA vai criar um plano de <strong>30 dias</strong> com exercícios práticos
-              específicos para realinhar o elemento <strong>{elementInfo.name}</strong> no seu relacionamento.
+              {isBalanced 
+                ? <>Nossa IA vai criar um plano de <strong>30 dias</strong> para manter seu relacionamento equilibrado e fortalecer ainda mais os 5 elementos.</>
+                : <>Nossa IA vai criar um plano de <strong>30 dias</strong> com exercícios práticos específicos para realinhar o elemento <strong>{elementInfo.name}</strong> no seu relacionamento.</>
+              }
             </p>
 
             <ul className="text-left max-w-md mx-auto mb-6 space-y-2">
@@ -365,7 +452,7 @@ FORMATO DE RESPOSTA (use EXATAMENTE esta estrutura):
             <button
               onClick={handleGeneratePlanner}
               disabled={isGeneratingPlanner}
-              className="btn-primary bg-fogo hover:bg-fogo-dark text-lg px-8 py-4 disabled:opacity-50"
+              className={`btn-primary text-lg px-8 py-4 disabled:opacity-50 ${isBalanced ? 'bg-green-500 hover:bg-green-600' : 'bg-fogo hover:bg-fogo-dark'}`}
             >
               {isGeneratingPlanner ? (
                 <>

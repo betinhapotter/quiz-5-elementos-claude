@@ -28,6 +28,15 @@ export function calculateScores(answers: Answer[]): ElementScores {
 }
 
 /**
+ * Verifica se o relacionamento está equilibrado (todos os scores altos)
+ * Score >= 6 de 8 = elemento saudável
+ */
+export function isRelationshipBalanced(scores: ElementScores): boolean {
+  const elements: Element[] = ['terra', 'agua', 'ar', 'fogo', 'eter'];
+  return elements.every((element) => scores[element] >= 6);
+}
+
+/**
  * Identifica o elemento com menor pontuação (mais desalinhado)
  */
 export function findLowestElement(scores: ElementScores): {
@@ -108,6 +117,7 @@ export function identifyPattern(
  */
 export function calculateResult(answers: Answer[]): QuizResult {
   const scores = calculateScores(answers);
+  const balanced = isRelationshipBalanced(scores);
   const { element: lowestElement, score: lowestScore } = findLowestElement(scores);
   const secondLowest = findSecondLowestElement(scores, lowestElement);
   const pattern = identifyPattern(
@@ -123,6 +133,7 @@ export function calculateResult(answers: Answer[]): QuizResult {
     disasterType: elementToDisaster[lowestElement],
     secondLowestElement: secondLowest?.element,
     pattern,
+    isBalanced: balanced,
   };
 }
 
@@ -137,6 +148,21 @@ export function generateResultExplanation(result: QuizResult): {
   firstSteps: string[];
 } {
   const elementInfo = elementsInfo[result.lowestElement];
+
+  // Se estiver equilibrado, retorna mensagem especial
+  if (result.isBalanced) {
+    return {
+      title: 'Relacionamento Equilibrado! 🎉',
+      subtitle: '✨ Todos os 5 elementos estão alinhados',
+      explanation: 'Parabéns! Seu relacionamento mostra saúde em todas as dimensões. Os 5 elementos estão em harmonia, o que indica que vocês têm uma base sólida de confiança, conexão emocional, comunicação, paixão e propósito compartilhado.',
+      whyNotHeard: 'Na verdade, vocês ESTÃO se ouvindo! Seu relacionamento tem os ingredientes essenciais para uma conexão profunda. Continue nutrindo cada elemento.',
+      firstSteps: [
+        'Celebrem essa conquista juntos — não é comum ter todos os elementos alinhados!',
+        'Mantenham os rituais e práticas que os trouxeram até aqui',
+        'Fiquem atentos a mudanças — o equilíbrio requer manutenção contínua',
+      ],
+    };
+  }
 
   const explanations: Record<Element, {
     title: string;
@@ -171,7 +197,7 @@ export function generateResultExplanation(result: QuizResult): {
       title: `Elemento AR desalinhado`,
       subtitle: `${elementInfo.icon} A comunicação está travada`,
       explanation: `O elemento Ar representa a troca verbal: diálogo, escuta, clareza. Quando está desalinhado, vocês falam línguas diferentes. Um pede conexão, o outro lê como cobrança. A mensagem nunca chega como foi enviada.`,
-      whyNotHeard: `Quando o AR está desalinhado, é EXATAMENTE isso: vocês falam lí­nguas diferentes. Um fala, o outro ouve como ataque. Um pede conexão, o outro lê como cobranã§a. O ar não circula — sufoca.`,
+      whyNotHeard: `Quando o AR está desalinhado, é EXATAMENTE isso: vocês falam línguas diferentes. Um fala, o outro ouve como ataque. Um pede conexão, o outro lê como cobrança. O ar não circula — sufoca.`,
       firstSteps: [
         'Respondam aos pedidos de conexão (mesmo que seja "agora não posso, mas às 20h sim")',
         'Durante conflitos, façam pausas de 20 min quando esquentar demais',
@@ -208,7 +234,10 @@ export function generateResultExplanation(result: QuizResult): {
 /**
  * Determina a severidade do resultado (para personalização do tom)
  */
-export function getResultSeverity(result: QuizResult): 'critica' | 'alta' | 'moderada' | 'leve' {
+export function getResultSeverity(result: QuizResult): 'equilibrado' | 'critica' | 'alta' | 'moderada' | 'leve' {
+  // Se equilibrado, retorna severidade especial
+  if (result.isBalanced) return 'equilibrado';
+
   const { lowestScore, secondLowestElement, scores } = result;
 
   // Score crítico no elemento principal
