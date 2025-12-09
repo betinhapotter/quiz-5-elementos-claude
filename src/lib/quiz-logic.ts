@@ -143,7 +143,7 @@ export function generateResultExplanation(result: QuizResult): {
   explanation: string;
   whyNotHeard: string;
   firstSteps: string[];
-} 
+} {
 // Se o relacionamento está equilibrado, retorna mensagem positiva
   if (result.isBalanced) {
     return {
