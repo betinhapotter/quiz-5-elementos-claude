@@ -74,7 +74,7 @@ export default function ResultScreen() {
         await supabase.from('planners').insert({
           user_id: user.id,
           element_focus: result.lowestElement,
-          content: plannerContent,
+          content: data.planner,
         });
       }
     } catch (err) {
