@@ -1,0 +1,118 @@
+# Quiz dos 5 Elementos 🌍💧🌬️🔥✨
+
+Quiz interativo para diagnóstico de relacionamentos baseado no Método dos 5 Elementos de Jaya Roberta.
+
+## Stack
+
+- **Frontend:** Next.js 14, React, Tailwind CSS, Framer Motion
+- **State Management:** Zustand
+- **Email:** Resend
+- **Deploy:** Vercel
+
+## Features
+
+- ✅ Quiz de 10 perguntas (2 por elemento)
+- ✅ Cálculo automático de scores
+- ✅ Identificação do elemento desalinhado
+- ✅ Detecção de padrões perigosos (combinações de elementos baixos)
+- ✅ Captura de email antes do resultado
+- ✅ Envio automático de email com diagnóstico
+- ✅ Design responsivo (mobile-first)
+- ✅ Animações suaves
+
+## Começando
+
+### 1. Clone e instale
+
+```bash
+git clone <repo>
+cd quiz-5-elementos
+npm install
+```
+
+### 2. Configure as variáveis de ambiente
+
+```bash
+cp .env.example .env.local
+```
+
+Edite `.env.local` com suas credenciais.
+
+### 3. Execute localmente
+
+```bash
+npm run dev
+```
+
+Acesse `http://localhost:3000`
+
+## Estrutura do Projeto
+
+```
+src/
+├── app/
+│   ├── api/
+│   │   └── submit-quiz/    # API para submissão
+│   ├── globals.css         # Estilos globais
+│   ├── layout.tsx          # Layout principal
+│   └── page.tsx            # Página principal
+├── components/
+│   ├── LandingScreen.tsx   # Tela inicial
+│   ├── QuizScreen.tsx      # Tela do quiz
+│   ├── CalculatingScreen.tsx # Tela de cálculo
+│   ├── EmailCaptureScreen.tsx # Captura de email
+│   └── ResultScreen.tsx    # Resultado final
+├── data/
+│   └── questions.ts        # As 10 perguntas
+├── hooks/
+│   └── useQuizStore.ts     # Estado global (Zustand)
+├── lib/
+│   └── quiz-logic.ts       # Lógica de cálculo
+└── types/
+    └── quiz.ts             # Tipos TypeScript
+```
+
+## Lógica de Pontuação
+
+- Cada elemento tem 2 perguntas
+- Cada resposta vale 1-4 pontos
+- Score por elemento: mínimo 2, máximo 8
+- O elemento com MENOR pontuação = desalinhado
+
+### Desastres Naturais
+
+| Elemento | Desastre | Significado |
+|----------|----------|-------------|
+| Terra | Terremoto | Base instável, falta confiança |
+| Água | Tsunami | Desconexão emocional |
+| Ar | Tornado | Comunicação travada |
+| Fogo | Incêndio | Paixão apagada |
+| Éter | Vazio | Sem propósito compartilhado |
+
+## Próximos Passos (Roadmap)
+
+### Fase 2: Monetização
+- [ ] Integração com Hotmart para checkout
+- [ ] Geração de planner de 30 dias com IA (OpenAI)
+- [ ] Área de membros para acesso ao planner
+
+### Fase 3: Automação
+- [ ] Sequência de 5 emails de nutrição
+- [ ] Dashboard de métricas
+- [ ] A/B testing de headlines
+
+## Deploy
+
+### Vercel (recomendado)
+
+1. Conecte o repositório no Vercel
+2. Configure as variáveis de ambiente
+3. Deploy automático a cada push
+
+## Licença
+
+Propriedade de Jaya Roberta. Todos os direitos reservados.
+
+---
+
+Desenvolvido com 🔥 para transformar relacionamentos.

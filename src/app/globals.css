@@ -1,0 +1,134 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 253 249 243;
+    --foreground: 37 34 32;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-cream text-warmGray-900 antialiased;
+    font-feature-settings: 'rlig' 1, 'calt' 1;
+  }
+}
+
+@layer components {
+  /* Container padrão */
+  .container-quiz {
+    @apply mx-auto max-w-2xl px-4 sm:px-6;
+  }
+
+  /* Botão primário */
+  .btn-primary {
+    @apply inline-flex items-center justify-center rounded-xl 
+           bg-fogo px-8 py-4 text-lg font-semibold text-white 
+           shadow-lg transition-all duration-300
+           hover:bg-fogo-dark hover:shadow-xl hover:-translate-y-0.5
+           focus:outline-none focus:ring-2 focus:ring-fogo focus:ring-offset-2
+           disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0;
+  }
+
+  /* Botão secundário */
+  .btn-secondary {
+    @apply inline-flex items-center justify-center rounded-xl 
+           border-2 border-warmGray-300 bg-white px-6 py-3 
+           text-base font-medium text-warmGray-700
+           transition-all duration-200
+           hover:border-warmGray-400 hover:bg-warmGray-50;
+  }
+
+  /* Card de opção do quiz */
+  .option-card {
+    @apply relative w-full rounded-xl border-2 border-warmGray-200 
+           bg-white p-4 text-left transition-all duration-200
+           hover:border-fogo hover:shadow-md
+           focus:outline-none focus:ring-2 focus:ring-fogo focus:ring-offset-2;
+  }
+
+  .option-card.selected {
+    @apply border-fogo bg-fogo/5 shadow-md;
+  }
+
+  /* Barra de progresso */
+  .progress-bar {
+    @apply h-2 rounded-full bg-warmGray-200 overflow-hidden;
+  }
+
+  .progress-bar-fill {
+    @apply h-full rounded-full bg-gradient-to-r from-terra via-agua to-fogo
+           transition-all duration-500 ease-out;
+  }
+
+  /* Cards de elemento */
+  .element-badge {
+    @apply inline-flex items-center gap-1.5 rounded-full px-3 py-1 
+           text-sm font-medium;
+  }
+
+  .element-badge.terra {
+    @apply bg-terra/10 text-terra-dark;
+  }
+
+  .element-badge.agua {
+    @apply bg-agua/10 text-agua-dark;
+  }
+
+  .element-badge.ar {
+    @apply bg-ar/20 text-ar-dark;
+  }
+
+  .element-badge.fogo {
+    @apply bg-fogo/10 text-fogo-dark;
+  }
+
+  .element-badge.eter {
+    @apply bg-eter/10 text-eter-dark;
+  }
+
+  /* Input de email */
+  .input-email {
+    @apply w-full rounded-xl border-2 border-warmGray-200 
+           bg-white px-4 py-3 text-lg
+           placeholder:text-warmGray-400
+           focus:border-fogo focus:outline-none focus:ring-2 focus:ring-fogo/20
+           transition-all duration-200;
+  }
+}
+
+@layer utilities {
+  /* Texto gradiente */
+  .text-gradient {
+    @apply bg-gradient-to-r from-fogo via-eter to-agua bg-clip-text text-transparent;
+  }
+
+  /* Animação de pulso suave nos elementos */
+  .animate-element-pulse {
+    animation: elementPulse 3s ease-in-out infinite;
+  }
+
+  @keyframes elementPulse {
+    0%, 100% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.05); opacity: 0.9; }
+  }
+
+  /* Loading spinner */
+  .loading-spinner {
+    @apply inline-block h-8 w-8 animate-spin rounded-full 
+           border-4 border-warmGray-200 border-t-fogo;
+  }
+}
+
+/* Animações do Framer Motion - fallbacks */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
