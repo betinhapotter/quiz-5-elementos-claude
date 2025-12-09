@@ -26,14 +26,6 @@ export function calculateScores(answers: Answer[]): ElementScores {
 
   return scores;
 }
-/**
- * Verifica se o relacionamento está equilibrado (todos os scores altos)
- * Score >= 6 de 8 = elemento saudável
- */
-export function isRelationshipBalanced(scores: ElementScores): boolean {
-  const elements: Element[] = ['terra', 'agua', 'ar', 'fogo', 'eter'];
-  return elements.every((element) => scores[element] >= 6);
-}
 
 /**
  * Identifica o elemento com menor pontuação (mais desalinhado)
@@ -131,7 +123,6 @@ export function calculateResult(answers: Answer[]): QuizResult {
     disasterType: elementToDisaster[lowestElement],
     secondLowestElement: secondLowest?.element,
     pattern,
-    isBalanced: balanced,
   };
 }
 
@@ -146,21 +137,7 @@ export function generateResultExplanation(result: QuizResult): {
   firstSteps: string[];
 } {
   const elementInfo = elementsInfo[result.lowestElement];
-   // Se estiver equilibrado, retorna mensagem especial
-  if (result.isBalanced) {
-    return {
-      title: 'Relacionamento Equilibrado! 🎉',
-      subtitle: '✨ Todos os 5 elementos estão alinhados',
-      explanation: 'Parabéns! Seu relacionamento mostra saúde em todas as dimensões. Os 5 elementos estão em harmonia, o que indica que vocês têm uma base sólida de confiança, conexão emocional, comunicação, paixão e propósito compartilhado.',
-      whyNotHeard: 'Na verdade, vocês ESTÃO se ouvindo! Seu relacionamento tem os ingredientes essenciais para uma conexão profunda. Continue nutrindo cada elemento.',
-      firstSteps: [
-        'Celebrem essa conquista juntos — não é comum ter todos os elementos alinhados!',
-        'Mantenham os rituais e práticas que os trouxeram até aqui',
-        'Fiquem atentos a mudanças — o equilíbrio requer manutenção contínua',
-      ],
-    };
-  }
-  
+
   const explanations: Record<Element, {
     title: string;
     subtitle: string;
@@ -231,9 +208,7 @@ export function generateResultExplanation(result: QuizResult): {
 /**
  * Determina a severidade do resultado (para personalização do tom)
  */
-export function getResultSeverity(result: QuizResult): 'equilibrado' | 'critica' | 'alta' | 'moderada' | 'leve' {
-  if (result.isBalanced) return 'equilibrado';
-  
+export function getResultSeverity(result: QuizResult): 'critica' | 'alta' | 'moderada' | 'leve' {
   const { lowestScore, secondLowestElement, scores } = result;
 
   // Score crítico no elemento principal
