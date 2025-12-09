@@ -1,15 +1,132 @@
 'use client';
 
+import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { ArrowRight, Instagram, RefreshCw } from 'lucide-react';
+import { ArrowRight, Instagram, RefreshCw, Sparkles, Loader2 } from 'lucide-react';
 import { useQuizStore } from '@/hooks/useQuizStore';
 import { elementsInfo, Element } from '@/types/quiz';
 import { generateResultExplanation, getResultSeverity } from '@/lib/quiz-logic';
+import PlannerScreen from './PlannerScreen';
 
 export default function ResultScreen() {
-  const { result, resetQuiz, userData } = useQuizStore();
+  const { result, resetQuiz, userData, answers } = useQuizStore();
+
+  const [isGeneratingPlanner, setIsGeneratingPlanner] = useState(false);
+  const [planner, setPlanner] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [showPlannerScreen, setShowPlannerScreen] = useState(false);
+
+  const handleGeneratePlanner = async () => {
+    if (!result) return;
+
+    setIsGeneratingPlanner(true);
+    setError(null);
+
+    try {
+      // Chama Gemini diretamente do cliente
+      const { GoogleGenerativeAI } = await import('@google/generative-ai');
+      const apiKey = process.env.NEXT_PUBLIC_GEMINI_API_KEY || '';
+      const genAI = new GoogleGenerativeAI(apiKey);
+      const model = genAI.getGenerativeModel({ model: 'gemini-2.5-pro' });
+
+      const elementInfo = elementsInfo[result.lowestElement];
+      const secondElementInfo = result.secondLowestElement
+        ? elementsInfo[result.secondLowestElement]
+        : null;
+
+      const prompt = `
+Você é Jaya Roberta, terapeuta integrativa especializada em relacionamentos e sexualidade humana,
+com 8 anos de experiência transformando casais. Você desenvolveu o Método dos 5 Elementos.
+
+O usuário completou o Quiz dos 5 Elementos e estes são os resultados:
+
+SCORES (de 2 a 8 cada):
+- Terra: ${result.scores.terra}/8 (${result.scores.terra <= 4 ? 'BAIXO' : result.scores.terra <= 6 ? 'MÉDIO' : 'BOM'})
+- Água: ${result.scores.agua}/8 (${result.scores.agua <= 4 ? 'BAIXO' : result.scores.agua <= 6 ? 'MÉDIO' : 'BOM'})
+- Ar: ${result.scores.ar}/8 (${result.scores.ar <= 4 ? 'BAIXO' : result.scores.ar <= 6 ? 'MÉDIO' : 'BOM'})
+- Fogo: ${result.scores.fogo}/8 (${result.scores.fogo <= 4 ? 'BAIXO' : result.scores.fogo <= 6 ? 'MÉDIO' : 'BOM'})
+- Éter: ${result.scores.eter}/8 (${result.scores.eter <= 4 ? 'BAIXO' : result.scores.eter <= 6 ? 'MÉDIO' : 'BOM'})
+
+ELEMENTO MAIS DESALINHADO: ${elementInfo.name.toUpperCase()} (${elementInfo.icon})
+- Score: ${result.scores[result.lowestElement]}/8
+- Significa: ${elementInfo.meaning}
+
+${secondElementInfo ? `
+SEGUNDO ELEMENTO EM RISCO: ${secondElementInfo.name.toUpperCase()} (${secondElementInfo.icon})
+` : ''}
+
+${result.pattern ? `PADRÃO IDENTIFICADO: ${result.pattern}` : ''}
+
+CRIE UM PLANNER DE 30 DIAS para este casal, seguindo estas regras:
+
+1. FOCO PRINCIPAL no elemento ${elementInfo.name} (o mais desalinhado)
+2. Cada dia deve ter 1 EXERCÍCIO PRÁTICO de 5-15 minutos
+3. Progressão:
+   - Semana 1: Exercícios INDIVIDUAIS (sem pressionar o parceiro)
+   - Semana 2: Exercícios LEVES a dois
+   - Semana 3: Exercícios de CONEXÃO mais profundos
+   - Semana 4: RITUAIS de consolidação
+4. Tom: DIRETO, prático, sem jargão new age
+5. Cada exercício deve ter:
+   - Nome criativo
+   - Duração (5-15 min)
+   - Por que funciona (1 frase)
+   - Passo a passo claro
+
+FORMATO DE RESPOSTA (use EXATAMENTE esta estrutura):
+
+# PLANNER DE 30 DIAS - ELEMENTO ${elementInfo.name.toUpperCase()}
+
+## Semana 1: Reconexão Individual
+### Dia 1
+**[Nome do Exercício]** (X minutos)
+*Por que funciona:* [explicação curta]
+- Passo 1
+- Passo 2
+- Passo 3
+
+[Continue para os dias 2-7]
+
+## Semana 2: Primeiros Passos a Dois
+[Dias 8-14]
+
+## Semana 3: Aprofundando a Conexão
+[Dias 15-21]
+
+## Semana 4: Consolidando Rituais
+[Dias 22-30]
+
+## Mensagem Final
+[Uma mensagem de encorajamento de 2-3 frases]
+`;
+
+      const genResult = await model.generateContent(prompt);
+      const response = await genResult.response;
+      const plannerContent = response.text();
+
+      setPlanner(plannerContent);
+      setShowPlannerScreen(true);
+    } catch (err: any) {
+      const errorMessage = err?.message || 'Erro desconhecido';
+      setError(`Erro ao gerar seu planner: ${errorMessage}`);
+      console.error('Erro completo:', err);
+    } finally {
+      setIsGeneratingPlanner(false);
+    }
+  };
 
   if (!result) return null;
+
+  // Se o planner foi gerado, mostra a página dedicada do planner
+  if (showPlannerScreen && planner) {
+    return (
+      <PlannerScreen
+        planner={planner}
+        element={result.lowestElement}
+        onBack={() => setShowPlannerScreen(false)}
+      />
+    );
+  }
 
   const elementInfo = elementsInfo[result.lowestElement];
   const explanation = generateResultExplanation(result);
@@ -145,7 +262,7 @@ export default function ResultScreen() {
                 className="flex items-start gap-4 bg-white rounded-xl p-4 shadow-sm border border-warmGray-100"
               >
                 <span
-                  className={`flex-shrink-0 w-8 h-8 rounded-full bg-${elementInfo.color}/10 
+                  className={`flex-shrink-0 w-8 h-8 rounded-full bg-${elementInfo.color}/10
                              text-${elementInfo.color}-dark font-bold flex items-center justify-center`}
                 >
                   {index + 1}
@@ -214,7 +331,7 @@ export default function ResultScreen() {
           </div>
         </motion.section>
 
-        {/* CTA Principal - Diagnóstico Completo */}
+        {/* CTA Principal - Gerar Planner com IA */}
         <motion.section
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -223,37 +340,49 @@ export default function ResultScreen() {
         >
           <div className="bg-gradient-to-br from-warmGray-900 to-warmGray-800 rounded-2xl p-8 text-white text-center">
             <h2 className="font-display text-2xl sm:text-3xl font-bold mb-4">
-              Quer Ir Mais Fundo?
+              🤖 Seu Planner de 30 Dias Personalizado
             </h2>
             <p className="text-warmGray-300 mb-6 max-w-lg mx-auto">
-              O <strong>Diagnóstico Completo dos 5 Elementos</strong> analisa
-              TODOS os elementos do seu relacionamento e te entrega um{' '}
-              <strong>Planner de 30 dias</strong> personalizado para realinhar.
+              Nossa IA vai criar um plano de <strong>30 dias</strong> com exercícios práticos
+              específicos para realinhar o elemento <strong>{elementInfo.name}</strong> no seu relacionamento.
             </p>
 
             <ul className="text-left max-w-md mx-auto mb-6 space-y-2">
               <li className="flex items-center gap-2 text-warmGray-300">
                 <span className="text-green-400">✓</span>
-                Análise profunda de cada elemento
+                Exercícios diários de 5-15 minutos
               </li>
               <li className="flex items-center gap-2 text-warmGray-300">
                 <span className="text-green-400">✓</span>
-                Planner de 30 dias com exercícios diários
+                Progressão gradual ao longo das 4 semanas
               </li>
               <li className="flex items-center gap-2 text-warmGray-300">
                 <span className="text-green-400">✓</span>
-                Gerado por IA com base nas suas respostas
+                Gerado por IA com base nas SUAS respostas
               </li>
             </ul>
 
-            <button className="btn-primary bg-fogo hover:bg-fogo-dark text-lg px-8 py-4">
-              Fazer Diagnóstico Completo — R$27
-              <ArrowRight className="w-5 h-5 ml-2 inline" />
+            <button
+              onClick={handleGeneratePlanner}
+              disabled={isGeneratingPlanner}
+              className="btn-primary bg-fogo hover:bg-fogo-dark text-lg px-8 py-4 disabled:opacity-50"
+            >
+              {isGeneratingPlanner ? (
+                <>
+                  <Loader2 className="w-5 h-5 mr-2 inline animate-spin" />
+                  Gerando seu planner...
+                </>
+              ) : (
+                <>
+                  <Sparkles className="w-5 h-5 mr-2 inline" />
+                  Gerar Meu Planner Grátis
+                </>
+              )}
             </button>
 
-            <p className="mt-4 text-xs text-warmGray-400">
-              Garantia de 7 dias. Se não servir, devolvemos seu dinheiro.
-            </p>
+            {error && (
+              <p className="mt-4 text-red-300 text-sm">{error}</p>
+            )}
           </div>
         </motion.section>
 
