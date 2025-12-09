@@ -8,6 +8,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { createClient } from '@/lib/supabase/client';
 import { elementsInfo, Element } from '@/types/quiz';
 import { generateResultExplanation, getResultSeverity } from '@/lib/quiz-logic';
+import { API_ENDPOINTS, callAPI } from '@/lib/api';
 
 export default function ResultScreen() {
   const { result, resetQuiz, userData, answers } = useQuizStore();
@@ -58,87 +59,15 @@ export default function ResultScreen() {
     setError(null);
 
     try {
-      // Chama Gemini diretamente do cliente
-      const { GoogleGenerativeAI } = await import('@google/generative-ai');
-      const genAI = new GoogleGenerativeAI('AIzaSyABbe6paXIz6h1B-2zT3o-AGpQa1UVgKck');
-      const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+      // Chama a API route que usa o Gemini no servidor
+      const data = await callAPI(API_ENDPOINTS.generatePlanner, {
+        lowestElement: result.lowestElement,
+        scores: result.scores,
+        secondLowestElement: result.secondLowestElement,
+        pattern: result.pattern,
+      });
 
-      const elementInfo = elementsInfo[result.lowestElement];
-      const secondElementInfo = result.secondLowestElement 
-        ? elementsInfo[result.secondLowestElement] 
-        : null;
-
-      const prompt = `
-Você é Jaya Roberta, terapeuta integrativa especializada em relacionamentos e sexualidade humana, 
-com 8 anos de experiência transformando casais. Você desenvolveu o Método dos 5 Elementos.
-
-O usuário completou o Quiz dos 5 Elementos e estes são os resultados:
-
-SCORES (de 2 a 8 cada):
-- Terra: ${result.scores.terra}/8 (${result.scores.terra <= 4 ? 'BAIXO' : result.scores.terra <= 6 ? 'MÉDIO' : 'BOM'})
-- Água: ${result.scores.agua}/8 (${result.scores.agua <= 4 ? 'BAIXO' : result.scores.agua <= 6 ? 'MÉDIO' : 'BOM'})
-- Ar: ${result.scores.ar}/8 (${result.scores.ar <= 4 ? 'BAIXO' : result.scores.ar <= 6 ? 'MÉDIO' : 'BOM'})
-- Fogo: ${result.scores.fogo}/8 (${result.scores.fogo <= 4 ? 'BAIXO' : result.scores.fogo <= 6 ? 'MÉDIO' : 'BOM'})
-- Éter: ${result.scores.eter}/8 (${result.scores.eter <= 4 ? 'BAIXO' : result.scores.eter <= 6 ? 'MÉDIO' : 'BOM'})
-
-ELEMENTO MAIS DESALINHADO: ${elementInfo.name.toUpperCase()} (${elementInfo.icon})
-- Score: ${result.scores[result.lowestElement]}/8
-- Significa: ${elementInfo.meaning}
-
-${secondElementInfo ? `
-SEGUNDO ELEMENTO EM RISCO: ${secondElementInfo.name.toUpperCase()} (${secondElementInfo.icon})
-` : ''}
-
-${result.pattern ? `PADRÃO IDENTIFICADO: ${result.pattern}` : ''}
-
-CRIE UM PLANNER DE 30 DIAS para este casal, seguindo estas regras:
-
-1. FOCO PRINCIPAL no elemento ${elementInfo.name} (o mais desalinhado)
-2. Cada dia deve ter 1 EXERCÍCIO PRÁTICO de 5-15 minutos
-3. Progressão:
-   - Semana 1: Exercícios INDIVIDUAIS (sem pressionar o parceiro)
-   - Semana 2: Exercícios LEVES a dois
-   - Semana 3: Exercícios de CONEXÃO mais profundos
-   - Semana 4: RITUAIS de consolidação
-4. Tom: DIRETO, prático, sem jargão new age
-5. Cada exercício deve ter:
-   - Nome criativo
-   - Duração (5-15 min)
-   - Por que funciona (1 frase)
-   - Passo a passo claro
-
-FORMATO DE RESPOSTA (use EXATAMENTE esta estrutura):
-
-# PLANNER DE 30 DIAS - ELEMENTO ${elementInfo.name.toUpperCase()}
-
-## Semana 1: Reconexão Individual
-### Dia 1
-**[Nome do Exercício]** (X minutos)
-*Por que funciona:* [explicação curta]
-- Passo 1
-- Passo 2
-- Passo 3
-
-[Continue para os dias 2-7]
-
-## Semana 2: Primeiros Passos a Dois
-[Dias 8-14]
-
-## Semana 3: Aprofundando a Conexão
-[Dias 15-21]
-
-## Semana 4: Consolidando Rituais
-[Dias 22-30]
-
-## Mensagem Final
-[Uma mensagem de encorajamento de 2-3 frases]
-`;
-
-      const genResult = await model.generateContent(prompt);
-      const response = await genResult.response;
-      const plannerContent = response.text();
-      
-      setPlanner(plannerContent);
+      setPlanner(data.planner);
 
       // Salva o planner no banco
       if (user) {
