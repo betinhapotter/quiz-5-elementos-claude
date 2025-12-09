@@ -5,6 +5,7 @@ import { motion } from 'framer-motion';
 import { Mail, Lock } from 'lucide-react';
 import { useQuizStore } from '@/hooks/useQuizStore';
 import { elementsInfo } from '@/types/quiz';
+import { createClient } from '@/lib/supabase/client';
 
 export default function EmailCaptureScreen() {
   const { result, submitEmail } = useQuizStore();
@@ -28,8 +29,24 @@ export default function EmailCaptureScreen() {
 
     setIsSubmitting(true);
 
-    // Simula envio (aqui você integra com sua API)
-    await new Promise((resolve) => setTimeout(resolve, 1000));
+    try {
+      const supabase = createClient();
+
+      // Salva o lead no Supabase
+      const { error: dbError } = await supabase.from('leads').insert({
+        email: email,
+        lowest_element: result.lowestElement,
+        lowest_score: result.lowestScore,
+        source: 'quiz-5-elementos',
+      });
+
+      if (dbError) {
+        console.error('Erro ao salvar lead:', dbError);
+        // Continua mesmo se der erro no banco (não bloqueia o usuário)
+      }
+    } catch (err) {
+      console.error('Erro ao salvar lead:', err);
+    }
 
     submitEmail(email);
   };

@@ -35,6 +35,11 @@ export const metadata: Metadata = {
     locale: 'pt_BR',
     siteName: 'Quiz dos 5 Elementos',
   },
+  icons: {
+    icon: [
+      { url: '/favicon.svg', type: 'image/svg+xml' },
+    ],
+  },
 };
 
 export default function RootLayout({
