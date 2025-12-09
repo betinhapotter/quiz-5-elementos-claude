@@ -93,59 +93,24 @@ export default function ResultScreen() {
     setIsGeneratingPDF(true);
 
     try {
-      const html2canvas = (await import('html2canvas')).default;
       const jsPDF = (await import('jspdf')).jsPDF;
-
       const element = plannerRef.current;
 
-      // Aumenta temporariamente os tamanhos das fontes
-      const allElements = element.querySelectorAll('*');
-      const originalStyles: { domElement: HTMLElement; fontSize: string }[] = [];
-
-      allElements.forEach((el) => {
-        const htmlEl = el as HTMLElement;
-        const currentFontSize = window.getComputedStyle(htmlEl).fontSize;
-        originalStyles.push({ domElement: htmlEl, fontSize: currentFontSize });
-
-        if (htmlEl.tagName === 'H1') htmlEl.style.fontSize = '42px';
-        if (htmlEl.tagName === 'H2') htmlEl.style.fontSize = '34px';
-        if (htmlEl.tagName === 'H3') htmlEl.style.fontSize = '28px';
-        if (htmlEl.tagName === 'P') htmlEl.style.fontSize = '20px';
-        if (htmlEl.tagName === 'LI') htmlEl.style.fontSize = '20px';
-      });
-
-      const canvas = await html2canvas(element, {
-        scale: 3,
-        useCORS: true,
-        logging: false,
-      });
-
-      // Restaura os tamanhos originais
-      originalStyles.forEach(({ domElement, fontSize }) => {
-        domElement.style.fontSize = fontSize;
-      });
-
-      const imgData = canvas.toDataURL('image/png');
+      // Cria o PDF diretamente do HTML (sem canvas = arquivo muito menor!)
       const pdf = new jsPDF('p', 'mm', 'a4');
-      const pdfWidth = pdf.internal.pageSize.getWidth();
-      const pdfHeight = pdf.internal.pageSize.getHeight();
-      const imgWidth = pdfWidth - 20; // 10mm margens
-      const imgHeight = (canvas.height * imgWidth) / canvas.width;
 
-      let heightLeft = imgHeight;
-      let position = 10;
-
-      pdf.addImage(imgData, 'PNG', 10, position, imgWidth, imgHeight);
-      heightLeft -= pdfHeight;
-
-      while (heightLeft > 0) {
-        position = heightLeft - imgHeight + 10;
-        pdf.addPage();
-        pdf.addImage(imgData, 'PNG', 10, position, imgWidth, imgHeight);
-        heightLeft -= pdfHeight;
-      }
-
-      pdf.save(`planner-30-dias-${result.lowestElement}.pdf`);
+      await pdf.html(element, {
+        callback: (doc) => {
+          doc.save(`planner-30-dias-${result.lowestElement}.pdf`);
+        },
+        x: 15,
+        y: 15,
+        width: 180, // largura útil em mm (A4 = 210mm - 30mm de margens)
+        windowWidth: 800, // largura de referência para renderização
+        html2canvas: {
+          scale: 0.25, // reduz muito o tamanho do arquivo
+        }
+      });
     } catch (err) {
       console.error('Erro ao gerar PDF:', err);
       alert('Erro ao gerar PDF. Tente novamente.');
