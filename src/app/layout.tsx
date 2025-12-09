@@ -37,7 +37,7 @@ export const metadata: Metadata = {
     siteName: 'Quiz dos 5 Elementos',
     images: [
       {
-        url: '/og-image.png',
+        url: '/api/og',
         width: 1200,
         height: 630,
         alt: 'Quiz dos 5 Elementos - Jaya Roberta',
@@ -49,7 +49,7 @@ export const metadata: Metadata = {
     title: 'Por Que Vocês Falam Mas Ninguém Se Sente Ouvido?',
     description:
       'Descubra em 3 minutos qual elemento está desalinhado no seu relacionamento.',
-    images: ['/og-image.png'],
+    images: ['/api/og'],
   },
 };
 
