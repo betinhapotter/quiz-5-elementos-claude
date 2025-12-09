@@ -1,213 +1,378 @@
 'use client';
 
 import { useState } from 'react';
-import { motion } from 'framer-motion';
-import { Mail, Lock } from 'lucide-react';
-import { useQuizStore } from '@/hooks/useQuizStore';
-import { elementsInfo } from '@/types/quiz';
-import { createClient } from '@/lib/supabase/client';
+import { QuizResult, elementsInfo } from '@/types/quiz';
 
-export default function EmailCaptureScreen() {
-  const { result, submitEmail } = useQuizStore();
+interface EmailCaptureScreenProps {
+  result: QuizResult;
+  onSubmit: (email: string) => void;
+  isLoading?: boolean;
+}
+
+export default function EmailCaptureScreen({
+  result,
+  onSubmit,
+  isLoading = false,
+}: EmailCaptureScreenProps) {
   const [email, setEmail] = useState('');
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
 
-  if (!result) return null;
-
-  const elementInfo = elementsInfo[result.lowestElement];
-  const isBalanced = result.isBalanced;
-
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
 
-    // Validação básica
-    if (!email || !email.includes('@')) {
+    // Validação básica de email
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
       setError('Por favor, insira um email válido');
       return;
     }
 
-    setIsSubmitting(true);
-
-    try {
-      const supabase = createClient();
-
-      // Salva o lead no Supabase
-      const { error: dbError } = await supabase.from('leads').insert({
-        email: email,
-        lowest_element: isBalanced ? 'equilibrado' : result.lowestElement,
-        lowest_score: result.lowestScore,
-        source: 'quiz-5-elementos',
-      });
-
-      if (dbError) {
-        console.error('Erro ao salvar lead:', dbError);
-        // Continua mesmo se der erro no banco (não bloqueia o usuário)
-      }
-    } catch (err) {
-      console.error('Erro ao salvar lead:', err);
-    }
-
-    submitEmail(email);
+    onSubmit(email);
   };
 
-  return (
-    <div className="min-h-screen bg-gradient-to-b from-cream to-warmGray-100 flex items-center justify-center">
-      <div className="container-quiz py-12">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-          className="text-center"
-        >
-          {/* Ícone - muda conforme resultado */}
-          <motion.div
-            initial={{ scale: 0.8, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            transition={{ duration: 0.5, delay: 0.2 }}
-            className="mb-6"
-          >
-            <span className="text-7xl">{isBalanced ? '🎉' : elementInfo.icon}</span>
-          </motion.div>
+  // Detecta se está em crise (todos elementos <= 3)
+  const isInCrisis = result.isInCrisis;
 
-          {/* Resultado parcial (gancho) */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.4 }}
-          >
-            {isBalanced ? (
-              <>
-                <h1 className="font-display text-2xl sm:text-3xl font-bold text-warmGray-900 mb-2">
-                  Parabéns!
-                </h1>
+  // Detecta se está equilibrado (todos elementos >= 6)
+  const isBalanced = result.isBalanced;
 
-                <h2 className="font-display text-3xl sm:text-4xl font-bold mb-4 text-green-600">
-                  Relacionamento Equilibrado!
-                </h2>
+  const elementInfo = elementsInfo[result.lowestElement];
 
-                <p className="text-warmGray-600 mb-8 max-w-md mx-auto">
-                  Todos os 5 elementos estão alinhados — isso é raro e valioso! 
-                  Vocês construíram uma base sólida juntos.
-                </p>
-              </>
-            ) : (
-              <>
-                <h1 className="font-display text-2xl sm:text-3xl font-bold text-warmGray-900 mb-2">
-                  Seu elemento desalinhado é:
-                </h1>
+  // Renderiza versão CRISE
+  if (isInCrisis) {
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-red-950 via-gray-900 to-gray-950 flex items-center justify-center p-4">
+        <div className="max-w-md w-full">
+          {/* Card Principal */}
+          <div className="bg-gray-800/50 backdrop-blur rounded-2xl p-8 shadow-2xl border border-red-900/50">
+            {/* Ícone de Alerta */}
+            <div className="text-center mb-6">
+              <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-red-900/50 mb-4">
+                <span className="text-5xl">🆘</span>
+              </div>
+              <h1 className="text-2xl font-bold text-white mb-2">
+                Relacionamento em Crise
+              </h1>
+              <p className="text-red-300">
+                Todos os 5 elementos estão em colapso
+              </p>
+            </div>
 
-                <h2 className="font-display text-4xl sm:text-5xl font-bold mb-4">
-                  <span className={`text-${elementInfo.color}`}>
-                    {elementInfo.name.toUpperCase()}
-                  </span>
-                </h2>
+            {/* Explicação */}
+            <div className="bg-red-900/20 border border-red-800/30 rounded-xl p-4 mb-6">
+              <p className="text-gray-300 text-sm leading-relaxed">
+                Quando todos os pilares estão abalados ao mesmo tempo, 
+                você precisa de <strong className="text-white">suporte real</strong>, 
+                não de um PDF bonito.
+              </p>
+            </div>
 
-                <p className="text-warmGray-600 mb-8 max-w-md mx-auto">
-                  {elementInfo.shortMeaning} — isso explica por que vocês
-                  falam mas não se sentem ouvidos.
-                </p>
-              </>
-            )}
-          </motion.div>
-
-          {/* Formulário de email */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.6 }}
-            className={`rounded-2xl shadow-lg border p-6 sm:p-8 max-w-md mx-auto ${
-              isBalanced 
-                ? 'bg-green-50 border-green-200' 
-                : 'bg-white border-warmGray-100'
-            }`}
-          >
-            <div className="text-left mb-6">
-              <h3 className="font-semibold text-warmGray-900 text-lg mb-2">
-                {isBalanced 
-                  ? 'Para receber seu plano de manutenção:' 
-                  : 'Para receber sua análise completa:'}
+            {/* O que você vai descobrir */}
+            <div className="mb-6">
+              <h3 className="text-white font-medium mb-3">
+                Na próxima tela você vai ver:
               </h3>
-              <ul className="space-y-2 text-sm text-warmGray-600">
-                {isBalanced ? (
-                  <>
-                    <li className="flex items-start gap-2">
-                      <span className="text-green-500 mt-0.5">✓</span>
-                      O que significa ter todos elementos alinhados
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <span className="text-green-500 mt-0.5">✓</span>
-                      Como vocês chegaram nesse equilíbrio
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <span className="text-green-500 mt-0.5">✓</span>
-                      Dicas para manter e aprofundar a conexão
-                    </li>
-                  </>
-                ) : (
-                  <>
-                    <li className="flex items-start gap-2">
-                      <span className="text-green-500 mt-0.5">✓</span>
-                      O que esse desalinhamento significa na prática
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <span className="text-green-500 mt-0.5">✓</span>
-                      Por que vocês "falam mas não se entendem"
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <span className="text-green-500 mt-0.5">✓</span>
-                      3 primeiros passos para realinhar
-                    </li>
-                  </>
-                )}
+              <ul className="space-y-2 text-sm">
+                <li className="flex items-start gap-2 text-gray-300">
+                  <span className="text-red-400">→</span>
+                  O que significa esse colapso
+                </li>
+                <li className="flex items-start gap-2 text-gray-300">
+                  <span className="text-red-400">→</span>
+                  Primeiros passos de emergência
+                </li>
+                <li className="flex items-start gap-2 text-gray-300">
+                  <span className="text-red-400">→</span>
+                  Como acessar suporte profissional
+                </li>
               </ul>
             </div>
 
-            <form onSubmit={handleSubmit}>
-              <div className="relative mb-4">
-                <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-warmGray-400" />
+            {/* Formulário */}
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div>
+                <label
+                  htmlFor="email"
+                  className="block text-sm font-medium text-gray-300 mb-2"
+                >
+                  Seu melhor email
+                </label>
                 <input
                   type="email"
+                  id="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="Seu melhor email"
-                  className="input-email pl-12"
-                  disabled={isSubmitting}
+                  placeholder="seu@email.com"
+                  className="w-full px-4 py-3 bg-gray-700/50 border border-gray-600 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all"
+                  disabled={isLoading}
                 />
+                {error && (
+                  <p className="mt-2 text-sm text-red-400">{error}</p>
+                )}
               </div>
-
-              {error && (
-                <p className="text-red-500 text-sm mb-4">{error}</p>
-              )}
 
               <button
                 type="submit"
-                disabled={isSubmitting}
-                className={`btn-primary w-full ${
-                  isBalanced ? 'bg-green-600 hover:bg-green-700' : ''
-                }`}
+                disabled={isLoading}
+                className="w-full bg-gradient-to-r from-red-600 to-orange-600 hover:from-red-500 hover:to-orange-500 text-white font-semibold py-4 px-6 rounded-xl transition-all transform hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none shadow-lg"
               >
-                {isSubmitting ? (
-                  <span className="flex items-center gap-2">
-                    <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                    Enviando...
+                {isLoading ? (
+                  <span className="flex items-center justify-center gap-2">
+                    <svg
+                      className="animate-spin h-5 w-5"
+                      viewBox="0 0 24 24"
+                    >
+                      <circle
+                        className="opacity-25"
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="currentColor"
+                        strokeWidth="4"
+                        fill="none"
+                      />
+                      <path
+                        className="opacity-75"
+                        fill="currentColor"
+                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                      />
+                    </svg>
+                    Processando...
                   </span>
-                ) : isBalanced ? (
-                  'Ver Meu Resultado Completo 🎉'
                 ) : (
-                  'Ver Meu Resultado Completo'
+                  'Ver Meu Resultado 🆘'
                 )}
               </button>
             </form>
 
-            {/* Garantia de privacidade */}
-            <div className="flex items-center justify-center gap-2 mt-4 text-xs text-warmGray-500">
-              <Lock className="w-3 h-3" />
-              <span>Seu email está seguro. Não enviamos spam.</span>
+            {/* Nota de privacidade */}
+            <p className="text-center text-gray-500 text-xs mt-4">
+              🔒 Seus dados estão seguros e não serão compartilhados
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Renderiza versão EQUILIBRADA
+  if (isBalanced) {
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-green-950 via-gray-900 to-gray-950 flex items-center justify-center p-4">
+        <div className="max-w-md w-full">
+          {/* Card Principal */}
+          <div className="bg-gray-800/50 backdrop-blur rounded-2xl p-8 shadow-2xl border border-green-900/50">
+            {/* Ícone de Celebração */}
+            <div className="text-center mb-6">
+              <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-green-900/50 mb-4">
+                <span className="text-5xl">🎉</span>
+              </div>
+              <h1 className="text-2xl font-bold text-white mb-2">
+                Parabéns! Relacionamento Equilibrado!
+              </h1>
+              <p className="text-green-300">
+                Todos os 5 elementos estão alinhados
+              </p>
             </div>
-          </motion.div>
-        </motion.div>
+
+            {/* O que você vai descobrir */}
+            <div className="bg-green-900/20 border border-green-800/30 rounded-xl p-4 mb-6">
+              <h3 className="text-white font-medium mb-3">
+                No seu resultado você vai ver:
+              </h3>
+              <ul className="space-y-2 text-sm">
+                <li className="flex items-start gap-2 text-gray-300">
+                  <span className="text-green-400">✓</span>
+                  O que significa ter todos elementos alinhados
+                </li>
+                <li className="flex items-start gap-2 text-gray-300">
+                  <span className="text-green-400">✓</span>
+                  Como vocês chegaram nesse equilíbrio
+                </li>
+                <li className="flex items-start gap-2 text-gray-300">
+                  <span className="text-green-400">✓</span>
+                  Dicas para manter e aprofundar
+                </li>
+              </ul>
+            </div>
+
+            {/* Formulário */}
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div>
+                <label
+                  htmlFor="email"
+                  className="block text-sm font-medium text-gray-300 mb-2"
+                >
+                  Seu melhor email para receber o resultado
+                </label>
+                <input
+                  type="email"
+                  id="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="seu@email.com"
+                  className="w-full px-4 py-3 bg-gray-700/50 border border-gray-600 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all"
+                  disabled={isLoading}
+                />
+                {error && (
+                  <p className="mt-2 text-sm text-red-400">{error}</p>
+                )}
+              </div>
+
+              <button
+                type="submit"
+                disabled={isLoading}
+                className="w-full bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-500 hover:to-emerald-500 text-white font-semibold py-4 px-6 rounded-xl transition-all transform hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none shadow-lg"
+              >
+                {isLoading ? (
+                  <span className="flex items-center justify-center gap-2">
+                    <svg
+                      className="animate-spin h-5 w-5"
+                      viewBox="0 0 24 24"
+                    >
+                      <circle
+                        className="opacity-25"
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="currentColor"
+                        strokeWidth="4"
+                        fill="none"
+                      />
+                      <path
+                        className="opacity-75"
+                        fill="currentColor"
+                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                      />
+                    </svg>
+                    Processando...
+                  </span>
+                ) : (
+                  'Ver Meu Resultado Completo 🎉'
+                )}
+              </button>
+            </form>
+
+            {/* Nota de privacidade */}
+            <p className="text-center text-gray-500 text-xs mt-4">
+              🔒 Seus dados estão seguros e não serão compartilhados
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Renderiza versão NORMAL (elemento desalinhado)
+  return (
+    <div className="min-h-screen bg-gradient-to-b from-gray-900 to-gray-950 flex items-center justify-center p-4">
+      <div className="max-w-md w-full">
+        {/* Card Principal */}
+        <div className="bg-gray-800/50 backdrop-blur rounded-2xl p-8 shadow-2xl border border-gray-700">
+          {/* Resultado Preview */}
+          <div className="text-center mb-6">
+            <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-gray-700/50 mb-4">
+              <span className="text-5xl">{elementInfo.icon}</span>
+            </div>
+            <h1 className="text-2xl font-bold text-white mb-2">
+              Seu elemento desalinhado é:
+            </h1>
+            <p className="text-3xl font-bold bg-gradient-to-r from-amber-400 to-orange-500 bg-clip-text text-transparent">
+              {elementInfo.name.toUpperCase()}
+            </p>
+          </div>
+
+          {/* Teaser do conteúdo */}
+          <div className="bg-gray-700/30 rounded-xl p-4 mb-6 border border-gray-600/50">
+            <p className="text-gray-300 text-sm leading-relaxed">
+              {elementInfo.meaning.substring(0, 100)}...
+            </p>
+          </div>
+
+          {/* O que você vai receber */}
+          <div className="mb-6">
+            <h3 className="text-white font-medium mb-3">
+              No resultado completo você vai descobrir:
+            </h3>
+            <ul className="space-y-2 text-sm">
+              <li className="flex items-start gap-2 text-gray-300">
+                <span className="text-amber-500">✓</span>
+                Por que vocês não estão se ouvindo
+              </li>
+              <li className="flex items-start gap-2 text-gray-300">
+                <span className="text-amber-500">✓</span>
+                Os 3 primeiros passos para reconectar
+              </li>
+              <li className="flex items-start gap-2 text-gray-300">
+                <span className="text-amber-500">✓</span>
+                Planner personalizado de 30 dias (com IA)
+              </li>
+            </ul>
+          </div>
+
+          {/* Formulário */}
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div>
+              <label
+                htmlFor="email"
+                className="block text-sm font-medium text-gray-300 mb-2"
+              >
+                Seu melhor email para receber o resultado
+              </label>
+              <input
+                type="email"
+                id="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="seu@email.com"
+                className="w-full px-4 py-3 bg-gray-700/50 border border-gray-600 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all"
+                disabled={isLoading}
+              />
+              {error && (
+                <p className="mt-2 text-sm text-red-400">{error}</p>
+              )}
+            </div>
+
+            <button
+              type="submit"
+              disabled={isLoading}
+              className="w-full bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-400 hover:to-orange-500 text-white font-semibold py-4 px-6 rounded-xl transition-all transform hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none shadow-lg"
+            >
+              {isLoading ? (
+                <span className="flex items-center justify-center gap-2">
+                  <svg
+                    className="animate-spin h-5 w-5"
+                    viewBox="0 0 24 24"
+                  >
+                    <circle
+                      className="opacity-25"
+                      cx="12"
+                      cy="12"
+                      r="10"
+                      stroke="currentColor"
+                      strokeWidth="4"
+                      fill="none"
+                    />
+                    <path
+                      className="opacity-75"
+                      fill="currentColor"
+                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                    />
+                  </svg>
+                  Processando...
+                </span>
+              ) : (
+                'Ver Meu Resultado Completo →'
+              )}
+            </button>
+          </form>
+
+          {/* Nota de privacidade */}
+          <p className="text-center text-gray-500 text-xs mt-4">
+            🔒 Seus dados estão seguros e não serão compartilhados
+          </p>
+        </div>
       </div>
     </div>
   );

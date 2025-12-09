@@ -43,6 +43,7 @@ export interface QuizResult {
   secondLowestElement?: Element;
   pattern?: string;
   isBalanced?: boolean;
+  isInCrisis?: boolean;
 }
 
 // Dados do usuário

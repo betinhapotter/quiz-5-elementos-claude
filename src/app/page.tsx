@@ -8,10 +8,12 @@ import QuizScreen from '@/components/QuizScreen';
 import CalculatingScreen from '@/components/CalculatingScreen';
 import EmailCaptureScreen from '@/components/EmailCaptureScreen';
 import ResultScreen from '@/components/ResultScreen';
+import CrisisScreen from '@/components/CrisisScreen'; //NOVO
 
 export default function Home() {
   const { user, loading, isAuthenticated } = useAuth();
   const currentStep = useQuizStore((state) => state.currentStep);
+  const result = useQuizStore((state) => state.result);  // ← NOVO
 
   // Debug: log do estado de autenticação
   console.log('Auth state:', { user: !!user, loading, isAuthenticated });
@@ -46,7 +48,9 @@ export default function Home() {
       {currentStep === 'quiz' && <QuizScreen />}
       {currentStep === 'calculating' && <CalculatingScreen />}
       {currentStep === 'email-capture' && <EmailCaptureScreen />}
-      {currentStep === 'result' && <ResultScreen />}
+      {currentStep === 'result' && (
+        result?.isInCrisis ? <CrisisScreen /> : <ResultScreen />
+)}
     </div>
   );
 }

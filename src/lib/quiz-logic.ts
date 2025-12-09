@@ -36,6 +36,14 @@ export function isRelationshipBalanced(scores: ElementScores): boolean {
 }
 
 /**
+ * Verifica se o relacionamento está em crise (todos elementos <= 3)
+ */
+export function isRelationshipInCrisis(scores: ElementScores): boolean {
+  const elements: Element[] = ['terra', 'agua', 'ar', 'fogo', 'eter'];
+  return elements.every((element) => scores[element] <= 3);
+}
+
+/**
  * Identifica o elemento com menor pontuação (mais desalinhado)
  */
 export function findLowestElement(scores: ElementScores): {
@@ -117,6 +125,7 @@ export function identifyPattern(
 export function calculateResult(answers: Answer[]): QuizResult {
   const scores = calculateScores(answers);
   const balanced = isRelationshipBalanced(scores);
+  const inCrisis = isRelationshipInCrisis(scores);
   const { element: lowestElement, score: lowestScore } = findLowestElement(scores);
   const secondLowest = findSecondLowestElement(scores, lowestElement);
   const pattern = identifyPattern(
@@ -133,6 +142,7 @@ export function calculateResult(answers: Answer[]): QuizResult {
     secondLowestElement: secondLowest?.element,
     pattern,
     isBalanced: balanced,
+    isInCrisis: inCrisis,
   };
 }
 
@@ -146,6 +156,22 @@ export function generateResultExplanation(result: QuizResult): {
   whyNotHeard: string;
   firstSteps: string[];
 } {
+  // Se o relacionamento está em crise total
+  if (result.isInCrisis) {
+    return {
+      title: 'Relacionamento em Crise 🆘',
+      subtitle: 'Todos os 5 elementos estão em colapso',
+      explanation: 'Quando todos os pilares estão abalados ao mesmo tempo, um planner não é suficiente. Isso não significa que acabou — casais já saíram de situações piores. Mas vocês precisam de suporte adequado, não de band-aid. Este é um momento que pede atenção profissional.',
+      whyNotHeard: 'Quando TODOS os elementos estão em colapso, a comunicação fica praticamente impossível. Não é que vocês não querem se ouvir — é que o sistema todo está sobrecarregado. É como tentar conversar durante um furacão.',
+      firstSteps: [
+        'NÃO tomem decisões drásticas essa semana',
+        'Busquem suporte profissional — individual ou de casal',
+        'Priorizem segurança física e emocional acima de tudo',
+        'Lembrem-se: crise não é sentença, é sinal de que algo precisa mudar',
+      ],
+    };
+  }
+
   // Se o relacionamento está equilibrado, retorna mensagem positiva
   if (result.isBalanced) {
     return {
@@ -234,7 +260,10 @@ export function generateResultExplanation(result: QuizResult): {
 /**
  * Determina a severidade do resultado (para personalização do tom)
  */
-export function getResultSeverity(result: QuizResult): 'equilibrado' | 'critica' | 'alta' | 'moderada' | 'leve' {
+export function getResultSeverity(result: QuizResult): 'crise' | 'equilibrado' | 'critica' | 'alta' | 'moderada' | 'leve' {
+  // Se está em crise total
+  if (result.isInCrisis) return 'crise';
+
   // Se está equilibrado, retorna 'equilibrado'
   if (result.isBalanced) return 'equilibrado';
 
