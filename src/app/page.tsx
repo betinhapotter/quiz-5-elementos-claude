@@ -13,6 +13,9 @@ export default function Home() {
   const { user, loading, isAuthenticated } = useAuth();
   const currentStep = useQuizStore((state) => state.currentStep);
 
+  // Debug: log do estado de autenticação
+  console.log('Auth state:', { user: !!user, loading, isAuthenticated });
+
   // Loading state
   if (loading) {
     return (
@@ -31,8 +34,8 @@ export default function Home() {
     );
   }
 
-  // Se não está autenticado, mostra tela de login
-  if (!isAuthenticated) {
+  // Se não está autenticado OU não tem usuário, mostra tela de login
+  if (!isAuthenticated || !user) {
     return <LoginScreen />;
   }
 
