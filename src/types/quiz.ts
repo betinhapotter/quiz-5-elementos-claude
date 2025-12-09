@@ -42,7 +42,7 @@ export interface QuizResult {
   disasterType: DisasterType;
   secondLowestElement?: Element;
   pattern?: string;
-  isBalanced?: boolean; // NOVO: indica se todos os elementos estão alinhados
+ // isBalanced?: boolean; // NOVO: indica se todos os elementos estão alinhados
 }
 
 // Dados do usuário
