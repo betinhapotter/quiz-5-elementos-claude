@@ -29,7 +29,7 @@ export default function EmailCaptureScreen() {
     try {
   // Salvar no Supabase
   const supabase = createClient();
-  const { error: supabaseError } = await supabase
+  await supabase
         .from('quiz_leads')
         .insert({
           email,
@@ -40,19 +40,11 @@ export default function EmailCaptureScreen() {
           created_at: new Date().toISOString(),
         });
 
-      if (supabaseError) {
-        console.error('Erro ao salvar lead:', supabaseError);
-      }
-
-      // Atualizar store e ir para resultado
-      // Atualizar store e ir para resultado
-		submitEmail(email);
     } catch (err) {
-      console.error('Erro:', err);
-      setError('Ocorreu um erro. Tente novamente.');
-    } finally {
-      setIsLoading(false);
+      console.error('Erro Supabase (ignorado):', err);
     }
+	// Sempre vai pro resultado, mesmo se Supabase falhar
+  submitEmail(email);
   };
 
   if (!result) {
