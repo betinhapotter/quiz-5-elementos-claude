@@ -7,10 +7,11 @@ import { elementsInfo, Element } from '@/types/quiz';
 interface PlannerScreenProps {
   planner: string;
   element: Element;
+  isBalanced?: boolean;
   onBack: () => void;
 }
 
-export default function PlannerScreen({ planner, element, onBack }: PlannerScreenProps) {
+export default function PlannerScreen({ planner, element, isBalanced, onBack }: PlannerScreenProps) {
   const elementInfo = elementsInfo[element];
 
   const elementColors: Record<Element, string> = {
@@ -21,6 +22,26 @@ export default function PlannerScreen({ planner, element, onBack }: PlannerScree
     eter: 'from-eter to-eter-dark',
   };
 
+  // Cor do header: verde se equilibrado, cor do elemento se não
+  const headerColor = isBalanced 
+    ? 'from-green-500 to-green-700' 
+    : elementColors[element];
+
+  // Título e subtítulo baseado no estado
+  const title = isBalanced 
+    ? 'Planner de Manutenção - 30 Dias' 
+    : 'Seu Planner de 30 Dias';
+  
+  const subtitle = isBalanced
+    ? 'Seu relacionamento está em equilíbrio! Este planner é para celebrar e aprofundar a conexão.'
+    : `Elemento ${elementInfo.name} - ${elementInfo.meaning}`;
+
+  const icon = isBalanced ? '🎉' : elementInfo.icon;
+
+  const pdfTitle = isBalanced 
+    ? 'PLANNER DE MANUTENÇÃO - 30 DIAS'
+    : `PLANNER DE 30 DIAS - ELEMENTO ${elementInfo.name.toUpperCase()}`;
+
   const handleDownloadPDF = () => {
     const printWindow = window.open('', '_blank');
     if (printWindow) {
@@ -29,7 +50,7 @@ export default function PlannerScreen({ planner, element, onBack }: PlannerScree
         <html>
         <head>
           <meta charset="UTF-8">
-          <title>Planner 30 Dias - ${elementInfo.name}</title>
+          <title>${pdfTitle}</title>
           <style>
             @page {
               size: A4;
@@ -67,17 +88,17 @@ export default function PlannerScreen({ planner, element, onBack }: PlannerScree
             }
 
             h1 {
-              color: #E25822;
+              color: ${isBalanced ? '#16a34a' : '#E25822'};
               font-size: 20pt;
               margin-bottom: 20px;
               padding-bottom: 10px;
-              border-bottom: 2px solid #E25822;
+              border-bottom: 2px solid ${isBalanced ? '#16a34a' : '#E25822'};
               page-break-after: avoid;
               page-break-inside: avoid;
             }
 
             h2 {
-              color: #E25822;
+              color: ${isBalanced ? '#16a34a' : '#E25822'};
               font-size: 14pt;
               margin-top: 25px;
               margin-bottom: 15px;
@@ -168,7 +189,7 @@ export default function PlannerScreen({ planner, element, onBack }: PlannerScree
         <body>
           <div class="container">
             <div class="header">
-              <h1>PLANNER DE 30 DIAS - ELEMENTO ${elementInfo.name.toUpperCase()}</h1>
+              <h1>${pdfTitle}</h1>
               <p>Método dos 5 Elementos por <strong>Jaya Roberta</strong></p>
             </div>
             ${planner
@@ -206,14 +227,16 @@ export default function PlannerScreen({ planner, element, onBack }: PlannerScree
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `planner-30-dias-${element}.md`;
+    a.download = isBalanced 
+      ? 'planner-manutencao-30-dias.md'
+      : `planner-30-dias-${element}.md`;
     a.click();
   };
 
   return (
     <div className="min-h-screen bg-cream">
       {/* Hero com ilustração do elemento */}
-      <div className={`bg-gradient-to-br ${elementColors[element]} text-white py-16`}>
+      <div className={`bg-gradient-to-br ${headerColor} text-white py-16`}>
         <div className="max-w-4xl mx-auto px-6 text-center">
           <motion.div
             initial={{ scale: 0.8, opacity: 0 }}
@@ -221,13 +244,13 @@ export default function PlannerScreen({ planner, element, onBack }: PlannerScree
             transition={{ duration: 0.5 }}
           >
             <span className="text-8xl block mb-6">
-              {elementInfo.icon}
+              {icon}
             </span>
             <h1 className="font-display text-4xl font-bold mb-3">
-              Seu Planner de 30 Dias
+              {title}
             </h1>
-            <p className="text-xl opacity-90">
-              Elemento {elementInfo.name} - {elementInfo.meaning}
+            <p className="text-xl opacity-90 max-w-2xl mx-auto">
+              {subtitle}
             </p>
           </motion.div>
         </div>
@@ -259,7 +282,7 @@ export default function PlannerScreen({ planner, element, onBack }: PlannerScree
             dangerouslySetInnerHTML={{
               __html: planner
                 .replace(/^# .+$/gm, '')
-                .replace(/^## (.+)$/gm, '<h2 class="text-2xl font-bold mt-8 mb-4 text-fogo-dark">$1</h2>')
+                .replace(/^## (.+)$/gm, `<h2 class="text-2xl font-bold mt-8 mb-4 ${isBalanced ? 'text-green-700' : 'text-fogo-dark'}">$1</h2>`)
                 .replace(/^### (.+)$/gm, '<h3 class="text-xl font-semibold mt-6 mb-3 text-warmGray-800">$1</h3>')
                 .replace(/\*\*([^*]+)\*\*/g, '<strong class="font-semibold text-warmGray-900">$1</strong>')
                 .replace(/\*([^*]+)\*/g, '<em class="text-warmGray-600 italic">$1</em>')
@@ -284,7 +307,11 @@ export default function PlannerScreen({ planner, element, onBack }: PlannerScree
         >
           <button
             onClick={handleDownloadPDF}
-            className="btn-primary bg-fogo hover:bg-fogo-dark flex items-center gap-2 text-lg px-8 py-4"
+            className={`btn-primary flex items-center gap-2 text-lg px-8 py-4 ${
+              isBalanced 
+                ? 'bg-green-600 hover:bg-green-700' 
+                : 'bg-fogo hover:bg-fogo-dark'
+            }`}
           >
             <Download className="w-5 h-5" />
             Baixar PDF
