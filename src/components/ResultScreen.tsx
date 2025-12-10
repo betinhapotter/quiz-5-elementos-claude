@@ -180,10 +180,11 @@ FORMATO DE RESPOSTA (use EXATAMENTE esta estrutura):
   if (showPlannerScreen && planner) {
     return (
       <PlannerScreen
-        planner={planner}
-        element={result.lowestElement}
-        onBack={() => setShowPlannerScreen(false)}
-      />
+  planner={planner}
+  element={result.lowestElement}
+  isBalanced={result.isBalanced}
+  onBack={() => setShowPlannerScreen(false)}
+/>
     );
   }
 
