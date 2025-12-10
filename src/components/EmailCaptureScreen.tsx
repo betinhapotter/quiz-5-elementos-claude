@@ -25,32 +25,35 @@ export default function EmailCaptureScreen() {
 
     setIsLoading(true);
 
-    // Tenta salvar no Supabase com timeout de 3 segundos
+    // Salva no Supabase
     try {
+      console.log('1. Tentando salvar lead...');
       const supabase = createClient();
-      const savePromise = supabase
+      
+      const { data, error: supabaseError } = await supabase
         .from('leads')
         .insert({
           email,
-          lowest_element: result?.isInCrisis 
-            ? 'crise' 
+          lowest_element: result?.isInCrisis
+            ? 'crise'
             : (result?.isBalanced ? 'equilibrado' : result?.lowestElement),
           lowest_score: result?.lowestScore,
           source: 'quiz-5-elementos',
-        });
+        })
+        .select();
 
-      // Timeout de 3 segundos
-      const timeoutPromise = new Promise((_, reject) => 
-        setTimeout(() => reject(new Error('Timeout')), 3000)
-      );
+      console.log('2. Resposta Supabase:', { data, error: supabaseError });
 
-      await Promise.race([savePromise, timeoutPromise]);
-      console.log('Lead salvo!');
+      if (supabaseError) {
+        console.error('3. Erro:', supabaseError.message);
+      } else {
+        console.log('3. Lead salvo com sucesso!', data);
+      }
     } catch (err) {
-      console.log('Supabase ignorado, continuando...', err);
+      console.error('CATCH:', err);
     }
 
-    // SEMPRE vai pro resultado
+    // Vai pro resultado
     submitEmail(email);
   };
 
