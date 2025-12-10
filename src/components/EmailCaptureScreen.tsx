@@ -17,7 +17,6 @@ export default function EmailCaptureScreen() {
     e.preventDefault();
     setError('');
 
-    // Validação básica de email
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
       setError('Por favor, insira um email válido');
@@ -27,9 +26,10 @@ export default function EmailCaptureScreen() {
     setIsLoading(true);
 
     try {
-  // Salvar no Supabase
-  const supabase = createClient();
-  await supabase
+      console.log('1. Iniciando salvamento no Supabase...');
+      
+      const supabase = createClient();
+      const { error: supabaseError } = await supabase
         .from('quiz_leads')
         .insert({
           email,
@@ -40,11 +40,20 @@ export default function EmailCaptureScreen() {
           created_at: new Date().toISOString(),
         });
 
+      if (supabaseError) {
+        console.error('2. Erro Supabase:', supabaseError);
+      } else {
+        console.log('2. Lead salvo com sucesso!');
+      }
+
+      console.log('3. Chamando submitEmail...');
+      submitEmail(email);
+      console.log('4. submitEmail chamado!');
+      
     } catch (err) {
-      console.error('Erro Supabase (ignorado):', err);
+      console.error('CATCH - Erro:', err);
+      submitEmail(email);
     }
-	// Sempre vai pro resultado, mesmo se Supabase falhar
-  submitEmail(email);
   };
 
   if (!result) {
