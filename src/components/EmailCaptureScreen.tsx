@@ -30,15 +30,15 @@ export default function EmailCaptureScreen() {
       
       const supabase = createClient();
       const { error: supabaseError } = await supabase
-        .from('quiz_leads')
-        .insert({
-          email,
-          lowest_element: result?.isInCrisis 
-            ? 'crise' 
-            : (result?.isBalanced ? 'equilibrado' : result?.lowestElement),
-          scores: result?.scores,
-          created_at: new Date().toISOString(),
-        });
+  .from('leads')
+  .insert({
+    email,
+    lowest_element: result?.isInCrisis 
+      ? 'crise' 
+      : (result?.isBalanced ? 'equilibrado' : result?.lowestElement),
+    lowest_score: result?.lowestScore,
+    source: 'quiz-5-elementos',
+  });
 
       if (supabaseError) {
         console.error('2. Erro Supabase:', supabaseError);
