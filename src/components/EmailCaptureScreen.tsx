@@ -25,35 +25,33 @@ export default function EmailCaptureScreen() {
 
     setIsLoading(true);
 
+    // Tenta salvar no Supabase com timeout de 3 segundos
     try {
-      console.log('1. Iniciando salvamento no Supabase...');
-      
       const supabase = createClient();
-      const { error: supabaseError } = await supabase
-  .from('leads')
-  .insert({
-    email,
-    lowest_element: result?.isInCrisis 
-      ? 'crise' 
-      : (result?.isBalanced ? 'equilibrado' : result?.lowestElement),
-    lowest_score: result?.lowestScore,
-    source: 'quiz-5-elementos',
-  });
+      const savePromise = supabase
+        .from('leads')
+        .insert({
+          email,
+          lowest_element: result?.isInCrisis 
+            ? 'crise' 
+            : (result?.isBalanced ? 'equilibrado' : result?.lowestElement),
+          lowest_score: result?.lowestScore,
+          source: 'quiz-5-elementos',
+        });
 
-      if (supabaseError) {
-        console.error('2. Erro Supabase:', supabaseError);
-      } else {
-        console.log('2. Lead salvo com sucesso!');
-      }
+      // Timeout de 3 segundos
+      const timeoutPromise = new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('Timeout')), 3000)
+      );
 
-      console.log('3. Chamando submitEmail...');
-      submitEmail(email);
-      console.log('4. submitEmail chamado!');
-      
+      await Promise.race([savePromise, timeoutPromise]);
+      console.log('Lead salvo!');
     } catch (err) {
-      console.error('CATCH - Erro:', err);
-      submitEmail(email);
+      console.log('Supabase ignorado, continuando...', err);
     }
+
+    // SEMPRE vai pro resultado
+    submitEmail(email);
   };
 
   if (!result) {
