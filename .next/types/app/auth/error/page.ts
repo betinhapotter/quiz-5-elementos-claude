@@ -1,4 +1,4 @@
-// File: D:\Documentos\Quiz2-Claude\quiz-5-elementos-v3-completo\src\app\auth\error\page.tsx
+// File: C:\Users\Jaya\.claude\Projetos\Quiz\quiz-5-elementos-v3-completo\src\app\auth\error\page.tsx
 import * as entry from '../../../../../src/app/auth/error/page.js'
 import type { ResolvingMetadata, ResolvingViewport } from 'next/dist/lib/metadata/types/metadata-interface.js'
 

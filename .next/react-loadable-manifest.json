@@ -27,14 +27,15 @@
   "app\\planner\\page.tsx -> jspdf": {
     "id": 7501,
     "files": [
-      "static/chunks/164f4fb6.19a6ddafced327bb.js",
+      "static/chunks/164f4fb6.85eeeec98b7f854c.js",
       "static/chunks/65.855e59001c27d38c.js"
     ]
   },
-  "components\\ResultScreen.tsx -> @google/generative-ai": {
-    "id": 973,
+  "components\\ResultScreen.tsx -> jspdf": {
+    "id": 7501,
     "files": [
-      "static/chunks/973.874f102e2edd6fe0.js"
+      "static/chunks/164f4fb6.85eeeec98b7f854c.js",
+      "static/chunks/65.855e59001c27d38c.js"
     ]
   }
 }

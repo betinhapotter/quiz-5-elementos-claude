@@ -18,13 +18,54 @@
       "wasm": [],
       "assets": [],
       "environments": {
-        "previewModeId": "7bf521dd3297527765ebb0bf08dd091c",
-        "previewModeSigningKey": "23b92f03505b9e91978fd667808117e1bc935a54e87b3f5cee920c1cda938b73",
-        "previewModeEncryptionKey": "e88b0df5c9578c2552e49fa088c072b794f517e8735b04660815cdf51e4bc61c"
+        "previewModeId": "7758dd37c7f768080841ece7314abc0e",
+        "previewModeSigningKey": "c19c105e9e704c7a6a3c496338f1ed2901007424123005811a6ab3df7c355576",
+        "previewModeEncryptionKey": "517465e5b73d672b9fea48ca35735afeb69652263273864db5ee69014529c17d"
       }
     }
   },
-  "functions": {},
+  "functions": {
+    "/api/og/route": {
+      "files": [
+        "server/middleware-build-manifest.js",
+        "server/middleware-react-loadable-manifest.js",
+        "server/next-font-manifest.js",
+        "server/interception-route-rewrite-manifest.js",
+        "prerender-manifest.js",
+        "server/edge-runtime-webpack.js",
+        "server/app/api/og/route.js"
+      ],
+      "name": "app/api/og/route",
+      "page": "/api/og/route",
+      "matchers": [
+        {
+          "regexp": "^/api/og$",
+          "originalSource": "/api/og"
+        }
+      ],
+      "wasm": [
+        {
+          "name": "wasm_77d9faebf7af9e421806970ce10a58e9d83116d7",
+          "filePath": "server/edge-chunks/wasm_77d9faebf7af9e421806970ce10a58e9d83116d7.wasm"
+        },
+        {
+          "name": "wasm_ef4866ecae192fd87727067cf2c0c0cf9fb8b020",
+          "filePath": "server/edge-chunks/wasm_ef4866ecae192fd87727067cf2c0c0cf9fb8b020.wasm"
+        }
+      ],
+      "assets": [
+        {
+          "name": "noto-sans-v27-latin-regular.5dda3fca77107598.ttf",
+          "filePath": "server/edge-chunks/asset_noto-sans-v27-latin-regular.5dda3fca77107598.ttf"
+        }
+      ],
+      "environments": {
+        "previewModeId": "7758dd37c7f768080841ece7314abc0e",
+        "previewModeSigningKey": "c19c105e9e704c7a6a3c496338f1ed2901007424123005811a6ab3df7c355576",
+        "previewModeEncryptionKey": "517465e5b73d672b9fea48ca35735afeb69652263273864db5ee69014529c17d"
+      }
+    }
+  },
   "sortedMiddleware": [
     "/"
   ]
