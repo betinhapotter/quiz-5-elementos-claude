@@ -93,24 +93,77 @@ export default function ResultScreen() {
     setIsGeneratingPDF(true);
 
     try {
-      const jsPDF = (await import('jspdf')).jsPDF;
+      const html2canvas = (await import('html2canvas')).default;
+      const { jsPDF } = await import('jspdf');
       const element = plannerRef.current;
 
-      // Cria o PDF diretamente do HTML (sem canvas = arquivo muito menor!)
-      const pdf = new jsPDF('p', 'mm', 'a4');
+      // Aumenta fontes temporariamente para o PDF
+      const originalStyles = {
+        fontSize: element.style.fontSize,
+        padding: element.style.padding,
+        maxWidth: element.style.maxWidth,
+      };
 
-      await pdf.html(element, {
-        callback: (doc) => {
-          doc.save(`planner-30-dias-${result.lowestElement}.pdf`);
-        },
-        x: 15,
-        y: 15,
-        width: 180, // largura útil em mm (A4 = 210mm - 30mm de margens)
-        windowWidth: 800, // largura de referência para renderização
-        html2canvas: {
-          scale: 0.25, // reduz muito o tamanho do arquivo
-        }
+      element.style.fontSize = '18px';
+      element.style.padding = '20px';
+      element.style.maxWidth = '100%';
+
+      // Ajusta fontes dos elementos filhos
+      const allElements = element.querySelectorAll('h1, h2, h3, p, li');
+      const originalChildStyles = new Map();
+
+      allElements.forEach((el) => {
+        const htmlEl = el as HTMLElement;
+        originalChildStyles.set(htmlEl, htmlEl.style.fontSize);
+        if (el.tagName === 'H1') htmlEl.style.fontSize = '32px';
+        if (el.tagName === 'H2') htmlEl.style.fontSize = '26px';
+        if (el.tagName === 'H3') htmlEl.style.fontSize = '22px';
+        if (el.tagName === 'P') htmlEl.style.fontSize = '16px';
+        if (el.tagName === 'LI') htmlEl.style.fontSize = '16px';
       });
+
+      const canvas = await html2canvas(element, {
+        scale: 2,
+        useCORS: true,
+        logging: false,
+        width: element.scrollWidth,
+        height: element.scrollHeight,
+        backgroundColor: '#ffffff',
+      });
+
+      // Restaura estilos originais
+      element.style.fontSize = originalStyles.fontSize;
+      element.style.padding = originalStyles.padding;
+      element.style.maxWidth = originalStyles.maxWidth;
+
+      allElements.forEach((el) => {
+        const htmlEl = el as HTMLElement;
+        htmlEl.style.fontSize = originalChildStyles.get(htmlEl) || '';
+      });
+
+      const imgData = canvas.toDataURL('image/png');
+      const pdf = new jsPDF({
+        orientation: 'portrait',
+        unit: 'mm',
+        format: 'a4',
+      });
+
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = pdf.internal.pageSize.getHeight();
+      const imgWidth = canvas.width;
+      const imgHeight = canvas.height;
+      const ratio = Math.min((pdfWidth - 20) / imgWidth, (pdfHeight - 20) / imgHeight); // 10mm de margem de cada lado
+      const imgX = (pdfWidth - imgWidth * ratio) / 2;
+
+      const totalPages = Math.ceil((imgHeight * ratio) / pdfHeight);
+
+      for (let page = 0; page < totalPages; page++) {
+        if (page > 0) pdf.addPage();
+        const yOffset = -page * pdfHeight;
+        pdf.addImage(imgData, 'PNG', imgX, yOffset, imgWidth * ratio, imgHeight * ratio);
+      }
+
+      pdf.save(`planner-30-dias-${result.lowestElement}.pdf`);
     } catch (err) {
       console.error('Erro ao gerar PDF:', err);
       alert('Erro ao gerar PDF. Tente novamente.');
@@ -128,6 +181,11 @@ export default function ResultScreen() {
   const scoreDifference = maxScore - minScore;
   const isAllBalanced = minScore >= 18 && scoreDifference <= 3; // THRESHOLDS.BALANCED_HIGH = 18
   const isPerfectBalance = minScore === 25 && maxScore === 25;
+  
+  // Verifica se todos estão em crise (alerta vermelho)
+  const isAllInCrisis = allScores.every(score => score <= 8); // THRESHOLDS.CRISIS = 8
+  const isAllLow = allScores.every(score => score <= 12); // THRESHOLDS.LOW = 12
+  const isCriticalSituation = isAllInCrisis || isAllLow || result.pattern?.includes('alerta_vermelho');
 
   const elementInfo = elementsInfo[result.lowestElement as keyof typeof elementsInfo];
   const explanation = generateResultExplanation(result);
@@ -203,22 +261,24 @@ export default function ResultScreen() {
           </div>
         </motion.section>
 
-        {/* Por que não se sentem ouvidos */}
-        <motion.section
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.3 }}
-          className="mb-10"
-        >
-          <h2 className="font-display text-2xl font-bold text-warmGray-900 mb-4">
-            Por Que Vocês Falam Mas Não Se Sentem Ouvidos
-          </h2>
-          <div className="bg-warmGray-50 rounded-xl p-6 border-l-4 border-fogo">
-            <p className="text-warmGray-700 leading-relaxed">
-              {explanation.whyNotHeard}
-            </p>
-          </div>
-        </motion.section>
+        {/* Por que não se sentem ouvidos - só mostra se NÃO estiver equilibrado */}
+        {!isAllBalanced && (
+          <motion.section
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3 }}
+            className="mb-10"
+          >
+            <h2 className="font-display text-2xl font-bold text-warmGray-900 mb-4">
+              Por Que Vocês Falam Mas Não Se Sentem Ouvidos
+            </h2>
+            <div className="bg-warmGray-50 rounded-xl p-6 border-l-4 border-fogo">
+              <p className="text-warmGray-700 leading-relaxed">
+                {explanation.whyNotHeard}
+              </p>
+            </div>
+          </motion.section>
+        )}
 
         {/* Padrão identificado (se houver) */}
         {result.pattern && (
@@ -229,13 +289,27 @@ export default function ResultScreen() {
             className="mb-10"
           >
             <h2 className="font-display text-2xl font-bold text-warmGray-900 mb-4">
-              ⚡ Padrão Identificado
+              {isAllBalanced ? '✨ Padrão Identificado' : '⚡ Padrão Identificado'}
             </h2>
-            <div className="bg-red-50 rounded-xl p-6 border border-red-100">
-              <p className="text-warmGray-700 leading-relaxed">
-                <strong>Atenção:</strong> {result.pattern}
+            <div className={`rounded-xl p-6 border ${
+              isAllBalanced 
+                ? 'bg-green-50 border-green-100' 
+                : isCriticalSituation
+                  ? 'bg-red-600 text-white border-red-700'
+                  : 'bg-red-50 border-red-100'
+            }`}>
+              <p className={`leading-relaxed ${
+                isCriticalSituation ? 'text-white' : 'text-warmGray-700'
+              }`}>
+                {isAllBalanced ? (
+                  <><strong>Parabéns:</strong> {result.pattern}</>
+                ) : isCriticalSituation ? (
+                  <><strong>🚨 Alerta Vermelho:</strong> {result.pattern}</>
+                ) : (
+                  <><strong>Atenção:</strong> {result.pattern}</>
+                )}
               </p>
-              {result.secondLowestElement && (
+              {result.secondLowestElement && !isAllBalanced && (
                 <p className="mt-2 text-sm text-warmGray-500">
                   Elemento secundário em risco:{' '}
                   <span className={`element-badge ${result.secondLowestElement}`}>
@@ -300,7 +374,9 @@ export default function ResultScreen() {
                 const info = elementsInfo[element as keyof typeof elementsInfo];
                 const isLowest = element === result.lowestElement;
                 // Não mostra "Desalinhado" se todos estão equilibrados
-                const showMisaligned = isLowest && !isAllBalanced;
+                // Se todos estão em crise, mostra "Em Crise" para todos, não apenas o lowest
+                const showMisaligned = isLowest && !isAllBalanced && !isCriticalSituation;
+                const showCritical = isCriticalSituation && score <= 12; // THRESHOLDS.LOW = 12
 
                 return (
                   <div key={element}>
@@ -308,6 +384,11 @@ export default function ResultScreen() {
                       <span className="flex items-center gap-2 text-sm font-medium text-warmGray-700">
                         <span>{info.icon}</span>
                         <span>{info.name}</span>
+                        {showCritical && (
+                          <span className="text-xs bg-red-600 text-white px-2 py-0.5 rounded-full font-semibold">
+                            🚨 Em Crise
+                          </span>
+                        )}
                         {showMisaligned && (
                           <span className="text-xs bg-red-100 text-red-600 px-2 py-0.5 rounded-full">
                             Desalinhado
@@ -407,13 +488,20 @@ export default function ResultScreen() {
             </div>
           ) : (
             <div className="bg-white rounded-2xl shadow-lg border border-warmGray-200 overflow-hidden">
-              <div className="bg-gradient-to-r from-fogo to-fogo-dark p-6 text-white">
+              <div className={`bg-gradient-to-r p-6 text-white ${
+                isAllBalanced 
+                  ? 'from-green-500 to-emerald-600' 
+                  : 'from-fogo to-fogo-dark'
+              }`}>
                 <h2 className="font-display text-2xl font-bold flex items-center gap-2">
                   <Sparkles className="w-6 h-6" />
                   Seu Planner de 30 Dias
                 </h2>
                 <p className="text-white/80 mt-1">
-                  Gerado especialmente para realinhar o elemento {elementInfo.name}
+                  {isAllBalanced 
+                    ? `Gerado especialmente para manter o equilíbrio perfeito dos 5 Elementos`
+                    : `Gerado especialmente para realinhar o elemento ${elementInfo.name}`
+                  }
                 </p>
               </div>
               

@@ -179,8 +179,12 @@ export function detectPatterns(scores: Scores): string[] {
   }
 
   // 3+ elementos em crise = Alerta vermelho
+  // Se TODOS os elementos estão em crise, também é alerta vermelho (situação crítica geral)
   const criticalElements = Object.values(scores).filter(s => s <= THRESHOLDS.CRISIS);
-  if (criticalElements.length >= 3) {
+  const lowElements = Object.values(scores).filter(s => s <= THRESHOLDS.LOW);
+  
+  // Se 3+ elementos estão em CRISE, ou se TODOS estão baixos (LOW), é alerta vermelho
+  if (criticalElements.length >= 3 || lowElements.length === 5) {
     patterns.push('alerta_vermelho');
   }
 
@@ -504,14 +508,27 @@ export function calculateResult(answers: Array<{ questionId: string; element: st
   // Mapeia padrão mais relevante
   let patternText: string | undefined;
   if (resultEn.patterns.length > 0) {
-    // Prioriza padrões de equilíbrio
-    if (resultEn.patterns.includes('equilibrio_perfeito')) {
+    // Prioriza padrões na seguinte ordem:
+    // 1. Alerta vermelho (situação mais crítica - todos ou maioria em crise)
+    // 2. Equilíbrio perfeito
+    // 3. Equilíbrio geral
+    // 4. Outros padrões específicos
+    if (resultEn.patterns.includes('alerta_vermelho')) {
+      patternText = patternTexts['alerta_vermelho']?.description;
+    } else if (resultEn.patterns.includes('equilibrio_perfeito')) {
       patternText = patternTexts['equilibrio_perfeito']?.description;
     } else if (resultEn.patterns.includes('equilibrio_geral')) {
       patternText = patternTexts['equilibrio_geral']?.description;
     } else {
-      const firstPattern = resultTexts[resultEn.lowestElement][resultEn.direction];
-      patternText = patternTexts[resultEn.patterns[0]]?.description || firstPattern.meaning;
+      // Para outros padrões, prioriza o primeiro padrão detectado
+      const firstPatternKey = resultEn.patterns[0];
+      if (patternTexts[firstPatternKey]) {
+        patternText = patternTexts[firstPatternKey]?.description;
+      } else {
+        // Fallback para o meaning do elemento mais baixo
+        const firstPattern = resultTexts[resultEn.lowestElement][resultEn.direction];
+        patternText = firstPattern.meaning;
+      }
     }
   }
 
@@ -557,6 +574,27 @@ export function generateResultExplanation(result: {
   const scoreDifference = maxScore - minScore;
   const isAllBalanced = minScore >= THRESHOLDS.BALANCED_HIGH && scoreDifference <= 3;
   const isPerfectBalance = minScore === 25 && maxScore === 25;
+  
+  // Verifica se há situação crítica (alerta vermelho)
+  const isAllInCrisis = allScores.every(score => score <= THRESHOLDS.CRISIS);
+  const isAllLow = allScores.every(score => score <= THRESHOLDS.LOW);
+  const isCriticalSituation = isAllInCrisis || isAllLow || result.pattern?.includes('alerta_vermelho');
+
+  // Se há situação crítica, retorna explicação de alerta vermelho
+  if (isCriticalSituation) {
+    return {
+      title: '🚨 Alerta Vermelho: Situação Crítica',
+      subtitle: 'Múltiplos elementos estão em crise. Este relacionamento precisa de atenção profissional urgente.',
+      explanation: 'Três ou mais elementos estão em crise, ou todos os elementos estão desalinhados. Isso indica uma situação crítica que requer atenção profissional. Não é apenas um elemento específico — o relacionamento como um todo precisa de suporte. Considere buscar terapia de casal ou orientação profissional especializada.',
+      whyNotHeard: 'Quando múltiplos elementos estão em crise, a comunicação fica completamente bloqueada. Não é apenas um problema de "não se entenderem" — é uma falha sistêmica na base do relacionamento. Cada tentativa de comunicação encontra múltiplos pontos de resistência, criando um ciclo de frustração e desconexão.',
+      firstSteps: [
+        'Busque ajuda profissional: terapia de casal é essencial nesta situação',
+        'Reconheça a gravidade: não tente resolver sozinho quando múltiplos elementos estão em crise',
+        'Crie espaço seguro: estabeleçam um acordo de não-agressão verbal enquanto buscam ajuda',
+        'Foquem em estabilização: antes de tentar melhorar, precisam estabilizar a situação atual'
+      ]
+    };
+  }
 
   // Se todos estão equilibrados, retorna explicação especial
   if (isPerfectBalance || (isAllBalanced && result.pattern?.includes('equilibrio'))) {

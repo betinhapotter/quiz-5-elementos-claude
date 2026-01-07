@@ -14,6 +14,14 @@ export default function EmailCaptureScreen() {
 
   if (!result) return null;
 
+  // Verifica se todos estão equilibrados
+  const allScores = Object.values(result.scores);
+  const minScore = Math.min(...allScores);
+  const maxScore = Math.max(...allScores);
+  const scoreDifference = maxScore - minScore;
+  const isAllBalanced = minScore >= 18 && scoreDifference <= 3; // THRESHOLDS.BALANCED_HIGH = 18
+  const isPerfectBalance = minScore === 25 && maxScore === 25;
+
   const elementInfo = elementsInfo[result.lowestElement as keyof typeof elementsInfo];
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -50,7 +58,7 @@ export default function EmailCaptureScreen() {
             transition={{ duration: 0.5, delay: 0.2 }}
             className="mb-6"
           >
-            <span className="text-7xl">{elementInfo.icon}</span>
+            <span className="text-7xl">{isAllBalanced ? '✨' : elementInfo.icon}</span>
           </motion.div>
 
           {/* Resultado parcial (gancho) */}
@@ -59,20 +67,39 @@ export default function EmailCaptureScreen() {
             animate={{ opacity: 1 }}
             transition={{ delay: 0.4 }}
           >
-            <h1 className="font-display text-2xl sm:text-3xl font-bold text-warmGray-900 mb-2">
-              Seu elemento desalinhado é:
-            </h1>
+            {isAllBalanced ? (
+              <>
+                <h1 className="font-display text-2xl sm:text-3xl font-bold text-warmGray-900 mb-2">
+                  {isPerfectBalance ? '🌟 Equilíbrio Perfeito!' : '✨ Equilíbrio Harmonioso!'}
+                </h1>
 
-            <h2 className="font-display text-4xl sm:text-5xl font-bold mb-4">
-              <span className={`text-${elementInfo.color}`}>
-                {elementInfo.name.toUpperCase()}
-              </span>
-            </h2>
+                <h2 className="font-display text-4xl sm:text-5xl font-bold mb-4 text-green-600">
+                  TODOS OS 5 ELEMENTOS ALINHADOS
+                </h2>
 
-            <p className="text-warmGray-600 mb-8 max-w-md mx-auto">
-              {elementInfo.shortMeaning} — isso explica por que vocês
-              falam mas não se sentem ouvidos.
-            </p>
+                <p className="text-warmGray-600 mb-8 max-w-md mx-auto">
+                  Parabéns! Todos os elementos estão perfeitamente alinhados no seu relacionamento. 
+                  Receba seu planner de manutenção para continuar nutrindo esse equilíbrio.
+                </p>
+              </>
+            ) : (
+              <>
+                <h1 className="font-display text-2xl sm:text-3xl font-bold text-warmGray-900 mb-2">
+                  Seu elemento desalinhado é:
+                </h1>
+
+                <h2 className="font-display text-4xl sm:text-5xl font-bold mb-4">
+                  <span className={`text-${elementInfo.color}`}>
+                    {elementInfo.name.toUpperCase()}
+                  </span>
+                </h2>
+
+                <p className="text-warmGray-600 mb-8 max-w-md mx-auto">
+                  {elementInfo.shortMeaning} — isso explica por que vocês
+                  falam mas não se sentem ouvidos.
+                </p>
+              </>
+            )}
           </motion.div>
 
           {/* Formulário de email */}
@@ -87,18 +114,37 @@ export default function EmailCaptureScreen() {
                 Para receber sua análise completa:
               </h3>
               <ul className="space-y-2 text-sm text-warmGray-600">
-                <li className="flex items-start gap-2">
-                  <span className="text-green-500 mt-0.5">✓</span>
-                  O que esse desalinhamento significa na prática
-                </li>
-                <li className="flex items-start gap-2">
-                  <span className="text-green-500 mt-0.5">✓</span>
-                  Por que vocês "falam mas não se entendem"
-                </li>
-                <li className="flex items-start gap-2">
-                  <span className="text-green-500 mt-0.5">✓</span>
-                  3 primeiros passos para realinhar
-                </li>
+                {isAllBalanced ? (
+                  <>
+                    <li className="flex items-start gap-2">
+                      <span className="text-green-500 mt-0.5">✓</span>
+                      Análise completa do seu equilíbrio perfeito
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="text-green-500 mt-0.5">✓</span>
+                      Planner de manutenção personalizado de 30 dias
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="text-green-500 mt-0.5">✓</span>
+                      Exercícios práticos para manter o equilíbrio
+                    </li>
+                  </>
+                ) : (
+                  <>
+                    <li className="flex items-start gap-2">
+                      <span className="text-green-500 mt-0.5">✓</span>
+                      O que esse desalinhamento significa na prática
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="text-green-500 mt-0.5">✓</span>
+                      Por que vocês "falam mas não se entendem"
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="text-green-500 mt-0.5">✓</span>
+                      3 primeiros passos para realinhar
+                    </li>
+                  </>
+                )}
               </ul>
             </div>
 
