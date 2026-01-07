@@ -11,7 +11,7 @@ Quiz interativo para diagnóstico de relacionamentos baseado no Método dos 5 El
 
 ## Features
 
-- ✅ Quiz de 10 perguntas (2 por elemento)
+- ✅ Quiz de 25 perguntas (5 por elemento)
 - ✅ Cálculo automático de scores
 - ✅ Identificação do elemento desalinhado
 - ✅ Detecção de padrões perigosos (combinações de elementos baixos)
