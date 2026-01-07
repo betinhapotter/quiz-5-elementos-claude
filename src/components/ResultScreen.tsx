@@ -342,8 +342,8 @@ export default function ResultScreen() {
           </motion.section>
         )}
 
-        {/* Padrão identificado (se houver) */}
-        {result.pattern && (
+        {/* Padrão identificado (sempre mostra quando equilibrado ou quando há padrão) */}
+        {(result.pattern || isAllBalanced) && (
           <motion.section
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -392,7 +392,7 @@ export default function ResultScreen() {
           className="mb-10"
         >
           <h2 className="font-display text-2xl font-bold text-warmGray-900 mb-4">
-            Primeiros Passos Para Realinhar
+            {isAllBalanced ? 'Primeiros Passos Para Manter o Equilíbrio' : 'Primeiros Passos Para Realinhar'}
           </h2>
           <div className="space-y-3">
             {explanation.firstSteps.map((step, index) => (

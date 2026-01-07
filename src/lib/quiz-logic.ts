@@ -493,6 +493,13 @@ export function calculateResult(answers: Array<{ questionId: string; element: st
   const scoreDifference = maxScore - minScore;
   const isAllBalanced = minScore >= THRESHOLDS.BALANCED_HIGH && scoreDifference <= 3;
   const isPerfectBalance = minScore === 25 && maxScore === 25;
+  
+  // Garante que o padrão de equilíbrio seja adicionado se não estiver presente
+  if (isPerfectBalance && !resultEn.patterns.includes('equilibrio_perfeito')) {
+    resultEn.patterns.push('equilibrio_perfeito');
+  } else if (isAllBalanced && !resultEn.patterns.includes('equilibrio_geral') && !resultEn.patterns.includes('equilibrio_perfeito')) {
+    resultEn.patterns.push('equilibrio_geral');
+  }
 
   // Encontra elementos mais baixos
   const elementsPt: Array<'terra' | 'agua' | 'ar' | 'fogo' | 'eter'> = ['terra', 'agua', 'ar', 'fogo', 'eter'];
@@ -507,18 +514,18 @@ export function calculateResult(answers: Array<{ questionId: string; element: st
 
   // Mapeia padrão mais relevante
   let patternText: string | undefined;
-  if (resultEn.patterns.length > 0) {
+  
+  // Se todos estão equilibrados, garante que o padrão seja definido
+  if (isPerfectBalance) {
+    patternText = patternTexts['equilibrio_perfeito']?.description;
+  } else if (isAllBalanced) {
+    patternText = patternTexts['equilibrio_geral']?.description;
+  } else if (resultEn.patterns.length > 0) {
     // Prioriza padrões na seguinte ordem:
     // 1. Alerta vermelho (situação mais crítica - todos ou maioria em crise)
-    // 2. Equilíbrio perfeito
-    // 3. Equilíbrio geral
-    // 4. Outros padrões específicos
+    // 2. Outros padrões específicos
     if (resultEn.patterns.includes('alerta_vermelho')) {
       patternText = patternTexts['alerta_vermelho']?.description;
-    } else if (resultEn.patterns.includes('equilibrio_perfeito')) {
-      patternText = patternTexts['equilibrio_perfeito']?.description;
-    } else if (resultEn.patterns.includes('equilibrio_geral')) {
-      patternText = patternTexts['equilibrio_geral']?.description;
     } else {
       // Para outros padrões, prioriza o primeiro padrão detectado
       const firstPatternKey = resultEn.patterns[0];
