@@ -140,36 +140,45 @@ export default function ResultScreen() {
 
         // Ajusta tamanhos para PDF (usando pt maiores para melhor legibilidade)
         if (el.tagName === 'H1') {
-          htmlEl.style.fontSize = '32pt';
-          htmlEl.style.marginTop = '20pt';
-          htmlEl.style.marginBottom = '16pt';
-          htmlEl.style.fontWeight = 'bold';
+          htmlEl.style.fontSize = '36pt';
+          htmlEl.style.marginTop = '24pt';
+          htmlEl.style.marginBottom = '18pt';
+          htmlEl.style.fontWeight = '700';
           htmlEl.style.lineHeight = '1.2';
+          htmlEl.style.pageBreakAfter = 'avoid';
+          htmlEl.style.pageBreakInside = 'avoid';
         } else if (el.tagName === 'H2') {
-          htmlEl.style.fontSize = '26pt';
-          htmlEl.style.marginTop = '18pt';
-          htmlEl.style.marginBottom = '14pt';
-          htmlEl.style.fontWeight = 'bold';
+          htmlEl.style.fontSize = '28pt';
+          htmlEl.style.marginTop = '22pt';
+          htmlEl.style.marginBottom = '16pt';
+          htmlEl.style.fontWeight = '600';
           htmlEl.style.lineHeight = '1.3';
+          htmlEl.style.pageBreakAfter = 'avoid';
+          htmlEl.style.pageBreakInside = 'avoid';
         } else if (el.tagName === 'H3') {
-          htmlEl.style.fontSize = '22pt';
-          htmlEl.style.marginTop = '16pt';
-          htmlEl.style.marginBottom = '12pt';
-          htmlEl.style.fontWeight = 'bold';
+          htmlEl.style.fontSize = '24pt';
+          htmlEl.style.marginTop = '20pt';
+          htmlEl.style.marginBottom = '14pt';
+          htmlEl.style.fontWeight = '600';
           htmlEl.style.lineHeight = '1.4';
+          htmlEl.style.pageBreakAfter = 'avoid';
+          htmlEl.style.pageBreakInside = 'avoid';
         } else if (el.tagName === 'P') {
-          htmlEl.style.fontSize = '16pt';
-          htmlEl.style.marginTop = '10pt';
-          htmlEl.style.marginBottom = '10pt';
-          htmlEl.style.lineHeight = '1.6';
+          htmlEl.style.fontSize = '17pt';
+          htmlEl.style.marginTop = '12pt';
+          htmlEl.style.marginBottom = '12pt';
+          htmlEl.style.lineHeight = '1.75';
+          htmlEl.style.pageBreakInside = 'avoid';
         } else if (el.tagName === 'LI') {
-          htmlEl.style.fontSize = '16pt';
-          htmlEl.style.marginBottom = '6pt';
-          htmlEl.style.lineHeight = '1.5';
+          htmlEl.style.fontSize = '17pt';
+          htmlEl.style.marginBottom = '8pt';
+          htmlEl.style.lineHeight = '1.7';
+          htmlEl.style.pageBreakInside = 'avoid';
         } else if (el.tagName === 'UL' || el.tagName === 'OL') {
-          htmlEl.style.marginTop = '10pt';
-          htmlEl.style.marginBottom = '10pt';
-          htmlEl.style.paddingLeft = '24pt';
+          htmlEl.style.marginTop = '14pt';
+          htmlEl.style.marginBottom = '14pt';
+          htmlEl.style.paddingLeft = '28pt';
+          htmlEl.style.pageBreakInside = 'avoid';
         }
       });
 
@@ -308,7 +317,13 @@ export default function ResultScreen() {
         }
       }
 
-      pdf.save(`planner-30-dias-${result.lowestElement}.pdf`);
+      // Define o nome do arquivo baseado no tipo de planner
+      const fileName = isMorna 
+        ? 'planner-despertar' 
+        : isAllBalanced 
+          ? 'planner-manutencao-equilibrio'
+          : `planner-30-dias-${result.lowestElement}`;
+      pdf.save(`${fileName}.pdf`);
     } catch (err) {
       console.error('Erro ao gerar PDF:', err);
       alert('Erro ao gerar PDF. Tente novamente.');
@@ -674,11 +689,13 @@ export default function ResultScreen() {
                   style={{ 
                     marginLeft: 0, 
                     marginRight: 0,
-                    padding: '2rem',
+                    padding: '2.5rem',
                     backgroundColor: '#ffffff',
                     color: '#1f2937',
-                    lineHeight: '1.6',
-                    fontFamily: 'system-ui, -apple-system, sans-serif'
+                    lineHeight: '1.7',
+                    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
+                    borderRadius: '8px',
+                    boxShadow: '0 1px 3px rgba(0,0,0,0.05)'
                   }}
                 >
                   {(() => {
@@ -695,11 +712,22 @@ export default function ResultScreen() {
                         // Fecha lista pendente se houver
                         if (currentList.length > 0) {
                           elements.push(
-                            <ul key={`list-${listKey++}`} style={{ margin: '1rem 0', paddingLeft: '2rem', listStyleType: 'disc' }}>
+                            <ul key={`list-${listKey++}`} style={{ 
+                              margin: '1.25rem 0', 
+                              paddingLeft: '2.5rem', 
+                              listStyleType: 'disc',
+                              pageBreakInside: 'avoid'
+                            }}>
                               {currentList.map((item, i) => (
-                                <li key={i} style={{ marginBottom: '0.5rem', fontSize: '16px', lineHeight: '1.6' }}>
+                                <li key={i} style={{ 
+                                  marginBottom: '0.75rem', 
+                                  fontSize: '17px', 
+                                  lineHeight: '1.7',
+                                  color: '#374151',
+                                  paddingLeft: '0.5rem'
+                                }}>
                                   <span dangerouslySetInnerHTML={{
-                                    __html: item.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>').replace(/\*([^*]+)\*/g, '<em>$1</em>')
+                                    __html: item.replace(/\*\*([^*]+)\*\*/g, '<strong style="color: #111827; font-weight: 600;">$1</strong>').replace(/\*([^*]+)\*/g, '<em style="color: #6b7280;">$1</em>')
                                   }} />
                                 </li>
                               ))}
@@ -731,11 +759,22 @@ export default function ResultScreen() {
                       if (trimmed.startsWith('## ')) {
                         if (currentList.length > 0) {
                           elements.push(
-                            <ul key={`list-${listKey++}`} style={{ margin: '1rem 0', paddingLeft: '2rem', listStyleType: 'disc' }}>
+                            <ul key={`list-${listKey++}`} style={{ 
+                              margin: '1.25rem 0', 
+                              paddingLeft: '2.5rem', 
+                              listStyleType: 'disc',
+                              pageBreakInside: 'avoid'
+                            }}>
                               {currentList.map((item, i) => (
-                                <li key={i} style={{ marginBottom: '0.5rem', fontSize: '16px', lineHeight: '1.6' }}>
+                                <li key={i} style={{ 
+                                  marginBottom: '0.75rem', 
+                                  fontSize: '17px', 
+                                  lineHeight: '1.7',
+                                  color: '#374151',
+                                  paddingLeft: '0.5rem'
+                                }}>
                                   <span dangerouslySetInnerHTML={{
-                                    __html: item.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>').replace(/\*([^*]+)\*/g, '<em>$1</em>')
+                                    __html: item.replace(/\*\*([^*]+)\*\*/g, '<strong style="color: #111827; font-weight: 600;">$1</strong>').replace(/\*([^*]+)\*/g, '<em style="color: #6b7280;">$1</em>')
                                   }} />
                                 </li>
                               ))}
@@ -747,16 +786,20 @@ export default function ResultScreen() {
                           <h2 
                             key={index} 
                             style={{ 
-                              marginLeft: 0, 
-                              marginRight: 0,
-                              marginTop: '1.5rem',
-                              marginBottom: '1rem',
-                              fontSize: '22px',
-                              fontWeight: 'bold',
+                              marginTop: '2.5rem',
+                              marginBottom: '1.25rem',
+                              marginLeft: '-1rem',
+                              marginRight: '-1rem',
+                              fontSize: '24px',
+                              fontWeight: '600',
                               lineHeight: '1.3',
-                              color: '#E25822',
-                              borderBottom: '2px solid #f3f4f6',
-                              paddingBottom: '0.5rem'
+                              color: isMorna ? '#d97706' : '#E25822',
+                              borderBottom: `2px solid ${isMorna ? '#fef3c7' : '#f3f4f6'}`,
+                              backgroundColor: isMorna ? '#fffbeb' : 'transparent',
+                              padding: '0.75rem 1rem',
+                              borderRadius: '6px',
+                              pageBreakAfter: 'avoid',
+                              pageBreakInside: 'avoid'
                             }}
                           >
                             {trimmed.substring(3)}
@@ -769,11 +812,22 @@ export default function ResultScreen() {
                       if (trimmed.startsWith('### ')) {
                         if (currentList.length > 0) {
                           elements.push(
-                            <ul key={`list-${listKey++}`} style={{ margin: '1rem 0', paddingLeft: '2rem', listStyleType: 'disc' }}>
+                            <ul key={`list-${listKey++}`} style={{ 
+                              margin: '1.25rem 0', 
+                              paddingLeft: '2.5rem', 
+                              listStyleType: 'disc',
+                              pageBreakInside: 'avoid'
+                            }}>
                               {currentList.map((item, i) => (
-                                <li key={i} style={{ marginBottom: '0.5rem', fontSize: '16px', lineHeight: '1.6' }}>
+                                <li key={i} style={{ 
+                                  marginBottom: '0.75rem', 
+                                  fontSize: '17px', 
+                                  lineHeight: '1.7',
+                                  color: '#374151',
+                                  paddingLeft: '0.5rem'
+                                }}>
                                   <span dangerouslySetInnerHTML={{
-                                    __html: item.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>').replace(/\*([^*]+)\*/g, '<em>$1</em>')
+                                    __html: item.replace(/\*\*([^*]+)\*\*/g, '<strong style="color: #111827; font-weight: 600;">$1</strong>').replace(/\*([^*]+)\*/g, '<em style="color: #6b7280;">$1</em>')
                                   }} />
                                 </li>
                               ))}
@@ -787,12 +841,16 @@ export default function ResultScreen() {
                             style={{ 
                               marginLeft: 0, 
                               marginRight: 0,
-                              marginTop: '1rem',
-                              marginBottom: '0.75rem',
-                              fontSize: '18px',
+                              marginTop: '1.75rem',
+                              marginBottom: '0.875rem',
+                              fontSize: '20px',
                               fontWeight: '600',
                               lineHeight: '1.4',
-                              color: '#374151'
+                              color: '#4b5563',
+                              paddingLeft: '0.5rem',
+                              borderLeft: `4px solid ${isMorna ? '#fbbf24' : '#E25822'}`,
+                              pageBreakAfter: 'avoid',
+                              pageBreakInside: 'avoid'
                             }}
                           >
                             {trimmed.substring(4)}
@@ -811,11 +869,22 @@ export default function ResultScreen() {
                       if (!trimmed) {
                         if (currentList.length > 0) {
                           elements.push(
-                            <ul key={`list-${listKey++}`} style={{ margin: '1rem 0', paddingLeft: '2rem', listStyleType: 'disc' }}>
+                            <ul key={`list-${listKey++}`} style={{ 
+                              margin: '1.25rem 0', 
+                              paddingLeft: '2.5rem', 
+                              listStyleType: 'disc',
+                              pageBreakInside: 'avoid'
+                            }}>
                               {currentList.map((item, i) => (
-                                <li key={i} style={{ marginBottom: '0.5rem', fontSize: '16px', lineHeight: '1.6' }}>
+                                <li key={i} style={{ 
+                                  marginBottom: '0.75rem', 
+                                  fontSize: '17px', 
+                                  lineHeight: '1.7',
+                                  color: '#374151',
+                                  paddingLeft: '0.5rem'
+                                }}>
                                   <span dangerouslySetInnerHTML={{
-                                    __html: item.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>').replace(/\*([^*]+)\*/g, '<em>$1</em>')
+                                    __html: item.replace(/\*\*([^*]+)\*\*/g, '<strong style="color: #111827; font-weight: 600;">$1</strong>').replace(/\*([^*]+)\*/g, '<em style="color: #6b7280;">$1</em>')
                                   }} />
                                 </li>
                               ))}
@@ -849,15 +918,18 @@ export default function ResultScreen() {
                           style={{ 
                             marginLeft: 0, 
                             marginRight: 0,
-                            marginBottom: '0.75rem',
-                            fontSize: '16px',
-                            lineHeight: '1.6',
-                            color: '#374151'
+                            marginTop: '0.5rem',
+                            marginBottom: '1rem',
+                            fontSize: '17px',
+                            lineHeight: '1.75',
+                            color: '#374151',
+                            textAlign: 'justify',
+                            pageBreakInside: 'avoid'
                           }}
                           dangerouslySetInnerHTML={{
                             __html: trimmed
-                              .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
-                              .replace(/\*([^*]+)\*/g, '<em>$1</em>')
+                              .replace(/\*\*([^*]+)\*\*/g, '<strong style="color: #111827; font-weight: 600;">$1</strong>')
+                              .replace(/\*([^*]+)\*/g, '<em style="color: #6b7280;">$1</em>')
                           }}
                         />
                       );
@@ -907,7 +979,13 @@ export default function ResultScreen() {
                     const url = URL.createObjectURL(blob);
                     const a = document.createElement('a');
                     a.href = url;
-                    a.download = `planner-30-dias-${result.lowestElement}.md`;
+                    // Define o nome do arquivo baseado no tipo de planner
+                    const fileName = isMorna 
+                      ? 'planner-despertar' 
+                      : isAllBalanced 
+                        ? 'planner-manutencao-equilibrio'
+                        : `planner-30-dias-${result.lowestElement}`;
+                    a.download = `${fileName}.md`;
                     a.click();
                   }}
                   className="btn-secondary flex items-center gap-2"
