@@ -30,7 +30,15 @@ export async function POST(request: NextRequest) {
     }
 
     // Verifica se todos estão equilibrados
-    const allScores = Object.values(scores) as number[];
+    // Type assertion explícita para garantir que scores é um objeto com números
+    const scoresTyped = scores as { terra: number; agua: number; ar: number; fogo: number; eter: number };
+    const allScores: number[] = [
+      scoresTyped.terra,
+      scoresTyped.agua,
+      scoresTyped.ar,
+      scoresTyped.fogo,
+      scoresTyped.eter
+    ];
     const minScore = Math.min(...allScores);
     const maxScore = Math.max(...allScores);
     const scoreDifference = maxScore - minScore;
