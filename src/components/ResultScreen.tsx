@@ -241,8 +241,11 @@ export default function ResultScreen() {
   const minScore = Math.min(...allScores);
   const maxScore = Math.max(...allScores);
   const scoreDifference = maxScore - minScore;
-  const isAllBalanced = minScore >= 18 && scoreDifference <= 3; // THRESHOLDS.BALANCED_HIGH = 18
-  const isPerfectBalance = minScore === 25 && maxScore === 25;
+  const isAllBalanced = (minScore >= 18 && scoreDifference <= 3) || 
+                        result.pattern?.includes('equilibrio_geral') || 
+                        result.pattern?.includes('equilibrio_perfeito'); // THRESHOLDS.BALANCED_HIGH = 18
+  const isPerfectBalance = (minScore === 25 && maxScore === 25) || 
+                          result.pattern?.includes('equilibrio_perfeito');
   
   // Verifica se todos estão em crise (alerta vermelho)
   const isAllInCrisis = allScores.every(score => score <= 8); // THRESHOLDS.CRISIS = 8
@@ -560,12 +563,10 @@ export default function ResultScreen() {
                   Seu Planner de 30 Dias
                 </h2>
                 <p className="text-white/80 mt-1">
-                  {isAllBalanced 
-                    ? `Gerado especialmente para manter o equilíbrio perfeito dos 5 Elementos`
+                  {isPerfectBalance 
+                    ? 'Gerado especialmente para manter o equilíbrio perfeito dos 5 Elementos'
                     : isAllBalanced 
-                      ? (isPerfectBalance 
-                          ? 'Gerado especialmente para manter o equilíbrio perfeito dos 5 Elementos'
-                          : 'Gerado especialmente para manter o equilíbrio harmonioso dos 5 Elementos')
+                      ? 'Gerado especialmente para manter o equilíbrio harmonioso dos 5 Elementos'
                       : `Gerado especialmente para realinhar o elemento ${elementInfo.name}`
                   }
                 </p>
