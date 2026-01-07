@@ -32,7 +32,10 @@ export async function POST(request: NextRequest) {
     // Verifica se todos estão equilibrados
     // Type assertion explícita para garantir que scores é um objeto com números
     // NOTA: Usamos scoresTyped e array manual para evitar type errors com Object.values
-    const scoresTyped = scores as { terra: number; agua: number; ar: number; fogo: number; eter: number };
+    type ScoresType = { terra: number; agua: number; ar: number; fogo: number; eter: number };
+    const scoresTyped: ScoresType = scores as ScoresType;
+    
+    // Cria array tipado manualmente para evitar problemas de type inference
     const allScores: number[] = [
       scoresTyped.terra,
       scoresTyped.agua,
@@ -40,11 +43,12 @@ export async function POST(request: NextRequest) {
       scoresTyped.fogo,
       scoresTyped.eter
     ];
-    const minScore = Math.min(...allScores);
-    const maxScore = Math.max(...allScores);
-    const scoreDifference = maxScore - minScore;
-    const isAllBalanced = minScore >= 18 && scoreDifference <= 3; // THRESHOLDS.BALANCED_HIGH = 18
-    const isPerfectBalance = minScore === 25 && maxScore === 25;
+    
+    const minScore: number = Math.min(...allScores);
+    const maxScore: number = Math.max(...allScores);
+    const scoreDifference: number = maxScore - minScore;
+    const isAllBalanced: boolean = minScore >= 18 && scoreDifference <= 3; // THRESHOLDS.BALANCED_HIGH = 18
+    const isPerfectBalance: boolean = minScore === 25 && maxScore === 25;
 
     const elementInfo = elementsInfo[lowestElement as keyof typeof elementsInfo];
     const secondElementInfo = secondLowestElement
