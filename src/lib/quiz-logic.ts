@@ -205,6 +205,16 @@ export function detectPatterns(scores: Scores): string[] {
     patterns.push('equilibrio_perfeito');
   }
 
+  // Detecta situação "morna" - todos os elementos na faixa média (13-17)
+  // Isso indica um relacionamento que não está ruim, mas também não está vibrante
+  const isAllMedium = minScore >= THRESHOLDS.BALANCED_LOW && 
+                       maxScore <= 17 && 
+                       scoreDifference <= 3;
+  
+  if (isAllMedium) {
+    patterns.push('relacao_morna');
+  }
+
   return patterns;
 }
 
@@ -426,6 +436,10 @@ export const patternTexts: Record<string, { title: string; description: string }
   equilibrio_perfeito: {
     title: '🌟 Equilíbrio Perfeito',
     description: 'Parabéns! Todos os 5 Elementos estão perfeitamente alinhados no seu relacionamento. Vocês têm uma base sólida em todas as dimensões. O planner de manutenção vai ajudar a manter esse equilíbrio.'
+  },
+  relacao_morna: {
+    title: '🌡️ Relação Morna',
+    description: 'Todos os elementos estão na faixa média. Seu relacionamento não está em crise, mas também não está vibrante. É como uma sopa morna: não queima, mas também não aquece o coração. Este é o momento perfeito para "aquecer" o relacionamento antes que esfrie de vez.'
   }
 };
 
@@ -512,30 +526,37 @@ export function calculateResult(answers: Array<{ questionId: string; element: st
   const lowestElementPt = elementMapEnToPt[resultEn.lowestElement];
   const secondLowestElementPt = sortedElements[1]?.element;
 
+  // Verifica se é situação "morna"
+  const isAllMedium = minScore >= THRESHOLDS.BALANCED_LOW && 
+                       maxScore <= 17 && 
+                       scoreDifference <= 3;
+
   // Mapeia padrão mais relevante
   let patternText: string | undefined;
   
-  // Se todos estão equilibrados, garante que o padrão seja definido
-  if (isPerfectBalance) {
+  // Prioriza padrões na seguinte ordem:
+  // 1. Alerta vermelho (situação mais crítica)
+  // 2. Equilíbrio perfeito
+  // 3. Equilíbrio geral
+  // 4. Relação morna (nova detecção)
+  // 5. Outros padrões específicos
+  if (resultEn.patterns.includes('alerta_vermelho')) {
+    patternText = patternTexts['alerta_vermelho']?.description;
+  } else if (isPerfectBalance) {
     patternText = patternTexts['equilibrio_perfeito']?.description;
   } else if (isAllBalanced) {
     patternText = patternTexts['equilibrio_geral']?.description;
+  } else if (isAllMedium || resultEn.patterns.includes('relacao_morna')) {
+    patternText = patternTexts['relacao_morna']?.description;
   } else if (resultEn.patterns.length > 0) {
-    // Prioriza padrões na seguinte ordem:
-    // 1. Alerta vermelho (situação mais crítica - todos ou maioria em crise)
-    // 2. Outros padrões específicos
-    if (resultEn.patterns.includes('alerta_vermelho')) {
-      patternText = patternTexts['alerta_vermelho']?.description;
+    // Para outros padrões, prioriza o primeiro padrão detectado
+    const firstPatternKey = resultEn.patterns[0];
+    if (patternTexts[firstPatternKey]) {
+      patternText = patternTexts[firstPatternKey]?.description;
     } else {
-      // Para outros padrões, prioriza o primeiro padrão detectado
-      const firstPatternKey = resultEn.patterns[0];
-      if (patternTexts[firstPatternKey]) {
-        patternText = patternTexts[firstPatternKey]?.description;
-      } else {
-        // Fallback para o meaning do elemento mais baixo
-        const firstPattern = resultTexts[resultEn.lowestElement][resultEn.direction];
-        patternText = firstPattern.meaning;
-      }
+      // Fallback para o meaning do elemento mais baixo
+      const firstPattern = resultTexts[resultEn.lowestElement][resultEn.direction];
+      patternText = firstPattern.meaning;
     }
   }
 
@@ -586,6 +607,12 @@ export function generateResultExplanation(result: {
   const isAllInCrisis = allScores.every(score => score <= THRESHOLDS.CRISIS);
   const isAllLow = allScores.every(score => score <= THRESHOLDS.LOW);
   const isCriticalSituation = isAllInCrisis || isAllLow || result.pattern?.includes('alerta_vermelho');
+  
+  // Verifica se é situação "morna" - todos na faixa média (13-17)
+  const isAllMedium = minScore >= THRESHOLDS.BALANCED_LOW && 
+                       maxScore <= 17 && 
+                       scoreDifference <= 3;
+  const isMorna = isAllMedium || result.pattern?.includes('relacao_morna');
 
   // Se há situação crítica, retorna explicação de alerta vermelho
   if (isCriticalSituation) {
@@ -599,6 +626,22 @@ export function generateResultExplanation(result: {
         'Reconheça a gravidade: não tente resolver sozinho quando múltiplos elementos estão em crise',
         'Crie espaço seguro: estabeleçam um acordo de não-agressão verbal enquanto buscam ajuda',
         'Foquem em estabilização: antes de tentar melhorar, precisam estabilizar a situação atual'
+      ]
+    };
+  }
+
+  // Se é situação "morna", retorna explicação específica
+  if (isMorna) {
+    return {
+      title: '🌡️ Relação Morna',
+      subtitle: 'Seu relacionamento está na zona de conforto — não está ruim, mas também não está vibrante.',
+      explanation: 'Todos os elementos estão na faixa média. É como uma sopa morna: não queima, mas também não aquece o coração. Vocês estão "ok", mas falta aquela faísca, aquela conexão profunda, aquela paixão que faz um relacionamento realmente florescer. Esta é a zona de conforto perigosa — onde muitos relacionamentos ficam estagnados e, com o tempo, esfriam completamente.',
+      whyNotHeard: 'Quando tudo está "morno", a comunicação também fica morna. Vocês conversam, mas não há profundidade. Falam sobre o dia, mas não sobre os sonhos. Estão juntos, mas não estão verdadeiramente conectados. É como se houvesse uma parede invisível de mediocridade entre vocês — nada está errado o suficiente para causar conflito, mas também nada está certo o suficiente para criar intimidade real.',
+      firstSteps: [
+        'Reconheçam a "mornidão": o primeiro passo é admitir que o relacionamento precisa de mais calor',
+        'Criem momentos de intensidade: planejem experiências que quebrem a rotina e tragam emoção',
+        'Aprofundem as conversas: vão além do superficial, compartilhem medos, sonhos e vulnerabilidades',
+        'Usem o planner de "aquecimento": exercícios específicos para reacender a paixão e conexão'
       ]
     };
   }

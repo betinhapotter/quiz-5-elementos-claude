@@ -52,6 +52,8 @@ export async function POST(request: NextRequest) {
     const scoreDifference: number = maxScore - minScore;
     const isAllBalanced: boolean = minScore >= 18 && scoreDifference <= 3; // THRESHOLDS.BALANCED_HIGH = 18
     const isPerfectBalance: boolean = minScore === 25 && maxScore === 25;
+    const isAllMedium: boolean = minScore >= 13 && maxScore <= 17 && scoreDifference <= 3; // THRESHOLDS.BALANCED_LOW = 13
+    const isMorna: boolean = isAllMedium || pattern?.includes('relacao_morna');
 
     const elementInfo = elementsInfo[lowestElement as keyof typeof elementsInfo];
     const secondElementInfo = secondLowestElement
