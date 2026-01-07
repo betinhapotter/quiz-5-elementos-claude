@@ -9,11 +9,13 @@ import { questions, type Question } from '@/data/questions';
 
 // Helper function para garantir type safety
 // Usa type narrowing explícito para garantir que TypeScript reconheça o tipo correto
-function getElementInfo(element: Element): typeof elementsInfo[Element] {
+function getElementInfo(element: Element) {
   // Type assertion explícita para garantir type safety
   // Garante que o elemento é uma chave válida de elementsInfo
-  if (element === 'terra' || element === 'agua' || element === 'ar' || element === 'fogo' || element === 'eter') {
-    return elementsInfo[element];
+  const validElements: Element[] = ['terra', 'agua', 'ar', 'fogo', 'eter'];
+  if (validElements.includes(element)) {
+    // Type assertion para garantir que TypeScript reconheça o tipo
+    return elementsInfo[element as keyof typeof elementsInfo];
   }
   throw new Error(`Elemento inválido: ${element}`);
 }
