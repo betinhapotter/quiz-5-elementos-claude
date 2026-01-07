@@ -97,70 +97,132 @@ export default function ResultScreen() {
       const { jsPDF } = await import('jspdf');
       const element = plannerRef.current;
 
-      // Aumenta fontes temporariamente para o PDF
-      const originalStyles = {
-        fontSize: element.style.fontSize,
+      // Salva estilos originais do container
+      const originalContainerStyles = {
+        backgroundColor: element.style.backgroundColor,
         padding: element.style.padding,
+        margin: element.style.margin,
+        width: element.style.width,
         maxWidth: element.style.maxWidth,
       };
 
-      element.style.fontSize = '18px';
-      element.style.padding = '20px';
-      element.style.maxWidth = '100%';
+      // Aplica estilos otimizados para PDF
+      element.style.backgroundColor = '#ffffff';
+      element.style.padding = '40px';
+      element.style.margin = '0';
+      element.style.width = '210mm'; // Largura A4
+      element.style.maxWidth = '210mm';
 
-      // Ajusta fontes dos elementos filhos
-      const allElements = element.querySelectorAll('h1, h2, h3, p, li');
-      const originalChildStyles = new Map();
+      // Ajusta fontes e espaçamentos para melhor legibilidade no PDF
+      const allElements = element.querySelectorAll('h1, h2, h3, p, li, ul, ol');
+      const originalStyles = new Map();
 
       allElements.forEach((el) => {
         const htmlEl = el as HTMLElement;
-        originalChildStyles.set(htmlEl, htmlEl.style.fontSize);
-        if (el.tagName === 'H1') htmlEl.style.fontSize = '32px';
-        if (el.tagName === 'H2') htmlEl.style.fontSize = '26px';
-        if (el.tagName === 'H3') htmlEl.style.fontSize = '22px';
-        if (el.tagName === 'P') htmlEl.style.fontSize = '16px';
-        if (el.tagName === 'LI') htmlEl.style.fontSize = '16px';
+        originalStyles.set(htmlEl, {
+          fontSize: htmlEl.style.fontSize,
+          marginTop: htmlEl.style.marginTop,
+          marginBottom: htmlEl.style.marginBottom,
+          padding: htmlEl.style.padding,
+        });
+
+        // Ajusta tamanhos para PDF
+        if (el.tagName === 'H1') {
+          htmlEl.style.fontSize = '24px';
+          htmlEl.style.marginTop = '20px';
+          htmlEl.style.marginBottom = '12px';
+        } else if (el.tagName === 'H2') {
+          htmlEl.style.fontSize = '20px';
+          htmlEl.style.marginTop = '16px';
+          htmlEl.style.marginBottom = '10px';
+        } else if (el.tagName === 'H3') {
+          htmlEl.style.fontSize = '18px';
+          htmlEl.style.marginTop = '14px';
+          htmlEl.style.marginBottom = '8px';
+        } else if (el.tagName === 'P') {
+          htmlEl.style.fontSize = '14px';
+          htmlEl.style.marginTop = '8px';
+          htmlEl.style.marginBottom = '8px';
+          htmlEl.style.lineHeight = '1.6';
+        } else if (el.tagName === 'LI') {
+          htmlEl.style.fontSize = '14px';
+          htmlEl.style.marginBottom = '6px';
+          htmlEl.style.lineHeight = '1.5';
+        }
       });
+
+      // Aguarda um momento para os estilos serem aplicados
+      await new Promise(resolve => setTimeout(resolve, 100));
 
       const canvas = await html2canvas(element, {
         scale: 2,
         useCORS: true,
         logging: false,
+        backgroundColor: '#ffffff',
         width: element.scrollWidth,
         height: element.scrollHeight,
-        backgroundColor: '#ffffff',
+        windowWidth: 800,
+        windowHeight: element.scrollHeight,
       });
 
       // Restaura estilos originais
-      element.style.fontSize = originalStyles.fontSize;
-      element.style.padding = originalStyles.padding;
-      element.style.maxWidth = originalStyles.maxWidth;
+      element.style.backgroundColor = originalContainerStyles.backgroundColor;
+      element.style.padding = originalContainerStyles.padding;
+      element.style.margin = originalContainerStyles.margin;
+      element.style.width = originalContainerStyles.width;
+      element.style.maxWidth = originalContainerStyles.maxWidth;
 
       allElements.forEach((el) => {
         const htmlEl = el as HTMLElement;
-        htmlEl.style.fontSize = originalChildStyles.get(htmlEl) || '';
+        const original = originalStyles.get(htmlEl);
+        if (original) {
+          htmlEl.style.fontSize = original.fontSize;
+          htmlEl.style.marginTop = original.marginTop;
+          htmlEl.style.marginBottom = original.marginBottom;
+          htmlEl.style.padding = original.padding;
+        }
       });
 
-      const imgData = canvas.toDataURL('image/png');
+      const imgData = canvas.toDataURL('image/png', 0.95);
       const pdf = new jsPDF({
         orientation: 'portrait',
         unit: 'mm',
         format: 'a4',
+        compress: true,
       });
 
       const pdfWidth = pdf.internal.pageSize.getWidth();
       const pdfHeight = pdf.internal.pageSize.getHeight();
+      const margin = 15; // Margem de 15mm de cada lado
+      const contentWidth = pdfWidth - (margin * 2);
+      const contentHeight = pdfHeight - (margin * 2);
+
       const imgWidth = canvas.width;
       const imgHeight = canvas.height;
-      const ratio = Math.min((pdfWidth - 20) / imgWidth, (pdfHeight - 20) / imgHeight); // 10mm de margem de cada lado
-      const imgX = (pdfWidth - imgWidth * ratio) / 2;
+      const ratio = Math.min(contentWidth / imgWidth, contentHeight / imgHeight);
+      const scaledWidth = imgWidth * ratio;
+      const scaledHeight = imgHeight * ratio;
 
-      const totalPages = Math.ceil((imgHeight * ratio) / pdfHeight);
+      const totalPages = Math.ceil(scaledHeight / contentHeight);
 
       for (let page = 0; page < totalPages; page++) {
         if (page > 0) pdf.addPage();
-        const yOffset = -page * pdfHeight;
-        pdf.addImage(imgData, 'PNG', imgX, yOffset, imgWidth * ratio, imgHeight * ratio);
+        
+        const sourceY = (page * contentHeight) / ratio;
+        const sourceHeight = Math.min(contentHeight / ratio, imgHeight - sourceY);
+        const destHeight = sourceHeight * ratio;
+
+        // Cria um canvas temporário para cada página
+        const pageCanvas = document.createElement('canvas');
+        pageCanvas.width = imgWidth;
+        pageCanvas.height = sourceHeight;
+        const pageCtx = pageCanvas.getContext('2d');
+        
+        if (pageCtx) {
+          pageCtx.drawImage(canvas, 0, sourceY, imgWidth, sourceHeight, 0, 0, imgWidth, sourceHeight);
+          const pageImgData = pageCanvas.toDataURL('image/png', 0.95);
+          pdf.addImage(pageImgData, 'PNG', margin, margin, scaledWidth, destHeight);
+        }
       }
 
       pdf.save(`planner-30-dias-${result.lowestElement}.pdf`);
@@ -508,67 +570,216 @@ export default function ResultScreen() {
               <div className="p-6 sm:p-8">
                 <div
                   ref={plannerRef}
-                  className="max-w-none"
-                  style={{ marginLeft: 0, marginRight: 0 }}
+                  className="max-w-none prose prose-lg"
+                  style={{ 
+                    marginLeft: 0, 
+                    marginRight: 0,
+                    padding: '2rem',
+                    backgroundColor: '#ffffff',
+                    color: '#1f2937',
+                    lineHeight: '1.6',
+                    fontFamily: 'system-ui, -apple-system, sans-serif'
+                  }}
                 >
-                  {planner.split('\n').map((line, index) => {
-                    const trimmed = line.trim();
+                  {(() => {
+                    const lines = planner.split('\n');
+                    const elements: JSX.Element[] = [];
+                    let currentList: string[] = [];
+                    let listKey = 0;
 
-                    // H1
-                    if (trimmed.startsWith('# ')) {
-                      return (
-                        <h1 key={index} className="text-2xl font-bold mt-8 mb-4 first:mt-0" style={{ marginLeft: 0, marginRight: 0 }}>
-                          {trimmed.substring(2)}
-                        </h1>
+                    lines.forEach((line, index) => {
+                      const trimmed = line.trim();
+
+                      // H1
+                      if (trimmed.startsWith('# ')) {
+                        // Fecha lista pendente se houver
+                        if (currentList.length > 0) {
+                          elements.push(
+                            <ul key={`list-${listKey++}`} style={{ margin: '1rem 0', paddingLeft: '2rem', listStyleType: 'disc' }}>
+                              {currentList.map((item, i) => (
+                                <li key={i} style={{ marginBottom: '0.5rem', fontSize: '16px', lineHeight: '1.6' }}>
+                                  <span dangerouslySetInnerHTML={{
+                                    __html: item.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>').replace(/\*([^*]+)\*/g, '<em>$1</em>')
+                                  }} />
+                                </li>
+                              ))}
+                            </ul>
+                          );
+                          currentList = [];
+                        }
+                        elements.push(
+                          <h1 
+                            key={index} 
+                            style={{ 
+                              marginLeft: 0, 
+                              marginRight: 0,
+                              marginTop: index === 0 ? 0 : '2rem',
+                              marginBottom: '1.5rem',
+                              fontSize: '28px',
+                              fontWeight: 'bold',
+                              lineHeight: '1.2',
+                              color: '#111827'
+                            }}
+                          >
+                            {trimmed.substring(2)}
+                          </h1>
+                        );
+                        return;
+                      }
+
+                      // H2
+                      if (trimmed.startsWith('## ')) {
+                        if (currentList.length > 0) {
+                          elements.push(
+                            <ul key={`list-${listKey++}`} style={{ margin: '1rem 0', paddingLeft: '2rem', listStyleType: 'disc' }}>
+                              {currentList.map((item, i) => (
+                                <li key={i} style={{ marginBottom: '0.5rem', fontSize: '16px', lineHeight: '1.6' }}>
+                                  <span dangerouslySetInnerHTML={{
+                                    __html: item.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>').replace(/\*([^*]+)\*/g, '<em>$1</em>')
+                                  }} />
+                                </li>
+                              ))}
+                            </ul>
+                          );
+                          currentList = [];
+                        }
+                        elements.push(
+                          <h2 
+                            key={index} 
+                            style={{ 
+                              marginLeft: 0, 
+                              marginRight: 0,
+                              marginTop: '1.5rem',
+                              marginBottom: '1rem',
+                              fontSize: '22px',
+                              fontWeight: 'bold',
+                              lineHeight: '1.3',
+                              color: '#E25822',
+                              borderBottom: '2px solid #f3f4f6',
+                              paddingBottom: '0.5rem'
+                            }}
+                          >
+                            {trimmed.substring(3)}
+                          </h2>
+                        );
+                        return;
+                      }
+
+                      // H3
+                      if (trimmed.startsWith('### ')) {
+                        if (currentList.length > 0) {
+                          elements.push(
+                            <ul key={`list-${listKey++}`} style={{ margin: '1rem 0', paddingLeft: '2rem', listStyleType: 'disc' }}>
+                              {currentList.map((item, i) => (
+                                <li key={i} style={{ marginBottom: '0.5rem', fontSize: '16px', lineHeight: '1.6' }}>
+                                  <span dangerouslySetInnerHTML={{
+                                    __html: item.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>').replace(/\*([^*]+)\*/g, '<em>$1</em>')
+                                  }} />
+                                </li>
+                              ))}
+                            </ul>
+                          );
+                          currentList = [];
+                        }
+                        elements.push(
+                          <h3 
+                            key={index} 
+                            style={{ 
+                              marginLeft: 0, 
+                              marginRight: 0,
+                              marginTop: '1rem',
+                              marginBottom: '0.75rem',
+                              fontSize: '18px',
+                              fontWeight: '600',
+                              lineHeight: '1.4',
+                              color: '#374151'
+                            }}
+                          >
+                            {trimmed.substring(4)}
+                          </h3>
+                        );
+                        return;
+                      }
+
+                      // Lista - acumula itens
+                      if (trimmed.startsWith('- ')) {
+                        currentList.push(trimmed.substring(2));
+                        return;
+                      }
+
+                      // Linha vazia - fecha lista se houver
+                      if (!trimmed) {
+                        if (currentList.length > 0) {
+                          elements.push(
+                            <ul key={`list-${listKey++}`} style={{ margin: '1rem 0', paddingLeft: '2rem', listStyleType: 'disc' }}>
+                              {currentList.map((item, i) => (
+                                <li key={i} style={{ marginBottom: '0.5rem', fontSize: '16px', lineHeight: '1.6' }}>
+                                  <span dangerouslySetInnerHTML={{
+                                    __html: item.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>').replace(/\*([^*]+)\*/g, '<em>$1</em>')
+                                  }} />
+                                </li>
+                              ))}
+                            </ul>
+                          );
+                          currentList = [];
+                        }
+                        elements.push(<div key={index} style={{ height: '0.75rem' }} />);
+                        return;
+                      }
+
+                      // Parágrafo normal - fecha lista se houver
+                      if (currentList.length > 0) {
+                        elements.push(
+                          <ul key={`list-${listKey++}`} style={{ margin: '1rem 0', paddingLeft: '2rem', listStyleType: 'disc' }}>
+                            {currentList.map((item, i) => (
+                              <li key={i} style={{ marginBottom: '0.5rem', fontSize: '16px', lineHeight: '1.6' }}>
+                                <span dangerouslySetInnerHTML={{
+                                  __html: item.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>').replace(/\*([^*]+)\*/g, '<em>$1</em>')
+                                }} />
+                              </li>
+                            ))}
+                          </ul>
+                        );
+                        currentList = [];
+                      }
+
+                      elements.push(
+                        <p
+                          key={index}
+                          style={{ 
+                            marginLeft: 0, 
+                            marginRight: 0,
+                            marginBottom: '0.75rem',
+                            fontSize: '16px',
+                            lineHeight: '1.6',
+                            color: '#374151'
+                          }}
+                          dangerouslySetInnerHTML={{
+                            __html: trimmed
+                              .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
+                              .replace(/\*([^*]+)\*/g, '<em>$1</em>')
+                          }}
+                        />
+                      );
+                    });
+
+                    // Fecha lista pendente no final
+                    if (currentList.length > 0) {
+                      elements.push(
+                        <ul key={`list-${listKey++}`} style={{ margin: '1rem 0', paddingLeft: '2rem', listStyleType: 'disc' }}>
+                          {currentList.map((item, i) => (
+                            <li key={i} style={{ marginBottom: '0.5rem', fontSize: '16px', lineHeight: '1.6' }}>
+                              <span dangerouslySetInnerHTML={{
+                                __html: item.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>').replace(/\*([^*]+)\*/g, '<em>$1</em>')
+                              }} />
+                            </li>
+                          ))}
+                        </ul>
                       );
                     }
 
-                    // H2
-                    if (trimmed.startsWith('## ')) {
-                      return (
-                        <h2 key={index} className="text-xl font-bold mt-6 mb-3 text-fogo-dark" style={{ marginLeft: 0, marginRight: 0 }}>
-                          {trimmed.substring(3)}
-                        </h2>
-                      );
-                    }
-
-                    // H3
-                    if (trimmed.startsWith('### ')) {
-                      return (
-                        <h3 key={index} className="text-lg font-semibold mt-4 mb-2" style={{ marginLeft: 0, marginRight: 0 }}>
-                          {trimmed.substring(4)}
-                        </h3>
-                      );
-                    }
-
-                    // Lista
-                    if (trimmed.startsWith('- ')) {
-                      return (
-                        <li key={index} className="ml-4 mb-1" style={{ marginLeft: '1rem', marginRight: 0 }}>
-                          {trimmed.substring(2).replace(/\*\*([^*]+)\*\*/g, '$1').replace(/\*([^*]+)\*/g, '$1')}
-                        </li>
-                      );
-                    }
-
-                    // Linha vazia
-                    if (!trimmed) {
-                      return <br key={index} />;
-                    }
-
-                    // Parágrafo normal
-                    return (
-                      <p
-                        key={index}
-                        className="mb-2"
-                        style={{ marginLeft: 0, marginRight: 0 }}
-                        dangerouslySetInnerHTML={{
-                          __html: trimmed
-                            .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
-                            .replace(/\*([^*]+)\*/g, '<em>$1</em>')
-                        }}
-                      />
-                    );
-                  })}
+                    return elements;
+                  })()}
                 </div>
               </div>
 
