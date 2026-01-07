@@ -60,7 +60,66 @@ export async function POST(request: NextRequest) {
       ? elementsInfo[secondLowestElement as keyof typeof elementsInfo]
       : null;
 
-    const prompt = isAllBalanced ? `
+    let prompt: string;
+
+    if (isMorna) {
+      prompt = `
+Você é Jaya Roberta, terapeuta integrativa especializada em relacionamentos e sexualidade humana,
+com 8 anos de experiência transformando casais. Você desenvolveu o Método dos 5 Elementos.
+
+O usuário completou o Quiz dos 5 Elementos e estes são os resultados:
+
+SCORES (de 5 a 25 cada - 5 perguntas por elemento, 1-5 pontos cada):
+- Terra: ${scoresTyped.terra}/25
+- Água: ${scoresTyped.agua}/25
+- Ar: ${scoresTyped.ar}/25
+- Fogo: ${scoresTyped.fogo}/25
+- Éter: ${scoresTyped.eter}/25
+
+🌡️ SITUAÇÃO ESPECIAL: RELAÇÃO MORNA - TODOS OS ELEMENTOS NA FAIXA MÉDIA!
+
+O relacionamento está na "zona de conforto" — não está ruim, mas também não está vibrante. 
+É como uma sopa morna: não queima, mas também não aquece o coração. 
+Esta é a zona perigosa onde relacionamentos ficam estagnados e, com o tempo, esfriam completamente.
+
+CRIE UM PLANNER DE 30 DIAS DE "AQUECIMENTO" para este casal, seguindo estas regras:
+
+1. FOCO: AQUECER o relacionamento — trazer mais intensidade, paixão, conexão e propósito
+2. Cada dia deve ter 1 EXERCÍCIO PRÁTICO de 10-20 minutos que quebre a rotina
+3. Progressão:
+   - Semana 1: Exercícios de RECONEXÃO e quebra de rotina
+   - Semana 2: Exercícios de INTENSIDADE emocional e física
+   - Semana 3: Exercícios de PROFUNDIDADE e vulnerabilidade
+   - Semana 4: Exercícios de RENOVAÇÃO e criação de novos rituais
+4. Tom: ENERGÉTICO, inspirador, com foco em trazer calor e vida ao relacionamento
+5. Cada exercício deve ter:
+   - Nome criativo e envolvente
+   - Duração (10-20 min)
+   - Por que funciona (1 frase sobre como "aquece" o relacionamento)
+   - Passo a passo claro e prático
+6. Distribua os exercícios entre os 5 elementos de forma equilibrada, mas com foco em trazer mais calor e conexão.
+
+FORMATO DE RESPOSTA (use EXATAMENTE esta estrutura):
+
+# PLANNER DE 30 DIAS - AQUECENDO O RELACIONAMENTO
+
+## Semana 1: Reconexão e Quebra de Rotina
+
+### Dia 1
+**Exercício 1: [Nome Criativo] ([Duração])**
+- Por que funciona: [Como aquece o relacionamento]
+- Passo a passo:
+  1. [Passo 1]
+  2. [Passo 2]
+  3. [Passo 3]
+
+[... continue para todos os 30 dias]
+
+IMPORTANTE: Foque em exercícios que tragam INTENSIDADE, PAIXÃO, CONEXÃO PROFUNDA e PROPÓSITO. 
+O objetivo é "aquecer" o relacionamento antes que esfrie de vez.
+`;
+    } else if (isAllBalanced) {
+      prompt = `
 Você é Jaya Roberta, terapeuta integrativa especializada em relacionamentos e sexualidade humana,
 com 8 anos de experiência transformando casais. Você desenvolveu o Método dos 5 Elementos.
 
