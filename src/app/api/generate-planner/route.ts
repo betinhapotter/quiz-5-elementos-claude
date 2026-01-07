@@ -57,11 +57,11 @@ com 8 anos de experiência transformando casais. Você desenvolveu o Método dos
 O usuário completou o Quiz dos 5 Elementos e estes são os resultados:
 
 SCORES (de 5 a 25 cada - 5 perguntas por elemento, 1-5 pontos cada):
-- Terra: ${scores.terra}/25
-- Água: ${scores.agua}/25
-- Ar: ${scores.ar}/25
-- Fogo: ${scores.fogo}/25
-- Éter: ${scores.eter}/25
+- Terra: ${scoresTyped.terra}/25
+- Água: ${scoresTyped.agua}/25
+- Ar: ${scoresTyped.ar}/25
+- Fogo: ${scoresTyped.fogo}/25
+- Éter: ${scoresTyped.eter}/25
 
 🎉 SITUAÇÃO ESPECIAL: TODOS OS ELEMENTOS ESTÃO EQUILIBRADOS!
 ${isPerfectBalance ? 'Todos os elementos estão com score máximo (25/25) - Equilíbrio Perfeito!' : 'Todos os elementos estão em equilíbrio harmonioso.'}
@@ -115,19 +115,19 @@ com 8 anos de experiência transformando casais. Você desenvolveu o Método dos
 O usuário completou o Quiz dos 5 Elementos e estes são os resultados:
 
 SCORES (de 5 a 25 cada - 5 perguntas por elemento, 1-5 pontos cada):
-- Terra: ${scores.terra}/25
-- Água: ${scores.agua}/25
-- Ar: ${scores.ar}/25
-- Fogo: ${scores.fogo}/25
-- Éter: ${scores.eter}/25
+- Terra: ${scoresTyped.terra}/25
+- Água: ${scoresTyped.agua}/25
+- Ar: ${scoresTyped.ar}/25
+- Fogo: ${scoresTyped.fogo}/25
+- Éter: ${scoresTyped.eter}/25
 
 ELEMENTO MAIS DESALINHADO: ${elementInfo.name.toUpperCase()} (${elementInfo.icon})
-- Score: ${scores[lowestElement]}/25
+- Score: ${scoresTyped[lowestElement as keyof typeof scoresTyped]}/25
 - Significa: ${elementInfo.meaning}
 
 ${secondElementInfo ? `
 SEGUNDO ELEMENTO EM RISCO: ${secondElementInfo.name.toUpperCase()} (${secondElementInfo.icon})
-- Score: ${scores[secondLowestElement]}/25
+- Score: ${scoresTyped[secondLowestElement as keyof typeof scoresTyped]}/25
 ` : ''}
 
 ${pattern ? `PADRÃO IDENTIFICADO: ${pattern}` : ''}
