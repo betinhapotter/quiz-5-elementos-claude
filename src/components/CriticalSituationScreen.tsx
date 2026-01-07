@@ -18,7 +18,7 @@ export default function CriticalSituationScreen() {
 
   if (!isCriticalSituation) return null;
 
-  const whatsappNumber = '5511999999999'; // Substitua pelo número real
+  const whatsappNumber = '55619962634557'; // Substitua pelo número real
   const whatsappMessage = encodeURIComponent('Olá Jaya, acabei de fazer o Quiz dos 5 Elementos e identifiquei uma situação crítica. Preciso de ajuda urgente.');
   const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${whatsappMessage}`;
 
