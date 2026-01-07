@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 
-// Force Vercel rebuild - código atualizado em 2025-01-08
+// VERCEL: Este arquivo foi corrigido para usar scoresTyped em vez de Object.values
+// Commit correto: ef5a247 ou posterior - NÃO usar commit 3590eaa
 
 const elementsInfo = {
   terra: { name: 'Terra', icon: '🌍', meaning: 'Segurança e Estrutura' },
