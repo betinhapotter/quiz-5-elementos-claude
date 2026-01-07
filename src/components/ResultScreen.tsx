@@ -562,7 +562,11 @@ export default function ResultScreen() {
                 <p className="text-white/80 mt-1">
                   {isAllBalanced 
                     ? `Gerado especialmente para manter o equilíbrio perfeito dos 5 Elementos`
-                    : `Gerado especialmente para realinhar o elemento ${elementInfo.name}`
+                    : isAllBalanced 
+                      ? (isPerfectBalance 
+                          ? 'Gerado especialmente para manter o equilíbrio perfeito dos 5 Elementos'
+                          : 'Gerado especialmente para manter o equilíbrio harmonioso dos 5 Elementos')
+                      : `Gerado especialmente para realinhar o elemento ${elementInfo.name}`
                   }
                 </p>
               </div>
