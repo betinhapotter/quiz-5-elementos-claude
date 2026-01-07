@@ -108,13 +108,13 @@ export default function ResultScreen() {
         fontFamily: element.style.fontFamily,
       };
 
-      // Aplica estilos otimizados para PDF
+      // Aplica estilos otimizados para PDF com fontes maiores
       element.style.backgroundColor = '#ffffff';
-      element.style.padding = '20mm';
+      element.style.padding = '15mm';
       element.style.margin = '0';
-      element.style.width = '210mm'; // Largura A4 em mm
-      element.style.maxWidth = '210mm';
-      element.style.fontSize = '12pt';
+      element.style.width = '170mm'; // Largura menor para forçar texto maior
+      element.style.maxWidth = '170mm';
+      element.style.fontSize = '16pt'; // Fonte base maior
       element.style.fontFamily = 'Arial, sans-serif';
       element.style.color = '#1f2937';
       element.style.lineHeight = '1.6';
@@ -135,38 +135,38 @@ export default function ResultScreen() {
           fontWeight: htmlEl.style.fontWeight || computedStyle.fontWeight,
         });
 
-        // Ajusta tamanhos para PDF (usando pt para melhor qualidade)
+        // Ajusta tamanhos para PDF (usando pt maiores para melhor legibilidade)
         if (el.tagName === 'H1') {
-          htmlEl.style.fontSize = '24pt';
-          htmlEl.style.marginTop = '16pt';
-          htmlEl.style.marginBottom = '12pt';
+          htmlEl.style.fontSize = '32pt';
+          htmlEl.style.marginTop = '20pt';
+          htmlEl.style.marginBottom = '16pt';
           htmlEl.style.fontWeight = 'bold';
           htmlEl.style.lineHeight = '1.2';
         } else if (el.tagName === 'H2') {
-          htmlEl.style.fontSize = '20pt';
-          htmlEl.style.marginTop = '14pt';
-          htmlEl.style.marginBottom = '10pt';
+          htmlEl.style.fontSize = '26pt';
+          htmlEl.style.marginTop = '18pt';
+          htmlEl.style.marginBottom = '14pt';
           htmlEl.style.fontWeight = 'bold';
           htmlEl.style.lineHeight = '1.3';
         } else if (el.tagName === 'H3') {
-          htmlEl.style.fontSize = '16pt';
-          htmlEl.style.marginTop = '12pt';
-          htmlEl.style.marginBottom = '8pt';
+          htmlEl.style.fontSize = '22pt';
+          htmlEl.style.marginTop = '16pt';
+          htmlEl.style.marginBottom = '12pt';
           htmlEl.style.fontWeight = 'bold';
           htmlEl.style.lineHeight = '1.4';
         } else if (el.tagName === 'P') {
-          htmlEl.style.fontSize = '12pt';
-          htmlEl.style.marginTop = '8pt';
-          htmlEl.style.marginBottom = '8pt';
+          htmlEl.style.fontSize = '16pt';
+          htmlEl.style.marginTop = '10pt';
+          htmlEl.style.marginBottom = '10pt';
           htmlEl.style.lineHeight = '1.6';
         } else if (el.tagName === 'LI') {
-          htmlEl.style.fontSize = '12pt';
-          htmlEl.style.marginBottom = '4pt';
+          htmlEl.style.fontSize = '16pt';
+          htmlEl.style.marginBottom = '6pt';
           htmlEl.style.lineHeight = '1.5';
         } else if (el.tagName === 'UL' || el.tagName === 'OL') {
-          htmlEl.style.marginTop = '8pt';
-          htmlEl.style.marginBottom = '8pt';
-          htmlEl.style.paddingLeft = '20pt';
+          htmlEl.style.marginTop = '10pt';
+          htmlEl.style.marginBottom = '10pt';
+          htmlEl.style.paddingLeft = '24pt';
         }
       });
 
@@ -176,7 +176,7 @@ export default function ResultScreen() {
       // Calcula dimensões ideais para o canvas
       const a4WidthMM = 210;
       const a4HeightMM = 297;
-      const marginMM = 20;
+      const marginMM = 15;
       const contentWidthMM = a4WidthMM - (marginMM * 2);
       const dpi = 300; // Alta resolução para melhor qualidade
       const scale = dpi / 96; // 96 DPI é o padrão de tela
@@ -230,24 +230,26 @@ export default function ResultScreen() {
       const contentWidth = pdfWidth - (margin * 2);
       const contentHeight = pdfHeight - (margin * 2);
 
-      // Converte pixels do canvas para mm (assumindo 96 DPI padrão)
+      // Converte pixels do canvas para mm considerando o scale aplicado
+      // O canvas foi gerado com scale, então precisamos ajustar a conversão
       const pxToMm = 0.264583; // 1px = 0.264583mm a 96 DPI
-      const imgWidthMM = canvas.width * pxToMm;
-      const imgHeightMM = canvas.height * pxToMm;
+      // Como usamos scale, o canvas tem mais pixels, mas o conteúdo real é menor
+      const actualWidthMM = (canvas.width / scale) * pxToMm;
+      const actualHeightMM = (canvas.height / scale) * pxToMm;
 
-      // Calcula ratio para caber na largura disponível
-      const ratio = contentWidth / imgWidthMM;
-      const scaledWidth = imgWidthMM * ratio;
-      const scaledHeight = imgHeightMM * ratio;
+      // Calcula ratio para caber na largura disponível (sem reduzir muito)
+      const ratio = Math.min(contentWidth / actualWidthMM, 1.0); // Não reduz, apenas ajusta se necessário
+      const scaledWidth = actualWidthMM * ratio;
+      const scaledHeight = actualHeightMM * ratio;
 
       const totalPages = Math.ceil(scaledHeight / contentHeight);
 
       for (let page = 0; page < totalPages; page++) {
         if (page > 0) pdf.addPage();
         
-        const sourceY = (page * contentHeight) / ratio / pxToMm;
-        const sourceHeight = Math.min(contentHeight / ratio / pxToMm, canvas.height - sourceY);
-        const destHeight = sourceHeight * ratio * pxToMm;
+        const sourceY = (page * contentHeight) / ratio / pxToMm * scale;
+        const sourceHeight = Math.min((contentHeight / ratio / pxToMm) * scale, canvas.height - sourceY);
+        const destHeight = (sourceHeight / scale) * ratio * pxToMm;
 
         // Cria um canvas temporário para cada página
         const pageCanvas = document.createElement('canvas');
