@@ -49,15 +49,34 @@ CREATE TABLE IF NOT EXISTS planners (
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
--- 3. Índices para performance
+-- 3. Tabela de leads (emails capturados)
+CREATE TABLE IF NOT EXISTS leads (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  email TEXT NOT NULL UNIQUE,
+  name TEXT,
+  user_id UUID REFERENCES auth.users(id) ON DELETE SET NULL,
+  
+  -- Dados do resultado do quiz (opcional, pode ser capturado antes do login)
+  lowest_element TEXT CHECK (lowest_element IN ('terra', 'agua', 'ar', 'fogo', 'eter')),
+  pattern TEXT,
+  
+  -- Timestamps
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- 4. Índices para performance
 CREATE INDEX IF NOT EXISTS idx_quiz_results_user_id ON quiz_results(user_id);
 CREATE INDEX IF NOT EXISTS idx_quiz_results_created_at ON quiz_results(created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_planners_user_id ON planners(user_id);
 CREATE INDEX IF NOT EXISTS idx_planners_quiz_result_id ON planners(quiz_result_id);
+CREATE INDEX IF NOT EXISTS idx_leads_email ON leads(email);
+CREATE INDEX IF NOT EXISTS idx_leads_created_at ON leads(created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_leads_user_id ON leads(user_id);
 
--- 4. Row Level Security (RLS) - IMPORTANTE!
+-- 5. Row Level Security (RLS) - IMPORTANTE!
 ALTER TABLE quiz_results ENABLE ROW LEVEL SECURITY;
 ALTER TABLE planners ENABLE ROW LEVEL SECURITY;
+ALTER TABLE leads ENABLE ROW LEVEL SECURITY;
 
 -- Políticas para quiz_results
 CREATE POLICY "Users can view own quiz results"
@@ -81,7 +100,18 @@ CREATE POLICY "Users can insert own planners"
   ON planners FOR INSERT
   WITH CHECK (auth.uid() = user_id);
 
--- 5. Função para atualizar updated_at automaticamente
+-- Políticas para leads
+-- Permite inserção pública (para captura de emails antes do login)
+CREATE POLICY "Anyone can insert leads"
+  ON leads FOR INSERT
+  WITH CHECK (true);
+
+-- Usuários podem ver seus próprios leads
+CREATE POLICY "Users can view own leads"
+  ON leads FOR SELECT
+  USING (auth.uid() = user_id OR auth.uid() IS NULL);
+
+-- 6. Função para atualizar updated_at automaticamente
 CREATE OR REPLACE FUNCTION update_updated_at_column()
 RETURNS TRIGGER AS $$
 BEGIN

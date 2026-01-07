@@ -4,11 +4,14 @@ import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Mail, Lock, AlertTriangle } from 'lucide-react';
 import { useQuizStore } from '@/hooks/useQuizStore';
+import { useAuth } from '@/hooks/useAuth';
 import { elementsInfo } from '@/types/quiz';
 import { THRESHOLDS } from '@/lib/quiz-logic';
+import { API_ENDPOINTS, callAPI } from '@/lib/api';
 
 export default function EmailCaptureScreen() {
   const { result, submitEmail } = useQuizStore();
+  const { user } = useAuth();
   const [email, setEmail] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
@@ -49,10 +52,26 @@ export default function EmailCaptureScreen() {
 
     setIsSubmitting(true);
 
-    // Simula envio (aqui você integra com sua API)
-    await new Promise((resolve) => setTimeout(resolve, 1000));
+    try {
+      // Salva o email na tabela de leads
+      await callAPI(API_ENDPOINTS.saveLead, {
+        email,
+        name: null,
+        userId: user?.id || null,
+        lowestElement: result?.lowestElement || null,
+        pattern: result?.pattern || null,
+      });
 
-    submitEmail(email);
+      // Continua com o fluxo normal
+      submitEmail(email);
+    } catch (err: any) {
+      console.error('Erro ao salvar lead:', err);
+      // Mesmo com erro, continua o fluxo para não bloquear o usuário
+      // Mas loga o erro para monitoramento
+      submitEmail(email);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
