@@ -196,45 +196,98 @@ export default function ResultScreen() {
       // Aguarda um pouco mais para garantir que o conteúdo está renderizado
       await new Promise(resolve => setTimeout(resolve, 500));
 
+      // Verifica se o elemento tem conteúdo antes de gerar o canvas
+      console.log('Elemento para PDF:', {
+        hasContent: element.innerHTML.length > 0,
+        scrollWidth: element.scrollWidth,
+        scrollHeight: element.scrollHeight,
+        offsetWidth: element.offsetWidth,
+        offsetHeight: element.offsetHeight,
+        innerHTML: element.innerHTML.substring(0, 200) + '...'
+      });
+
       const canvas = await html2canvas(element, {
         scale: scale,
         useCORS: true,
         logging: true, // Ativa logging para debug
         backgroundColor: '#ffffff',
-        width: element.scrollWidth,
-        height: element.scrollHeight,
-        windowWidth: element.scrollWidth,
-        windowHeight: element.scrollHeight,
+        width: element.scrollWidth || element.offsetWidth,
+        height: element.scrollHeight || element.offsetHeight,
+        windowWidth: element.scrollWidth || element.offsetWidth,
+        windowHeight: element.scrollHeight || element.offsetHeight,
         allowTaint: false,
-        foreignObjectRendering: false, // Desativa para melhor compatibilidade
-        onclone: (clonedDoc) => {
-          // Garante que o elemento clonado tem as mesmas propriedades
-          // Procura pelo elemento com a classe 'prose' que contém o planner
-          const clonedElement = clonedDoc.querySelector('div.prose') || 
-                               clonedDoc.body.querySelector('[ref="plannerRef"]') ||
-                               clonedDoc.querySelector('[style*="prose"]');
-          if (clonedElement) {
-            const htmlEl = clonedElement as HTMLElement;
+        foreignObjectRendering: true, // Ativa para melhor renderização de conteúdo HTML
+        onclone: (clonedDoc, clonedElement) => {
+          // O segundo parâmetro é o elemento clonado diretamente
+          const htmlEl = clonedElement as HTMLElement;
+          if (htmlEl) {
             htmlEl.style.backgroundColor = '#ffffff';
             htmlEl.style.color = '#1f2937';
             htmlEl.style.display = 'block';
             htmlEl.style.visibility = 'visible';
             htmlEl.style.opacity = '1';
+            htmlEl.style.width = 'auto';
+            htmlEl.style.height = 'auto';
+            htmlEl.style.overflow = 'visible';
+            htmlEl.style.position = 'relative';
+            
+            // Garante que todos os elementos filhos estão visíveis
+            const allChildren = htmlEl.querySelectorAll('*');
+            allChildren.forEach((child) => {
+              const childEl = child as HTMLElement;
+              const computedStyle = window.getComputedStyle(childEl);
+              if (computedStyle.display === 'none' || computedStyle.visibility === 'hidden') {
+                childEl.style.visibility = 'visible';
+                childEl.style.opacity = '1';
+                childEl.style.display = computedStyle.display === 'none' ? 'block' : computedStyle.display;
+              }
+            });
+            
+            console.log('Elemento clonado preparado:', {
+              hasContent: htmlEl.innerHTML.length > 0,
+              width: htmlEl.offsetWidth,
+              height: htmlEl.offsetHeight
+            });
           }
         }
       });
 
       // Verifica se o canvas foi gerado corretamente
+      console.log('Canvas gerado:', {
+        width: canvas?.width,
+        height: canvas?.height,
+        hasData: canvas ? canvas.toDataURL().length > 100 : false
+      });
+
       if (!canvas || canvas.width === 0 || canvas.height === 0) {
         console.error('Canvas vazio ou inválido', { 
           width: canvas?.width, 
           height: canvas?.height,
           elementWidth: element.scrollWidth,
-          elementHeight: element.scrollHeight
+          elementHeight: element.scrollHeight,
+          elementInnerHTML: element.innerHTML.substring(0, 500)
         });
         alert('Erro ao gerar imagem do planner. O conteúdo pode não estar visível. Verifique o console para mais detalhes.');
         setIsGeneratingPDF(false);
         return;
+      }
+
+      // Verifica se o canvas tem conteúdo (não está completamente branco)
+      const ctx = canvas.getContext('2d');
+      if (ctx) {
+        const imageData = ctx.getImageData(0, 0, Math.min(canvas.width, 100), Math.min(canvas.height, 100));
+        const pixels = imageData.data;
+        let hasNonWhitePixels = false;
+        for (let i = 0; i < pixels.length; i += 4) {
+          // Verifica se não é branco puro (RGB > 250)
+          if (pixels[i] < 250 || pixels[i + 1] < 250 || pixels[i + 2] < 250) {
+            hasNonWhitePixels = true;
+            break;
+          }
+        }
+        if (!hasNonWhitePixels) {
+          console.warn('Canvas parece estar vazio (apenas branco)');
+        }
       }
 
       // Restaura estilos originais

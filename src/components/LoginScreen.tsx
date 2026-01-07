@@ -19,6 +19,9 @@ export default function LoginScreen({ onSkip }: { onSkip?: () => void }) {
         provider: 'google',
         options: {
           redirectTo: `${window.location.origin}/`,
+          queryParams: {
+            prompt: 'select_account', // Força seleção de conta ao invés de auto-login
+          },
         },
       });
 

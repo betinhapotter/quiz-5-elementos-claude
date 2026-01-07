@@ -53,8 +53,41 @@ export function useAuth() {
   }, []);
 
   const signOut = async () => {
-    await supabase.auth.signOut();
-    setUser(null);
+    try {
+      // Faz logout no Supabase com scope global para limpar em todos os dispositivos
+      const { error } = await supabase.auth.signOut({
+        scope: 'global'
+      });
+      
+      if (error) {
+        console.error('Erro ao fazer logout:', error);
+      }
+      
+      // Limpa o estado local imediatamente
+      setUser(null);
+      
+      // Aguarda um pouco para garantir que o logout foi processado
+      await new Promise(resolve => setTimeout(resolve, 200));
+      
+      // Limpa todos os cookies relacionados ao Supabase manualmente
+      document.cookie.split(";").forEach((c) => {
+        const eqPos = c.indexOf("=");
+        const name = eqPos > -1 ? c.substr(0, eqPos).trim() : c.trim();
+        // Remove cookies do Supabase
+        if (name.startsWith('sb-') || name.includes('supabase')) {
+          document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/`;
+          document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/;domain=${window.location.hostname}`;
+        }
+      });
+      
+      // Força recarregamento completo da página para limpar todos os estados
+      // Usa replace para não manter histórico
+      window.location.replace(window.location.origin);
+    } catch (err) {
+      console.error('Erro inesperado ao fazer logout:', err);
+      // Mesmo com erro, força redirecionamento
+      window.location.replace(window.location.origin);
+    }
   };
 
   return {
