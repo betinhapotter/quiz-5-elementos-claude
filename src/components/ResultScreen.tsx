@@ -88,7 +88,10 @@ export default function ResultScreen() {
   };
 
   const handleDownloadPDF = async () => {
-    if (!plannerRef.current || !result) return;
+    if (!plannerRef.current || !result || !planner) {
+      alert('Planner não está disponível. Gere o planner primeiro.');
+      return;
+    }
 
     setIsGeneratingPDF(true);
 
