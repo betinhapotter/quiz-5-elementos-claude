@@ -58,6 +58,7 @@ CREATE TABLE IF NOT EXISTS leads (
   
   -- Dados do resultado do quiz (opcional, pode ser capturado antes do login)
   lowest_element TEXT CHECK (lowest_element IN ('terra', 'agua', 'ar', 'fogo', 'eter')),
+  lowest_score INTEGER,
   pattern TEXT,
   
   -- Timestamps

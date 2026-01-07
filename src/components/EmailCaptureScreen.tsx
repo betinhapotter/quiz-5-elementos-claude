@@ -59,6 +59,7 @@ export default function EmailCaptureScreen() {
         name: null,
         userId: user?.id || null,
         lowestElement: result?.lowestElement || null,
+        lowestScore: result?.lowestScore || null,
         pattern: result?.pattern || null,
       });
 

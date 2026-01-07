@@ -3,7 +3,7 @@ import { createClient } from '@/lib/supabase/server';
 
 export async function POST(request: NextRequest) {
   try {
-    const { email, name, userId, lowestElement, pattern } = await request.json();
+    const { email, name, userId, lowestElement, lowestScore, pattern } = await request.json();
 
     if (!email || !email.includes('@')) {
       return NextResponse.json(
@@ -22,6 +22,7 @@ export async function POST(request: NextRequest) {
         name: name || null,
         user_id: userId || null,
         lowest_element: lowestElement || null,
+        lowest_score: lowestScore || null,
         pattern: pattern || null,
       })
       .select()
