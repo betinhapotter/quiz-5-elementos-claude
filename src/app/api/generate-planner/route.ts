@@ -30,7 +30,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Verifica se todos estão equilibrados
-    const allScores = Object.values(scores);
+    const allScores = Object.values(scores) as number[];
     const minScore = Math.min(...allScores);
     const maxScore = Math.max(...allScores);
     const scoreDifference = maxScore - minScore;
