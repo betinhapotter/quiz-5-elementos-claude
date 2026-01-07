@@ -31,6 +31,7 @@ export async function POST(request: NextRequest) {
 
     // Verifica se todos estão equilibrados
     // Type assertion explícita para garantir que scores é um objeto com números
+    // NOTA: Usamos scoresTyped e array manual para evitar type errors com Object.values
     const scoresTyped = scores as { terra: number; agua: number; ar: number; fogo: number; eter: number };
     const allScores: number[] = [
       scoresTyped.terra,
