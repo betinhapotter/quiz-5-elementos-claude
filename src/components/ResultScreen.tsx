@@ -376,7 +376,13 @@ export default function ResultScreen() {
     <div className="min-h-screen bg-cream">
       {/* Hero do resultado */}
       <div
-        className={`bg-gradient-to-br ${isAllBalanced ? balancedGradient : elementColors[result.lowestElement]} text-white py-12 sm:py-16`}
+        className={`bg-gradient-to-br ${
+          isAllBalanced 
+            ? balancedGradient 
+            : isMorna 
+            ? 'from-warmGray-800 to-warmGray-900' 
+            : elementColors[result.lowestElement]
+        } text-white py-12 sm:py-16`}
       >
         <div className="container-quiz text-center">
           <motion.div
@@ -385,7 +391,7 @@ export default function ResultScreen() {
             transition={{ duration: 0.5 }}
           >
             <span className="text-6xl sm:text-8xl block mb-4">
-              {isAllBalanced ? '✨' : elementInfo.icon}
+              {isAllBalanced ? '✨' : isMorna ? '💨' : elementInfo.icon}
             </span>
 
             <h1 className="font-display text-3xl sm:text-4xl font-bold mb-2">
