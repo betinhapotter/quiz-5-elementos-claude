@@ -292,7 +292,11 @@ export default function ResultScreen() {
   const isAllInCrisis = allScores.every(score => score <= 8); // THRESHOLDS.CRISIS = 8
   const isAllLow = allScores.every(score => score <= 12); // THRESHOLDS.LOW = 12
   const isCriticalSituation = isAllInCrisis || isAllLow || result.pattern?.includes('alerta_vermelho');
-
+  
+  // Verifica se é situação "morna" - todos na faixa média (13-17)
+  const isAllMedium = minScore >= 13 && maxScore <= 17 && scoreDifference <= 3; // THRESHOLDS.BALANCED_LOW = 13
+  const isMorna = isAllMedium || result.pattern?.includes('relacao_morna');
+  
   const elementInfo = elementsInfo[result.lowestElement as keyof typeof elementsInfo];
   const explanation = generateResultExplanation(result);
   const severity = getResultSeverity(result);
