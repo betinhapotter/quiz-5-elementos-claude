@@ -104,65 +104,94 @@ export default function ResultScreen() {
         margin: element.style.margin,
         width: element.style.width,
         maxWidth: element.style.maxWidth,
+        fontSize: element.style.fontSize,
+        fontFamily: element.style.fontFamily,
       };
 
       // Aplica estilos otimizados para PDF
       element.style.backgroundColor = '#ffffff';
-      element.style.padding = '40px';
+      element.style.padding = '20mm';
       element.style.margin = '0';
-      element.style.width = '210mm'; // Largura A4
+      element.style.width = '210mm'; // Largura A4 em mm
       element.style.maxWidth = '210mm';
+      element.style.fontSize = '12pt';
+      element.style.fontFamily = 'Arial, sans-serif';
+      element.style.color = '#1f2937';
+      element.style.lineHeight = '1.6';
 
       // Ajusta fontes e espaçamentos para melhor legibilidade no PDF
-      const allElements = element.querySelectorAll('h1, h2, h3, p, li, ul, ol');
+      const allElements = element.querySelectorAll('h1, h2, h3, h4, p, li, ul, ol, strong, em, span, div');
       const originalStyles = new Map();
 
       allElements.forEach((el) => {
         const htmlEl = el as HTMLElement;
+        const computedStyle = window.getComputedStyle(htmlEl);
         originalStyles.set(htmlEl, {
-          fontSize: htmlEl.style.fontSize,
-          marginTop: htmlEl.style.marginTop,
-          marginBottom: htmlEl.style.marginBottom,
-          padding: htmlEl.style.padding,
+          fontSize: htmlEl.style.fontSize || computedStyle.fontSize,
+          marginTop: htmlEl.style.marginTop || computedStyle.marginTop,
+          marginBottom: htmlEl.style.marginBottom || computedStyle.marginBottom,
+          padding: htmlEl.style.padding || computedStyle.padding,
+          lineHeight: htmlEl.style.lineHeight || computedStyle.lineHeight,
+          fontWeight: htmlEl.style.fontWeight || computedStyle.fontWeight,
         });
 
-        // Ajusta tamanhos para PDF
+        // Ajusta tamanhos para PDF (usando pt para melhor qualidade)
         if (el.tagName === 'H1') {
-          htmlEl.style.fontSize = '24px';
-          htmlEl.style.marginTop = '20px';
-          htmlEl.style.marginBottom = '12px';
+          htmlEl.style.fontSize = '24pt';
+          htmlEl.style.marginTop = '16pt';
+          htmlEl.style.marginBottom = '12pt';
+          htmlEl.style.fontWeight = 'bold';
+          htmlEl.style.lineHeight = '1.2';
         } else if (el.tagName === 'H2') {
-          htmlEl.style.fontSize = '20px';
-          htmlEl.style.marginTop = '16px';
-          htmlEl.style.marginBottom = '10px';
+          htmlEl.style.fontSize = '20pt';
+          htmlEl.style.marginTop = '14pt';
+          htmlEl.style.marginBottom = '10pt';
+          htmlEl.style.fontWeight = 'bold';
+          htmlEl.style.lineHeight = '1.3';
         } else if (el.tagName === 'H3') {
-          htmlEl.style.fontSize = '18px';
-          htmlEl.style.marginTop = '14px';
-          htmlEl.style.marginBottom = '8px';
+          htmlEl.style.fontSize = '16pt';
+          htmlEl.style.marginTop = '12pt';
+          htmlEl.style.marginBottom = '8pt';
+          htmlEl.style.fontWeight = 'bold';
+          htmlEl.style.lineHeight = '1.4';
         } else if (el.tagName === 'P') {
-          htmlEl.style.fontSize = '14px';
-          htmlEl.style.marginTop = '8px';
-          htmlEl.style.marginBottom = '8px';
+          htmlEl.style.fontSize = '12pt';
+          htmlEl.style.marginTop = '8pt';
+          htmlEl.style.marginBottom = '8pt';
           htmlEl.style.lineHeight = '1.6';
         } else if (el.tagName === 'LI') {
-          htmlEl.style.fontSize = '14px';
-          htmlEl.style.marginBottom = '6px';
+          htmlEl.style.fontSize = '12pt';
+          htmlEl.style.marginBottom = '4pt';
           htmlEl.style.lineHeight = '1.5';
+        } else if (el.tagName === 'UL' || el.tagName === 'OL') {
+          htmlEl.style.marginTop = '8pt';
+          htmlEl.style.marginBottom = '8pt';
+          htmlEl.style.paddingLeft = '20pt';
         }
       });
 
       // Aguarda um momento para os estilos serem aplicados
-      await new Promise(resolve => setTimeout(resolve, 100));
+      await new Promise(resolve => setTimeout(resolve, 200));
+
+      // Calcula dimensões ideais para o canvas
+      const a4WidthMM = 210;
+      const a4HeightMM = 297;
+      const marginMM = 20;
+      const contentWidthMM = a4WidthMM - (marginMM * 2);
+      const dpi = 300; // Alta resolução para melhor qualidade
+      const scale = dpi / 96; // 96 DPI é o padrão de tela
 
       const canvas = await html2canvas(element, {
-        scale: 2,
+        scale: scale,
         useCORS: true,
         logging: false,
         backgroundColor: '#ffffff',
         width: element.scrollWidth,
         height: element.scrollHeight,
-        windowWidth: 800,
+        windowWidth: element.scrollWidth,
         windowHeight: element.scrollHeight,
+        allowTaint: false,
+        foreignObjectRendering: true,
       });
 
       // Restaura estilos originais
@@ -171,6 +200,8 @@ export default function ResultScreen() {
       element.style.margin = originalContainerStyles.margin;
       element.style.width = originalContainerStyles.width;
       element.style.maxWidth = originalContainerStyles.maxWidth;
+      element.style.fontSize = originalContainerStyles.fontSize;
+      element.style.fontFamily = originalContainerStyles.fontFamily;
 
       allElements.forEach((el) => {
         const htmlEl = el as HTMLElement;
@@ -180,10 +211,12 @@ export default function ResultScreen() {
           htmlEl.style.marginTop = original.marginTop;
           htmlEl.style.marginBottom = original.marginBottom;
           htmlEl.style.padding = original.padding;
+          htmlEl.style.lineHeight = original.lineHeight;
+          htmlEl.style.fontWeight = original.fontWeight;
         }
       });
 
-      const imgData = canvas.toDataURL('image/png', 0.95);
+      const imgData = canvas.toDataURL('image/png', 1.0);
       const pdf = new jsPDF({
         orientation: 'portrait',
         unit: 'mm',
@@ -193,34 +226,40 @@ export default function ResultScreen() {
 
       const pdfWidth = pdf.internal.pageSize.getWidth();
       const pdfHeight = pdf.internal.pageSize.getHeight();
-      const margin = 15; // Margem de 15mm de cada lado
+      const margin = marginMM;
       const contentWidth = pdfWidth - (margin * 2);
       const contentHeight = pdfHeight - (margin * 2);
 
-      const imgWidth = canvas.width;
-      const imgHeight = canvas.height;
-      const ratio = Math.min(contentWidth / imgWidth, contentHeight / imgHeight);
-      const scaledWidth = imgWidth * ratio;
-      const scaledHeight = imgHeight * ratio;
+      // Converte pixels do canvas para mm (assumindo 96 DPI padrão)
+      const pxToMm = 0.264583; // 1px = 0.264583mm a 96 DPI
+      const imgWidthMM = canvas.width * pxToMm;
+      const imgHeightMM = canvas.height * pxToMm;
+
+      // Calcula ratio para caber na largura disponível
+      const ratio = contentWidth / imgWidthMM;
+      const scaledWidth = imgWidthMM * ratio;
+      const scaledHeight = imgHeightMM * ratio;
 
       const totalPages = Math.ceil(scaledHeight / contentHeight);
 
       for (let page = 0; page < totalPages; page++) {
         if (page > 0) pdf.addPage();
         
-        const sourceY = (page * contentHeight) / ratio;
-        const sourceHeight = Math.min(contentHeight / ratio, imgHeight - sourceY);
-        const destHeight = sourceHeight * ratio;
+        const sourceY = (page * contentHeight) / ratio / pxToMm;
+        const sourceHeight = Math.min(contentHeight / ratio / pxToMm, canvas.height - sourceY);
+        const destHeight = sourceHeight * ratio * pxToMm;
 
         // Cria um canvas temporário para cada página
         const pageCanvas = document.createElement('canvas');
-        pageCanvas.width = imgWidth;
+        pageCanvas.width = canvas.width;
         pageCanvas.height = sourceHeight;
         const pageCtx = pageCanvas.getContext('2d');
         
         if (pageCtx) {
-          pageCtx.drawImage(canvas, 0, sourceY, imgWidth, sourceHeight, 0, 0, imgWidth, sourceHeight);
-          const pageImgData = pageCanvas.toDataURL('image/png', 0.95);
+          pageCtx.fillStyle = '#ffffff';
+          pageCtx.fillRect(0, 0, pageCanvas.width, pageCanvas.height);
+          pageCtx.drawImage(canvas, 0, sourceY, canvas.width, sourceHeight, 0, 0, canvas.width, sourceHeight);
+          const pageImgData = pageCanvas.toDataURL('image/png', 1.0);
           pdf.addImage(pageImgData, 'PNG', margin, margin, scaledWidth, destHeight);
         }
       }
