@@ -171,7 +171,7 @@ export default function ResultScreen() {
       });
 
       // Aguarda um momento para os estilos serem aplicados
-      await new Promise(resolve => setTimeout(resolve, 200));
+      await new Promise(resolve => setTimeout(resolve, 500));
 
       // Calcula dimensões ideais para o canvas
       const a4WidthMM = 210;
@@ -181,17 +181,29 @@ export default function ResultScreen() {
       const dpi = 300; // Alta resolução para melhor qualidade
       const scale = dpi / 96; // 96 DPI é o padrão de tela
 
+      // Aguarda um pouco mais para garantir que o conteúdo está renderizado
+      await new Promise(resolve => setTimeout(resolve, 500));
+
       const canvas = await html2canvas(element, {
         scale: scale,
         useCORS: true,
-        logging: false,
+        logging: true, // Ativa logging para debug
         backgroundColor: '#ffffff',
         width: element.scrollWidth,
         height: element.scrollHeight,
         windowWidth: element.scrollWidth,
         windowHeight: element.scrollHeight,
         allowTaint: false,
-        foreignObjectRendering: true,
+        foreignObjectRendering: false, // Desativa para melhor compatibilidade
+        onclone: (clonedDoc) => {
+          // Garante que o elemento clonado tem as mesmas propriedades
+          const clonedElement = clonedDoc.querySelector('[ref="plannerRef"]') || 
+                               clonedDoc.body.querySelector('div.prose');
+          if (clonedElement) {
+            (clonedElement as HTMLElement).style.backgroundColor = '#ffffff';
+            (clonedElement as HTMLElement).style.color = '#1f2937';
+          }
+        }
       });
 
       // Restaura estilos originais
@@ -257,12 +269,20 @@ export default function ResultScreen() {
         pageCanvas.height = sourceHeight;
         const pageCtx = pageCanvas.getContext('2d');
         
-        if (pageCtx) {
+        if (pageCtx && canvas.width > 0 && canvas.height > 0 && sourceHeight > 0) {
           pageCtx.fillStyle = '#ffffff';
           pageCtx.fillRect(0, 0, pageCanvas.width, pageCanvas.height);
-          pageCtx.drawImage(canvas, 0, sourceY, canvas.width, sourceHeight, 0, 0, canvas.width, sourceHeight);
-          const pageImgData = pageCanvas.toDataURL('image/png', 1.0);
-          pdf.addImage(pageImgData, 'PNG', margin, margin, scaledWidth, destHeight);
+          
+          // Verifica se há conteúdo para desenhar
+          if (sourceY < canvas.height && sourceHeight > 0) {
+            pageCtx.drawImage(canvas, 0, sourceY, canvas.width, sourceHeight, 0, 0, canvas.width, sourceHeight);
+            const pageImgData = pageCanvas.toDataURL('image/png', 1.0);
+            
+            // Verifica se a imagem não está vazia (imagem válida tem mais de 100 caracteres)
+            if (pageImgData && pageImgData.length > 100) {
+              pdf.addImage(pageImgData, 'PNG', margin, margin, scaledWidth, destHeight);
+            }
+          }
         }
       }
 
@@ -371,8 +391,8 @@ export default function ResultScreen() {
           </div>
         </motion.section>
 
-        {/* Por que não se sentem ouvidos - só mostra se NÃO estiver equilibrado */}
-        {!isAllBalanced && (
+        {/* Por que não se sentem ouvidos - só mostra se NÃO estiver equilibrado ou morno */}
+        {!isAllBalanced && !isMorna && (
           <motion.section
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -419,7 +439,7 @@ export default function ResultScreen() {
                   <><strong>Atenção:</strong> {result.pattern}</>
                 )}
               </p>
-              {result.secondLowestElement && !isAllBalanced && (
+              {result.secondLowestElement && !isAllBalanced && !isMorna && (
                 <p className="mt-2 text-sm text-warmGray-500">
                   Elemento secundário em risco:{' '}
                   <span className={`element-badge ${result.secondLowestElement}`}>
@@ -559,7 +579,9 @@ export default function ResultScreen() {
                 Nossa IA vai criar um plano de <strong>30 dias</strong> com exercícios práticos
                 {isAllBalanced 
                   ? ' para manter o equilíbrio perfeito dos 5 Elementos no seu relacionamento.'
-                  : ` específicos para realinhar o elemento <strong>${elementInfo.name}</strong> no seu relacionamento.`
+                  : isMorna
+                    ? ' para despertar a brasa adormecida e tirar seu relacionamento do piloto automático.'
+                    : ` específicos para realinhar o elemento ${elementInfo.name} no seu relacionamento.`
                 }
               </p>
 
