@@ -2,8 +2,9 @@
 
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ChevronLeft } from 'lucide-react';
+import { ChevronLeft, LogOut } from 'lucide-react';
 import { useQuizStore } from '@/hooks/useQuizStore';
+import { useAuth } from '@/hooks/useAuth';
 import { elementsInfo, Element } from '@/types/quiz';
 import { questions, type Question } from '@/data/questions';
 
@@ -28,6 +29,7 @@ export default function QuizScreen() {
     goToPreviousQuestion,
     getProgress,
   } = useQuizStore();
+  const { signOut } = useAuth();
 
   const [selectedValue, setSelectedValue] = useState<number | null>(null);
 
@@ -92,6 +94,17 @@ export default function QuizScreen() {
             <span className="text-sm font-medium text-warmGray-500 tabular-nums">
               {currentQuestionIndex + 1}/{questions.length}
             </span>
+            
+            {/* Botão de Logout */}
+            <button
+              onClick={signOut}
+              className="p-2 rounded-lg text-warmGray-500 hover:text-warmGray-700 
+                       hover:bg-warmGray-100 transition-colors"
+              title="Sair"
+              aria-label="Sair"
+            >
+              <LogOut className="w-5 h-5" />
+            </button>
           </div>
 
           {/* Indicador de elemento */}

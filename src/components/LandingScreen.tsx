@@ -1,16 +1,31 @@
 'use client';
 
 import { motion } from 'framer-motion';
+import { LogOut } from 'lucide-react';
 import { useQuizStore } from '@/hooks/useQuizStore';
+import { useAuth } from '@/hooks/useAuth';
 import { elementsInfo } from '@/types/quiz';
 
 export default function LandingScreen() {
   const startQuiz = useQuizStore((state) => state.startQuiz);
+  const { signOut } = useAuth();
 
   const elements = Object.values(elementsInfo);
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-cream to-warmGray-100">
+      {/* Botão de Logout */}
+      <div className="absolute top-4 right-4 sm:top-6 sm:right-6">
+        <button
+          onClick={signOut}
+          className="flex items-center gap-2 px-4 py-2 text-sm text-warmGray-600 hover:text-warmGray-900 hover:bg-warmGray-100 rounded-lg transition-colors"
+          title="Sair"
+        >
+          <LogOut className="w-4 h-4" />
+          <span className="hidden sm:inline">Sair</span>
+        </button>
+      </div>
+      
       <div className="container-quiz py-12 sm:py-16">
         {/* Header */}
         <motion.div

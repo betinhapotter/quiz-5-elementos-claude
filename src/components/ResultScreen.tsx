@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
-import { ArrowRight, Instagram, RefreshCw, Sparkles, Download, Loader2 } from 'lucide-react';
+import { ArrowRight, Instagram, RefreshCw, Sparkles, Download, Loader2, LogOut } from 'lucide-react';
 import { useQuizStore } from '@/hooks/useQuizStore';
 import { useAuth } from '@/hooks/useAuth';
 import { createClient } from '@/lib/supabase/client';
@@ -12,7 +12,7 @@ import { API_ENDPOINTS, callAPI } from '@/lib/api';
 
 export default function ResultScreen() {
   const { result, resetQuiz, userData, answers } = useQuizStore();
-  const { user } = useAuth();
+  const { user, signOut } = useAuth();
   const supabase = createClient();
   
   const [isGeneratingPlanner, setIsGeneratingPlanner] = useState(false);
@@ -374,6 +374,18 @@ export default function ResultScreen() {
 
   return (
     <div className="min-h-screen bg-cream">
+      {/* Botão de Logout */}
+      <div className="absolute top-4 right-4 sm:top-6 sm:right-6 z-20">
+        <button
+          onClick={signOut}
+          className="flex items-center gap-2 px-4 py-2 text-sm text-warmGray-600 hover:text-warmGray-900 hover:bg-warmGray-100 rounded-lg transition-colors bg-white/80 backdrop-blur-sm shadow-sm"
+          title="Sair"
+        >
+          <LogOut className="w-4 h-4" />
+          <span className="hidden sm:inline">Sair</span>
+        </button>
+      </div>
+      
       {/* Hero do resultado */}
       <div
         className={`bg-gradient-to-br ${
