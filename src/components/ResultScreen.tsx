@@ -200,14 +200,33 @@ export default function ResultScreen() {
         foreignObjectRendering: false, // Desativa para melhor compatibilidade
         onclone: (clonedDoc) => {
           // Garante que o elemento clonado tem as mesmas propriedades
-          const clonedElement = clonedDoc.querySelector('[ref="plannerRef"]') || 
-                               clonedDoc.body.querySelector('div.prose');
+          // Procura pelo elemento com a classe 'prose' que contém o planner
+          const clonedElement = clonedDoc.querySelector('div.prose') || 
+                               clonedDoc.body.querySelector('[ref="plannerRef"]') ||
+                               clonedDoc.querySelector('[style*="prose"]');
           if (clonedElement) {
-            (clonedElement as HTMLElement).style.backgroundColor = '#ffffff';
-            (clonedElement as HTMLElement).style.color = '#1f2937';
+            const htmlEl = clonedElement as HTMLElement;
+            htmlEl.style.backgroundColor = '#ffffff';
+            htmlEl.style.color = '#1f2937';
+            htmlEl.style.display = 'block';
+            htmlEl.style.visibility = 'visible';
+            htmlEl.style.opacity = '1';
           }
         }
       });
+
+      // Verifica se o canvas foi gerado corretamente
+      if (!canvas || canvas.width === 0 || canvas.height === 0) {
+        console.error('Canvas vazio ou inválido', { 
+          width: canvas?.width, 
+          height: canvas?.height,
+          elementWidth: element.scrollWidth,
+          elementHeight: element.scrollHeight
+        });
+        alert('Erro ao gerar imagem do planner. O conteúdo pode não estar visível. Verifique o console para mais detalhes.');
+        setIsGeneratingPDF(false);
+        return;
+      }
 
       // Restaura estilos originais
       element.style.backgroundColor = originalContainerStyles.backgroundColor;
