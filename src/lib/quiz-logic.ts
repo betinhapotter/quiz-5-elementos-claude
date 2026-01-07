@@ -34,7 +34,7 @@ export interface QuizResult {
 // Máximo possível: 25 (5 × 5)
 // Ponto médio: 15 (5 × 3)
 
-const THRESHOLDS = {
+export const THRESHOLDS = {
   CRISIS: 8,        // ≤8 = situação crítica (média ≤1.6)
   LOW: 12,          // ≤12 = elemento em falta (média ≤2.4)
   BALANCED_LOW: 13, // 13-17 = atenção (média 2.6-3.4)

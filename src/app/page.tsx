@@ -8,6 +8,7 @@ import QuizScreen from '@/components/QuizScreen';
 import CalculatingScreen from '@/components/CalculatingScreen';
 import EmailCaptureScreen from '@/components/EmailCaptureScreen';
 import ResultScreen from '@/components/ResultScreen';
+import CriticalSituationScreen from '@/components/CriticalSituationScreen';
 
 export default function Home() {
   const { user, loading, isAuthenticated } = useAuth();
@@ -46,6 +47,7 @@ export default function Home() {
       {currentStep === 'quiz' && <QuizScreen />}
       {currentStep === 'calculating' && <CalculatingScreen />}
       {currentStep === 'email-capture' && <EmailCaptureScreen />}
+      {currentStep === 'critical' && <CriticalSituationScreen />}
       {currentStep === 'result' && <ResultScreen />}
     </div>
   );

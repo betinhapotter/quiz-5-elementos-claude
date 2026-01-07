@@ -53,7 +53,7 @@ export interface UserData {
 
 // Estado completo do quiz
 export interface QuizState {
-  currentStep: 'landing' | 'quiz' | 'calculating' | 'email-capture' | 'result';
+  currentStep: 'landing' | 'quiz' | 'calculating' | 'email-capture' | 'result' | 'critical';
   currentQuestionIndex: number;
   answers: Answer[];
   userData: UserData | null;

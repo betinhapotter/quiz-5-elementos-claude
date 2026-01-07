@@ -2,9 +2,10 @@
 
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Mail, Lock } from 'lucide-react';
+import { Mail, Lock, AlertTriangle } from 'lucide-react';
 import { useQuizStore } from '@/hooks/useQuizStore';
 import { elementsInfo } from '@/types/quiz';
+import { THRESHOLDS } from '@/lib/quiz-logic';
 
 export default function EmailCaptureScreen() {
   const { result, submitEmail } = useQuizStore();
@@ -24,6 +25,11 @@ export default function EmailCaptureScreen() {
                         result.pattern?.includes('equilibrio_perfeito'); // THRESHOLDS.BALANCED_HIGH = 18
   const isPerfectBalance = (minScore === 25 && maxScore === 25) || 
                           result.pattern?.includes('equilibrio_perfeito');
+  
+  // Verifica se é situação crítica
+  const isAllInCrisis = allScores.every(score => score <= 8); // THRESHOLDS.CRISIS = 8
+  const isAllLow = allScores.every(score => score <= 12); // THRESHOLDS.LOW = 12
+  const isCriticalSituation = isAllInCrisis || isAllLow || result.pattern?.includes('alerta_vermelho');
 
   const elementInfo = elementsInfo[result.lowestElement as keyof typeof elementsInfo];
 
@@ -61,7 +67,9 @@ export default function EmailCaptureScreen() {
             transition={{ duration: 0.5, delay: 0.2 }}
             className="mb-6"
           >
-            <span className="text-7xl">{isAllBalanced ? '✨' : elementInfo.icon}</span>
+            <span className="text-7xl">
+              {isCriticalSituation ? '🚨' : isAllBalanced ? '✨' : elementInfo.icon}
+            </span>
           </motion.div>
 
           {/* Resultado parcial (gancho) */}
@@ -70,7 +78,22 @@ export default function EmailCaptureScreen() {
             animate={{ opacity: 1 }}
             transition={{ delay: 0.4 }}
           >
-            {isAllBalanced ? (
+            {isCriticalSituation ? (
+              <>
+                <h1 className="font-display text-2xl sm:text-3xl font-bold text-warmGray-900 mb-2">
+                  🚨 Situação Crítica Identificada
+                </h1>
+
+                <h2 className="font-display text-4xl sm:text-5xl font-bold mb-4 text-red-600">
+                  ALERTA VERMELHO
+                </h2>
+
+                <p className="text-warmGray-600 mb-8 max-w-md mx-auto">
+                  Múltiplos elementos do seu relacionamento estão em crise. 
+                  Esta situação requer atenção profissional urgente.
+                </p>
+              </>
+            ) : isAllBalanced ? (
               <>
                 <h1 className="font-display text-2xl sm:text-3xl font-bold text-warmGray-900 mb-2">
                   {isPerfectBalance ? '🌟 Equilíbrio Perfeito!' : '✨ Equilíbrio Harmonioso!'}
@@ -117,7 +140,22 @@ export default function EmailCaptureScreen() {
                 Para receber sua análise completa:
               </h3>
               <ul className="space-y-2 text-sm text-warmGray-600">
-                {isAllBalanced ? (
+                {isCriticalSituation ? (
+                  <>
+                    <li className="flex items-start gap-2">
+                      <span className="text-red-500 mt-0.5">⚠</span>
+                      Informações sobre a situação crítica identificada
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="text-red-500 mt-0.5">⚠</span>
+                      Orientações para busca de ajuda profissional urgente
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="text-red-500 mt-0.5">⚠</span>
+                      Contatos de emergência e recursos disponíveis
+                    </li>
+                  </>
+                ) : isAllBalanced ? (
                   <>
                     <li className="flex items-start gap-2">
                       <span className="text-green-500 mt-0.5">✓</span>

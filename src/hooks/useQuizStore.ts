@@ -96,13 +96,32 @@ export const useQuizStore = create<QuizStore>((set, get) => ({
 
   // Submeter email
   submitEmail: (email: string, name?: string) => {
+    const state = get();
+    if (!state.result) {
+      set({
+        userData: {
+          email,
+          name,
+          createdAt: new Date(),
+        },
+        currentStep: 'result',
+      });
+      return;
+    }
+
+    // Verifica se é situação crítica
+    const allScores = Object.values(state.result.scores);
+    const isAllInCrisis = allScores.every(score => score <= 8); // THRESHOLDS.CRISIS = 8
+    const isAllLow = allScores.every(score => score <= 12); // THRESHOLDS.LOW = 12
+    const isCriticalSituation = isAllInCrisis || isAllLow || state.result.pattern?.includes('alerta_vermelho');
+
     set({
       userData: {
         email,
         name,
         createdAt: new Date(),
       },
-      currentStep: 'result',
+      currentStep: isCriticalSituation ? 'critical' : 'result',
     });
   },
 
