@@ -14,14 +14,6 @@ export async function POST(request: NextRequest) {
 
     const supabase = createClient();
 
-    // Debug: log dos dados recebidos
-    console.log('Dados recebidos na API:', {
-      email,
-      lowestElement,
-      lowestScore,
-      pattern,
-    });
-
     // Insere o lead na tabela
     const { data, error } = await supabase
       .from('leads')

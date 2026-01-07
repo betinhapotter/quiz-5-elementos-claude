@@ -76,7 +76,7 @@ export const useQuizStore = create<QuizStore>((set, get) => ({
           result,
           currentStep: 'email-capture',
         });
-      }, 2500);
+      }, 5000);
     } else {
       // Próxima pergunta
       set({
