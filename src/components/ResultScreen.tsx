@@ -533,7 +533,8 @@ export default function ResultScreen() {
           </div>
         </motion.section>
 
-        {/* CTA Principal - Gerar Planner com IA */}
+        {/* CTA Principal - Gerar Planner com IA (não mostra se for situação crítica) */}
+        {!isCriticalSituation && (
         <motion.section
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -863,6 +864,7 @@ export default function ResultScreen() {
             </div>
           )}
         </motion.section>
+        )}
 
         {/* Footer / Ações secundárias */}
         <motion.div
