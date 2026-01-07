@@ -30,6 +30,10 @@ export default function EmailCaptureScreen() {
   const isAllInCrisis = allScores.every(score => score <= 8); // THRESHOLDS.CRISIS = 8
   const isAllLow = allScores.every(score => score <= 12); // THRESHOLDS.LOW = 12
   const isCriticalSituation = isAllInCrisis || isAllLow || result.pattern?.includes('alerta_vermelho');
+  
+  // Verifica se é situação "morna" - todos na faixa média (13-17)
+  const isAllMedium = minScore >= 13 && maxScore <= 17 && scoreDifference <= 3; // THRESHOLDS.BALANCED_LOW = 13
+  const isMorna = isAllMedium || result.pattern?.includes('relacao_morna');
 
   const elementInfo = elementsInfo[result.lowestElement as keyof typeof elementsInfo];
 
@@ -68,7 +72,7 @@ export default function EmailCaptureScreen() {
             className="mb-6"
           >
             <span className="text-7xl">
-              {isCriticalSituation ? '🚨' : isAllBalanced ? '✨' : elementInfo.icon}
+              {isCriticalSituation ? '🚨' : isAllBalanced ? '✨' : isMorna ? '🔥' : elementInfo.icon}
             </span>
           </motion.div>
 
@@ -91,6 +95,21 @@ export default function EmailCaptureScreen() {
                 <p className="text-warmGray-600 mb-8 max-w-md mx-auto">
                   Múltiplos elementos do seu relacionamento estão em crise. 
                   Esta situação requer atenção profissional urgente.
+                </p>
+              </>
+            ) : isMorna ? (
+              <>
+                <h1 className="font-display text-2xl sm:text-3xl font-bold text-warmGray-900 mb-2">
+                  🔥 A Brasa Adormecida
+                </h1>
+
+                <h2 className="font-display text-4xl sm:text-5xl font-bold mb-4 text-orange-600">
+                  RELACIONAMENTO NO PILOTO AUTOMÁTICO
+                </h2>
+
+                <p className="text-warmGray-600 mb-8 max-w-md mx-auto">
+                  Seu relacionamento não morreu — está esperando ser despertado. 
+                  Receba seu Planner Despertar para reacender a brasa.
                 </p>
               </>
             ) : isAllBalanced ? (
@@ -153,6 +172,21 @@ export default function EmailCaptureScreen() {
                     <li className="flex items-start gap-2">
                       <span className="text-red-500 mt-0.5">⚠</span>
                       Contatos de emergência e recursos disponíveis
+                    </li>
+                  </>
+                ) : isMorna ? (
+                  <>
+                    <li className="flex items-start gap-2">
+                      <span className="text-orange-500 mt-0.5">🔥</span>
+                      O que significa estar no "piloto automático"
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="text-orange-500 mt-0.5">🔥</span>
+                      Como despertar a brasa adormecida
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="text-orange-500 mt-0.5">🔥</span>
+                      Planner Despertar: 30 dias trabalhando os 5 elementos
                     </li>
                   </>
                 ) : isAllBalanced ? (

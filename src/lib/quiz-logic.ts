@@ -633,15 +633,15 @@ export function generateResultExplanation(result: {
   // Se é situação "morna", retorna explicação específica
   if (isMorna) {
     return {
-      title: '🌡️ Relação Morna',
-      subtitle: 'Seu relacionamento está na zona de conforto — não está ruim, mas também não está vibrante.',
-      explanation: 'Todos os elementos estão na faixa média. É como uma sopa morna: não queima, mas também não aquece o coração. Vocês estão "ok", mas falta aquela faísca, aquela conexão profunda, aquela paixão que faz um relacionamento realmente florescer. Esta é a zona de conforto perigosa — onde muitos relacionamentos ficam estagnados e, com o tempo, esfriam completamente.',
-      whyNotHeard: 'Quando tudo está "morno", a comunicação também fica morna. Vocês conversam, mas não há profundidade. Falam sobre o dia, mas não sobre os sonhos. Estão juntos, mas não estão verdadeiramente conectados. É como se houvesse uma parede invisível de mediocridade entre vocês — nada está errado o suficiente para causar conflito, mas também nada está certo o suficiente para criar intimidade real.',
+      title: '🔥 A Brasa Adormecida',
+      subtitle: 'Seu relacionamento não morreu — está esperando ser despertado.',
+      explanation: 'Este é o relacionamento no piloto automático — não está em crise, mas também não está vivo. Todos os elementos estão na faixa média, funcionando, mas sem vitalidade. É o tipo de relacionamento que morre lentamente sem ninguém perceber. Não há dor suficiente para agir, mas também não há vida suficiente para celebrar. Vocês viraram "colegas de quarto confortáveis" — a brasa ainda está lá, sob as cinzas, esperando ser despertada.',
+      whyNotHeard: 'Quando tudo está "morno", a comunicação também fica morna. Vocês conversam sobre logística, mas não sobre sonhos. Falam sobre o dia, mas não sobre o que realmente importa. Estão juntos, mas não estão verdadeiramente presentes. A brasa está adormecida — precisa de oxigênio, de movimento, de intenção para voltar a brilhar.',
       firstSteps: [
-        'Reconheçam a "mornidão": o primeiro passo é admitir que o relacionamento precisa de mais calor',
-        'Criem momentos de intensidade: planejem experiências que quebrem a rotina e tragam emoção',
-        'Aprofundem as conversas: vão além do superficial, compartilhem medos, sonhos e vulnerabilidades',
-        'Usem o planner de "aquecimento": exercícios específicos para reacender a paixão e conexão'
+        'Reconheçam o piloto automático: o primeiro passo é admitir que o relacionamento precisa ser despertado',
+        'Usem o Planner Despertar: 30 dias trabalhando os 5 elementos em ciclos de 6 dias cada',
+        'Criem momentos de presença: quebrem a rotina com experiências que tragam vida de volta',
+        'Reacendam a brasa: pequenos gestos intencionais que mostrem que vocês ainda se escolhem'
       ]
     };
   }

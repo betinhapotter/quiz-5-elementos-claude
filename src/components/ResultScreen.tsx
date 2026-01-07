@@ -479,9 +479,10 @@ export default function ResultScreen() {
                 const percentage = ((score - minScore) / (maxScore - minScore)) * 100;
                 const info = elementsInfo[element as keyof typeof elementsInfo];
                 const isLowest = element === result.lowestElement;
-                // Não mostra "Desalinhado" se todos estão equilibrados
+                // Não mostra "Desalinhado" se todos estão equilibrados, em crise, ou mornos
                 // Se todos estão em crise, mostra "Em Crise" para todos, não apenas o lowest
-                const showMisaligned = isLowest && !isAllBalanced && !isCriticalSituation;
+                // Se todos estão mornos, não mostra nenhum desalinhado
+                const showMisaligned = isLowest && !isAllBalanced && !isCriticalSituation && !isMorna;
                 const showCritical = isCriticalSituation && score <= 12; // THRESHOLDS.LOW = 12
 
                 return (
@@ -518,13 +519,15 @@ export default function ResultScreen() {
                         className={`h-full rounded-full ${
                           isAllBalanced
                             ? 'bg-green-400'
-                            : isLowest
-                              ? 'bg-red-400'
-                              : percentage >= 75
-                                ? 'bg-green-400'
-                                : percentage >= 50
-                                  ? 'bg-yellow-400'
-                                  : 'bg-orange-400'
+                            : isMorna
+                              ? 'bg-yellow-400' // Todos amarelos quando morno
+                              : isLowest
+                                ? 'bg-red-400'
+                                : percentage >= 75
+                                  ? 'bg-green-400'
+                                  : percentage >= 50
+                                    ? 'bg-yellow-400'
+                                    : 'bg-orange-400'
                         }`}
                       />
                     </div>
@@ -609,7 +612,9 @@ export default function ResultScreen() {
                     ? 'Gerado especialmente para manter o equilíbrio perfeito dos 5 Elementos'
                     : isAllBalanced 
                       ? 'Gerado especialmente para manter o equilíbrio harmonioso dos 5 Elementos'
-                      : `Gerado especialmente para realinhar o elemento ${elementInfo.name}`
+                      : isMorna
+                        ? 'Planner Despertar - Relacionamento Fora do Piloto Automático'
+                        : `Gerado especialmente para realinhar o elemento ${elementInfo.name}`
                   }
                 </p>
               </div>

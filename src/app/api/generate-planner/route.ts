@@ -76,47 +76,105 @@ SCORES (de 5 a 25 cada - 5 perguntas por elemento, 1-5 pontos cada):
 - Fogo: ${scoresTyped.fogo}/25
 - Éter: ${scoresTyped.eter}/25
 
-🌡️ SITUAÇÃO ESPECIAL: RELAÇÃO MORNA - TODOS OS ELEMENTOS NA FAIXA MÉDIA!
+🔥 SITUAÇÃO ESPECIAL: A BRASA ADORMECIDA - RELACIONAMENTO NO PILOTO AUTOMÁTICO
 
-O relacionamento está na "zona de conforto" — não está ruim, mas também não está vibrante. 
-É como uma sopa morna: não queima, mas também não aquece o coração. 
-Esta é a zona perigosa onde relacionamentos ficam estagnados e, com o tempo, esfriam completamente.
+Este é o relacionamento no piloto automático — não está em crise, mas também não está vivo. 
+Nenhum elemento em crise, nenhum elemento brilhando. Relacionamento funcional, mas estagnado. 
+"Colegas de quarto confortáveis". O perigo: É o tipo de relacionamento que morre lentamente 
+sem ninguém perceber. Não há dor suficiente para agir, mas também não há vida.
 
-CRIE UM PLANNER DE 30 DIAS DE "AQUECIMENTO" para este casal, seguindo estas regras:
+CRIE UM "PLANNER DESPERTAR - Relacionamento Fora do Piloto Automático" de 30 dias.
 
-1. FOCO: AQUECER o relacionamento — trazer mais intensidade, paixão, conexão e propósito
-2. Cada dia deve ter 1 EXERCÍCIO PRÁTICO de 10-20 minutos que quebre a rotina
-3. Progressão:
-   - Semana 1: Exercícios de RECONEXÃO e quebra de rotina
-   - Semana 2: Exercícios de INTENSIDADE emocional e física
-   - Semana 3: Exercícios de PROFUNDIDADE e vulnerabilidade
-   - Semana 4: Exercícios de RENOVAÇÃO e criação de novos rituais
-4. Tom: ENERGÉTICO, inspirador, com foco em trazer calor e vida ao relacionamento
-5. Cada exercício deve ter:
+METODOLOGIA: Baseado no Método dos 5 Elementos de Jaya Roberta.
+
+ESTRUTURA DOS 30 DIAS (trabalhando os 5 elementos em ciclos de 6 dias cada):
+
+=== CICLO 1: TERRA (Dias 1-6) — Presença ===
+Tema: "Voltar a estar aqui"
+- Reconstruir base e segurança
+- Rituais de presença
+- Micro-compromissos diários
+
+=== CICLO 2: ÁGUA (Dias 7-12) — Profundidade ===
+Tema: "Voltar a sentir"
+- Reconexão emocional
+- Vulnerabilidade gradual
+- Exercícios de escuta profunda
+
+=== CICLO 3: FOGO (Dias 13-18) — Desejo ===
+Tema: "Voltar a querer"
+- Reacender desejo e admiração
+- Novidade e surpresa
+- Presença física intencional
+
+=== CICLO 4: AR (Dias 19-24) — Verdade ===
+Tema: "Voltar a falar"
+- Comunicação consciente
+- Expressão de necessidades
+- Resolução de pendências
+
+=== CICLO 5: ÉTER (Dias 25-30) — Propósito ===
+Tema: "Voltar a sonhar juntos"
+- Visão compartilhada de futuro
+- Propósito da relação
+- Ritual de fechamento e renovação
+
+REGRAS:
+
+1. Cada dia deve ter 1 EXERCÍCIO PRÁTICO de 10-20 minutos
+2. Cada exercício deve ter:
    - Nome criativo e envolvente
    - Duração (10-20 min)
-   - Por que funciona (1 frase sobre como "aquece" o relacionamento)
+   - Por que funciona (1 frase sobre como "desperta" o relacionamento)
    - Passo a passo claro e prático
-6. Distribua os exercícios entre os 5 elementos de forma equilibrada, mas com foco em trazer mais calor e conexão.
+3. Ao final de cada ciclo (Dias 6, 12, 18, 24), inclua uma "Reflexão [Elemento]" perguntando o que mudou
+4. Tom: ENERGÉTICO, inspirador, com foco em despertar a brasa adormecida
+5. Use a metáfora da "brasa sob cinzas" — o relacionamento não morreu, precisa ser despertado
 
 FORMATO DE RESPOSTA (use EXATAMENTE esta estrutura):
 
-# PLANNER DE 30 DIAS - AQUECENDO O RELACIONAMENTO
+# PLANNER DESPERTAR - Relacionamento Fora do Piloto Automático
 
-## Semana 1: Reconexão e Quebra de Rotina
+## Introdução
+[Uma página explicando o conceito de "relacionamento morno" e a metáfora da brasa adormecida]
 
-### Dia 1
-**Exercício 1: [Nome Criativo] ([Duração])**
-- Por que funciona: [Como aquece o relacionamento]
+## CICLO 1: TERRA (Dias 1-6) — Presença
+### Tema: "Voltar a estar aqui"
+
+#### Dia 1
+**Exercício: Check-in de presença (10 minutos)**
+- Por que funciona: Reconecta vocês com o momento presente e um ao outro
 - Passo a passo:
-  1. [Passo 1]
-  2. [Passo 2]
-  3. [Passo 3]
+  1. Sentem-se frente a frente
+  2. Olhem-se nos olhos por 2 minutos em silêncio
+  3. Compartilhem uma palavra que descreve como estão se sentindo agora
 
-[... continue para todos os 30 dias]
+[... continue para dias 2-6 com exercícios específicos de TERRA]
 
-IMPORTANTE: Foque em exercícios que tragam INTENSIDADE, PAIXÃO, CONEXÃO PROFUNDA e PROPÓSITO. 
-O objetivo é "aquecer" o relacionamento antes que esfrie de vez.
+#### Dia 6 - Reflexão Terra
+[Perguntas para refletir sobre o que mudou na sensação de segurança e presença]
+
+## CICLO 2: ÁGUA (Dias 7-12) — Profundidade
+### Tema: "Voltar a sentir"
+
+[... continue seguindo a mesma estrutura para todos os 5 ciclos]
+
+## CICLO 5: ÉTER (Dias 25-30) — Propósito
+### Tema: "Voltar a sonhar juntos"
+
+#### Dia 30
+**Exercício: Carta ao futuro (20 minutos)**
+- Por que funciona: Cria uma visão compartilhada e compromisso com o futuro
+- Passo a passo:
+  1. Individualmente, escrevam uma carta para o casal que serão em 1 ano
+  2. Compartilhem as cartas
+  3. Criem um ritual simbólico de "recomeço" juntos
+
+## Mensagem Final
+[Uma mensagem de encorajamento sobre despertar a brasa e manter o relacionamento vivo]
+
+IMPORTANTE: Foque em exercícios que tragam PRESENÇA, PROFUNDIDADE, DESEJO, VERDADE e PROPÓSITO. 
+O objetivo é despertar a brasa adormecida e tirar o relacionamento do piloto automático.
 `;
     } else if (isAllBalanced) {
       prompt = `
