@@ -364,7 +364,7 @@ export default function ResultScreen() {
                 isCriticalSituation ? 'text-white' : 'text-warmGray-700'
               }`}>
                 {isAllBalanced ? (
-                  <><strong>Parabéns:</strong> {result.pattern}</>
+                  <><strong>Parabéns:</strong> {result.pattern || (isPerfectBalance ? 'Todos os 5 Elementos estão perfeitamente alinhados no seu relacionamento. Vocês têm uma base sólida em todas as dimensões. O planner de manutenção vai ajudar a manter esse equilíbrio.' : 'Todos os elementos estão em equilíbrio! Seu relacionamento tem uma base saudável. Continue nutrindo cada dimensão.')}</>
                 ) : isCriticalSituation ? (
                   <><strong>🚨 Alerta Vermelho:</strong> {result.pattern}</>
                 ) : (
