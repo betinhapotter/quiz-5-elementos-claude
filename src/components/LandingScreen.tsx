@@ -80,7 +80,7 @@ export default function LandingScreen() {
           </button>
 
           <p className="text-sm text-warmGray-500">
-            ✓ 10 perguntas rápidas &nbsp;•&nbsp; ✓ Resultado imediato &nbsp;•&nbsp; ✓ 100% gratuito
+            ✓ 25 perguntas rápidas &nbsp;•&nbsp; ✓ Resultado imediato &nbsp;•&nbsp; ✓ 100% gratuito
           </p>
         </motion.div>
 
