@@ -121,7 +121,7 @@ export default function ResultScreen() {
 
   if (!result) return null;
 
-  const elementInfo = elementsInfo[result.lowestElement];
+  const elementInfo = elementsInfo[result.lowestElement as keyof typeof elementsInfo];
   const explanation = generateResultExplanation(result);
   const severity = getResultSeverity(result);
 
@@ -226,8 +226,8 @@ export default function ResultScreen() {
                 <p className="mt-2 text-sm text-warmGray-500">
                   Elemento secundário em risco:{' '}
                   <span className={`element-badge ${result.secondLowestElement}`}>
-                    {elementsInfo[result.secondLowestElement].icon}{' '}
-                    {elementsInfo[result.secondLowestElement].name}
+                    {elementsInfo[result.secondLowestElement as keyof typeof elementsInfo].icon}{' '}
+                    {elementsInfo[result.secondLowestElement as keyof typeof elementsInfo].name}
                   </span>
                 </p>
               )}
@@ -280,9 +280,11 @@ export default function ResultScreen() {
             <div className="space-y-4">
               {(Object.keys(result.scores) as Element[]).map((element) => {
                 const score = result.scores[element];
-                const maxScore = 8;
-                const percentage = (score / maxScore) * 100;
-                const info = elementsInfo[element];
+                const maxScore = 25; // 5 perguntas × 5 pontos máximo
+                const minScore = 5;  // 5 perguntas × 1 ponto mínimo
+                // Normaliza para 0-100% baseado na escala 5-25
+                const percentage = ((score - minScore) / (maxScore - minScore)) * 100;
+                const info = elementsInfo[element as keyof typeof elementsInfo];
                 const isLowest = element === result.lowestElement;
 
                 return (
@@ -304,7 +306,7 @@ export default function ResultScreen() {
                     <div className="h-3 bg-warmGray-100 rounded-full overflow-hidden">
                       <motion.div
                         initial={{ width: 0 }}
-                        animate={{ width: `${percentage}%` }}
+                        animate={{ width: `${Math.max(0, Math.min(100, percentage))}%` }}
                         transition={{ duration: 0.8, delay: 0.7 }}
                         className={`h-full rounded-full ${
                           isLowest

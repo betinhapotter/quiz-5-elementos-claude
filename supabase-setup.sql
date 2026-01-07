@@ -8,12 +8,12 @@ CREATE TABLE IF NOT EXISTS quiz_results (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
   user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
   
-  -- Scores de cada elemento (2-8)
-  terra_score INTEGER NOT NULL CHECK (terra_score >= 2 AND terra_score <= 8),
-  agua_score INTEGER NOT NULL CHECK (agua_score >= 2 AND agua_score <= 8),
-  ar_score INTEGER NOT NULL CHECK (ar_score >= 2 AND ar_score <= 8),
-  fogo_score INTEGER NOT NULL CHECK (fogo_score >= 2 AND fogo_score <= 8),
-  eter_score INTEGER NOT NULL CHECK (eter_score >= 2 AND eter_score <= 8),
+  -- Scores de cada elemento (5-25: 5 perguntas × 1-5 pontos cada)
+  terra_score INTEGER NOT NULL CHECK (terra_score >= 5 AND terra_score <= 25),
+  agua_score INTEGER NOT NULL CHECK (agua_score >= 5 AND agua_score <= 25),
+  ar_score INTEGER NOT NULL CHECK (ar_score >= 5 AND ar_score <= 25),
+  fogo_score INTEGER NOT NULL CHECK (fogo_score >= 5 AND fogo_score <= 25),
+  eter_score INTEGER NOT NULL CHECK (eter_score >= 5 AND eter_score <= 25),
   
   -- Elemento identificado como mais baixo
   lowest_element TEXT NOT NULL CHECK (lowest_element IN ('terra', 'agua', 'ar', 'fogo', 'eter')),

@@ -66,20 +66,20 @@ com 8 anos de experiência transformando casais. Você desenvolveu o Método dos
 
 O usuário completou o Quiz dos 5 Elementos e estes são os resultados:
 
-SCORES (de 2 a 8 cada):
-- Terra: ${scores.terra}/8
-- Água: ${scores.agua}/8
-- Ar: ${scores.ar}/8
-- Fogo: ${scores.fogo}/8
-- Éter: ${scores.eter}/8
+SCORES (de 5 a 25 cada - 5 perguntas por elemento, 1-5 pontos cada):
+- Terra: ${scores.terra}/25
+- Água: ${scores.agua}/25
+- Ar: ${scores.ar}/25
+- Fogo: ${scores.fogo}/25
+- Éter: ${scores.eter}/25
 
 ELEMENTO MAIS DESALINHADO: ${elementInfo.name.toUpperCase()} (${elementInfo.icon})
-- Score: ${scores[lowestElement]}/8
+- Score: ${scores[lowestElement]}/25
 - Significa: ${elementInfo.meaning}
 
 ${secondElementInfo ? `
 SEGUNDO ELEMENTO EM RISCO: ${secondElementInfo.name.toUpperCase()} (${secondElementInfo.icon})
-- Score: ${scores[secondLowestElement]}/8
+- Score: ${scores[secondLowestElement]}/25
 ` : ''}
 
 ${pattern ? `PADRÃO IDENTIFICADO: ${pattern}` : ''}

@@ -24,7 +24,7 @@ export default function PlannerPage() {
     return null;
   }
 
-  const elementInfo = elementsInfo[result.lowestElement];
+  const elementInfo = elementsInfo[result.lowestElement as keyof typeof elementsInfo];
 
   const elementColors: Record<Element, string> = {
     terra: 'from-terra to-terra-dark',

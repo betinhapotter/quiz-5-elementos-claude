@@ -14,7 +14,7 @@ export default function EmailCaptureScreen() {
 
   if (!result) return null;
 
-  const elementInfo = elementsInfo[result.lowestElement];
+  const elementInfo = elementsInfo[result.lowestElement as keyof typeof elementsInfo];
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

@@ -18,7 +18,7 @@ export default function PlannerScreen({ onBack }: PlannerScreenProps) {
 
   if (!result) return null;
 
-  const elementInfo = elementsInfo[result.lowestElement];
+  const elementInfo = elementsInfo[result.lowestElement as keyof typeof elementsInfo];
 
   const generatePlanner = async () => {
     setIsLoading(true);

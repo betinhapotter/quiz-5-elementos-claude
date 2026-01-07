@@ -4,8 +4,19 @@ import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronLeft } from 'lucide-react';
 import { useQuizStore } from '@/hooks/useQuizStore';
-import { elementsInfo } from '@/types/quiz';
-import { questions } from '@/data/questions';
+import { elementsInfo, Element } from '@/types/quiz';
+import { questions, type Question } from '@/data/questions';
+
+// Helper function para garantir type safety
+// Usa type narrowing explícito para garantir que TypeScript reconheça o tipo correto
+function getElementInfo(element: Element): typeof elementsInfo[Element] {
+  // Type assertion explícita para garantir type safety
+  // Garante que o elemento é uma chave válida de elementsInfo
+  if (element === 'terra' || element === 'agua' || element === 'ar' || element === 'fogo' || element === 'eter') {
+    return elementsInfo[element];
+  }
+  throw new Error(`Elemento inválido: ${element}`);
+}
 
 export default function QuizScreen() {
   const {
@@ -18,8 +29,16 @@ export default function QuizScreen() {
 
   const [selectedValue, setSelectedValue] = useState<number | null>(null);
 
-  const question = questions[currentQuestionIndex];
-  const elementInfo = elementsInfo[question.element];
+  const question: Question = questions[currentQuestionIndex];
+  // Type assertion explícita para garantir que TypeScript reconheça o tipo correto
+  // question.element é do tipo Element ('terra' | 'agua' | 'ar' | 'fogo' | 'eter')
+  // Usa type narrowing explícito para evitar inferência incorreta
+  const element = question.element as Element;
+  // Verificação de tipo em runtime para garantir type safety
+  if (!['terra', 'agua', 'ar', 'fogo', 'eter'].includes(element)) {
+    throw new Error(`Elemento inválido: ${element}`);
+  }
+  const elementInfo = getElementInfo(element);
   const progress = getProgress();
 
   // Verifica se já tinha resposta para essa pergunta (caso volte)
@@ -32,7 +51,7 @@ export default function QuizScreen() {
     setTimeout(() => {
       answerQuestion({
         questionId: question.id,
-        element: question.element,
+        element: element,
         value,
       });
       setSelectedValue(null);
@@ -75,7 +94,7 @@ export default function QuizScreen() {
 
           {/* Indicador de elemento */}
           <div className="flex items-center gap-2">
-            <span className={`element-badge ${question.element}`}>
+            <span className={`element-badge ${element}`}>
               {elementInfo.icon} {elementInfo.name}
             </span>
             <span className="text-xs text-warmGray-400">
