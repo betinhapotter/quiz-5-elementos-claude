@@ -326,7 +326,7 @@ export default function PlannerPage() {
               Quer acompanhamento profissional para aplicar esse planner?
             </p>
             <a
-              href="https://instagram.com/jayaroberta"
+              href="https://instagram.com/jaya.terapia"
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center gap-2 bg-gradient-to-r from-fogo to-fogo-dark text-white px-6 py-3 rounded-xl font-semibold hover:shadow-lg transition-all"

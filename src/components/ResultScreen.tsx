@@ -1086,13 +1086,13 @@ export default function ResultScreen() {
           </button>
 
           <a
-            href="https://instagram.com/jayaroberta"
+            href="https://instagram.com/jaya.terapia"
             target="_blank"
             rel="noopener noreferrer"
             className="btn-secondary flex items-center gap-2"
           >
             <Instagram className="w-4 h-4" />
-            Seguir @jayaroberta
+            Seguir @jaya.terapia
           </a>
         </motion.div>
 
