@@ -303,6 +303,7 @@ FORMATO DE RESPOSTA (use EXATAMENTE esta estrutura):
 ## Mensagem Final
 [Uma mensagem de encorajamento de 2-3 frases]
 `;
+    }
 
     const genAI = new GoogleGenerativeAI(apiKey);
     const model = genAI.getGenerativeModel({ model: 'gemini-2.5-pro' });
