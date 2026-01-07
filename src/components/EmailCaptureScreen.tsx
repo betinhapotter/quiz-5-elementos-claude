@@ -19,8 +19,11 @@ export default function EmailCaptureScreen() {
   const minScore = Math.min(...allScores);
   const maxScore = Math.max(...allScores);
   const scoreDifference = maxScore - minScore;
-  const isAllBalanced = minScore >= 18 && scoreDifference <= 3; // THRESHOLDS.BALANCED_HIGH = 18
-  const isPerfectBalance = minScore === 25 && maxScore === 25;
+  const isAllBalanced = (minScore >= 18 && scoreDifference <= 3) || 
+                        result.pattern?.includes('equilibrio_geral') || 
+                        result.pattern?.includes('equilibrio_perfeito'); // THRESHOLDS.BALANCED_HIGH = 18
+  const isPerfectBalance = (minScore === 25 && maxScore === 25) || 
+                          result.pattern?.includes('equilibrio_perfeito');
 
   const elementInfo = elementsInfo[result.lowestElement as keyof typeof elementsInfo];
 
