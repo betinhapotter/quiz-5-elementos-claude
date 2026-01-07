@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 
+// Force Vercel rebuild - código atualizado em 2025-01-08
+
 const elementsInfo = {
   terra: { name: 'Terra', icon: '🌍', meaning: 'Segurança e Estrutura' },
   agua: { name: 'Água', icon: '💧', meaning: 'Emoção e Intimidade' },
