@@ -184,12 +184,21 @@ export function detectPatterns(scores: Scores): string[] {
     patterns.push('alerta_vermelho');
   }
 
-  // Todos os elementos equilibrados
-  const balancedElements = Object.values(scores).filter(
-    s => s >= THRESHOLDS.BALANCED_LOW && s <= THRESHOLDS.HIGH
-  );
-  if (balancedElements.length === 5) {
+  // Todos os elementos equilibrados (todos com score alto e similares)
+  const allScores = Object.values(scores);
+  const minScore = Math.min(...allScores);
+  const maxScore = Math.max(...allScores);
+  const scoreDifference = maxScore - minScore;
+  
+  // Se todos estão com score alto (>= BALANCED_HIGH) e a diferença é pequena (<= 3 pontos)
+  // ou se todos estão no máximo (25), considera equilíbrio geral
+  if (minScore >= THRESHOLDS.BALANCED_HIGH && scoreDifference <= 3) {
     patterns.push('equilibrio_geral');
+  }
+  
+  // Caso especial: todos com score máximo (25)
+  if (minScore === 25 && maxScore === 25) {
+    patterns.push('equilibrio_perfeito');
   }
 
   return patterns;
@@ -409,6 +418,10 @@ export const patternTexts: Record<string, { title: string; description: string }
   equilibrio_geral: {
     title: '✨ Equilíbrio Harmonioso',
     description: 'Todos os elementos estão em equilíbrio! Seu relacionamento tem uma base saudável. Continue nutrindo cada dimensão.'
+  },
+  equilibrio_perfeito: {
+    title: '🌟 Equilíbrio Perfeito',
+    description: 'Parabéns! Todos os 5 Elementos estão perfeitamente alinhados no seu relacionamento. Vocês têm uma base sólida em todas as dimensões. O planner de manutenção vai ajudar a manter esse equilíbrio.'
   }
 };
 
@@ -469,20 +482,37 @@ export function calculateResult(answers: Array<{ questionId: string; element: st
     eter: scoresEn.ether
   };
 
+  // Verifica se todos os elementos estão equilibrados/perfeitos
+  const allScores = Object.values(scoresPt);
+  const minScore = Math.min(...allScores);
+  const maxScore = Math.max(...allScores);
+  const scoreDifference = maxScore - minScore;
+  const isAllBalanced = minScore >= THRESHOLDS.BALANCED_HIGH && scoreDifference <= 3;
+  const isPerfectBalance = minScore === 25 && maxScore === 25;
+
   // Encontra elementos mais baixos
   const elementsPt: Array<'terra' | 'agua' | 'ar' | 'fogo' | 'eter'> = ['terra', 'agua', 'ar', 'fogo', 'eter'];
   const sortedElements = elementsPt
     .map(el => ({ element: el, score: scoresPt[el] }))
     .sort((a, b) => a.score - b.score);
 
+  // Se todos estão equilibrados, usa o primeiro elemento apenas como referência (para exibição)
+  // mas o padrão vai indicar que está equilibrado
   const lowestElementPt = elementMapEnToPt[resultEn.lowestElement];
   const secondLowestElementPt = sortedElements[1]?.element;
 
   // Mapeia padrão mais relevante
   let patternText: string | undefined;
   if (resultEn.patterns.length > 0) {
-    const firstPattern = resultTexts[resultEn.lowestElement][resultEn.direction];
-    patternText = patternTexts[resultEn.patterns[0]]?.description || firstPattern.meaning;
+    // Prioriza padrões de equilíbrio
+    if (resultEn.patterns.includes('equilibrio_perfeito')) {
+      patternText = patternTexts['equilibrio_perfeito']?.description;
+    } else if (resultEn.patterns.includes('equilibrio_geral')) {
+      patternText = patternTexts['equilibrio_geral']?.description;
+    } else {
+      const firstPattern = resultTexts[resultEn.lowestElement][resultEn.direction];
+      patternText = patternTexts[resultEn.patterns[0]]?.description || firstPattern.meaning;
+    }
   }
 
   // Mapeia disaster type
@@ -520,6 +550,32 @@ export function generateResultExplanation(result: {
   whyNotHeard: string;
   firstSteps: string[];
 } {
+  // Verifica se todos estão equilibrados
+  const allScores = Object.values(result.scores);
+  const minScore = Math.min(...allScores);
+  const maxScore = Math.max(...allScores);
+  const scoreDifference = maxScore - minScore;
+  const isAllBalanced = minScore >= THRESHOLDS.BALANCED_HIGH && scoreDifference <= 3;
+  const isPerfectBalance = minScore === 25 && maxScore === 25;
+
+  // Se todos estão equilibrados, retorna explicação especial
+  if (isPerfectBalance || (isAllBalanced && result.pattern?.includes('equilibrio'))) {
+    return {
+      title: isPerfectBalance ? '🌟 Equilíbrio Perfeito' : '✨ Equilíbrio Harmonioso',
+      subtitle: 'Todos os 5 Elementos estão alinhados no seu relacionamento!',
+      explanation: isPerfectBalance 
+        ? 'Parabéns! Todos os 5 Elementos estão perfeitamente alinhados no seu relacionamento. Vocês têm uma base sólida em todas as dimensões: segurança (Terra), conexão emocional (Água), comunicação (Ar), paixão (Fogo) e propósito (Éter). O planner de manutenção vai ajudar vocês a manter esse equilíbrio e continuar crescendo juntos.'
+        : 'Todos os elementos estão em equilíbrio! Seu relacionamento tem uma base saudável em todas as dimensões. Continue nutrindo cada área para manter esse alinhamento.',
+      whyNotHeard: 'Quando todos os elementos estão equilibrados, vocês têm uma comunicação fluida e se sentem ouvidos porque há base sólida em todas as dimensões do relacionamento. Não há desalinhamento que cause ruído na comunicação.',
+      firstSteps: [
+        'Mantenham os rituais que já funcionam bem',
+        'Continuem praticando escuta ativa e presença',
+        'Celebrem regularmente o que está funcionando',
+        'Usem o planner de manutenção para continuar nutrindo todos os elementos'
+      ]
+    };
+  }
+
   const elementEn = elementMapPtToEn[result.lowestElement];
   const direction = result.direction || (result.lowestScore <= THRESHOLDS.LOW ? 'low' : 'high');
   const resultData = resultTexts[elementEn][direction];

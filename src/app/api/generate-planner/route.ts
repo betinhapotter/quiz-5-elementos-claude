@@ -29,12 +29,78 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Verifica se todos estão equilibrados
+    const allScores = Object.values(scores);
+    const minScore = Math.min(...allScores);
+    const maxScore = Math.max(...allScores);
+    const scoreDifference = maxScore - minScore;
+    const isAllBalanced = minScore >= 18 && scoreDifference <= 3; // THRESHOLDS.BALANCED_HIGH = 18
+    const isPerfectBalance = minScore === 25 && maxScore === 25;
+
     const elementInfo = elementsInfo[lowestElement as keyof typeof elementsInfo];
     const secondElementInfo = secondLowestElement
       ? elementsInfo[secondLowestElement as keyof typeof elementsInfo]
       : null;
 
-    const prompt = `
+    const prompt = isAllBalanced ? `
+Você é Jaya Roberta, terapeuta integrativa especializada em relacionamentos e sexualidade humana,
+com 8 anos de experiência transformando casais. Você desenvolveu o Método dos 5 Elementos.
+
+O usuário completou o Quiz dos 5 Elementos e estes são os resultados:
+
+SCORES (de 5 a 25 cada - 5 perguntas por elemento, 1-5 pontos cada):
+- Terra: ${scores.terra}/25
+- Água: ${scores.agua}/25
+- Ar: ${scores.ar}/25
+- Fogo: ${scores.fogo}/25
+- Éter: ${scores.eter}/25
+
+🎉 SITUAÇÃO ESPECIAL: TODOS OS ELEMENTOS ESTÃO EQUILIBRADOS!
+${isPerfectBalance ? 'Todos os elementos estão com score máximo (25/25) - Equilíbrio Perfeito!' : 'Todos os elementos estão em equilíbrio harmonioso.'}
+
+CRIE UM PLANNER DE 30 DIAS DE MANUTENÇÃO para este casal, seguindo estas regras:
+
+1. FOCO: MANUTENÇÃO do equilíbrio perfeito dos 5 Elementos
+2. Cada dia deve ter 1 EXERCÍCIO PRÁTICO de 5-15 minutos
+3. Progressão:
+   - Semana 1: Exercícios de CONSOLIDAÇÃO dos rituais existentes
+   - Semana 2: Exercícios de APROFUNDAMENTO da conexão
+   - Semana 3: Exercícios de CRESCIMENTO conjunto
+   - Semana 4: Exercícios de CELEBRAÇÃO e renovação
+4. Tom: POSITIVO, encorajador, celebrativo, mas prático
+5. Cada exercício deve ter:
+   - Nome criativo
+   - Duração (5-15 min)
+   - Por que funciona (1 frase)
+   - Passo a passo claro
+6. Distribua os exercícios entre os 5 elementos de forma equilibrada
+
+FORMATO DE RESPOSTA (use EXATAMENTE esta estrutura):
+
+# PLANNER DE 30 DIAS - MANUTENÇÃO DO EQUILÍBRIO
+
+## Semana 1: Consolidando Rituais
+### Dia 1
+**[Nome do Exercício]** (X minutos)
+*Por que funciona:* [explicação curta]
+- Passo 1
+- Passo 2
+- Passo 3
+
+[Continue para os dias 2-7]
+
+## Semana 2: Aprofundando a Conexão
+[Dias 8-14]
+
+## Semana 3: Crescimento Conjunto
+[Dias 15-21]
+
+## Semana 4: Celebração e Renovação
+[Dias 22-30]
+
+## Mensagem Final
+[Uma mensagem de encorajamento e celebração de 2-3 frases]
+` : `
 Você é Jaya Roberta, terapeuta integrativa especializada em relacionamentos e sexualidade humana,
 com 8 anos de experiência transformando casais. Você desenvolveu o Método dos 5 Elementos.
 

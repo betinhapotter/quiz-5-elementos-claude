@@ -121,6 +121,14 @@ export default function ResultScreen() {
 
   if (!result) return null;
 
+  // Verifica se todos estão equilibrados
+  const allScores = Object.values(result.scores);
+  const minScore = Math.min(...allScores);
+  const maxScore = Math.max(...allScores);
+  const scoreDifference = maxScore - minScore;
+  const isAllBalanced = minScore >= 18 && scoreDifference <= 3; // THRESHOLDS.BALANCED_HIGH = 18
+  const isPerfectBalance = minScore === 25 && maxScore === 25;
+
   const elementInfo = elementsInfo[result.lowestElement as keyof typeof elementsInfo];
   const explanation = generateResultExplanation(result);
   const severity = getResultSeverity(result);
@@ -134,11 +142,16 @@ export default function ResultScreen() {
     eter: 'from-eter to-eter-dark',
   };
 
+  // Cor especial para equilíbrio
+  const balancedGradient = isPerfectBalance 
+    ? 'from-green-500 to-emerald-600' 
+    : 'from-green-400 to-teal-500';
+
   return (
     <div className="min-h-screen bg-cream">
       {/* Hero do resultado */}
       <div
-        className={`bg-gradient-to-br ${elementColors[result.lowestElement]} text-white py-12 sm:py-16`}
+        className={`bg-gradient-to-br ${isAllBalanced ? balancedGradient : elementColors[result.lowestElement]} text-white py-12 sm:py-16`}
       >
         <div className="container-quiz text-center">
           <motion.div
@@ -147,7 +160,7 @@ export default function ResultScreen() {
             transition={{ duration: 0.5 }}
           >
             <span className="text-6xl sm:text-8xl block mb-4">
-              {elementInfo.icon}
+              {isAllBalanced ? '✨' : elementInfo.icon}
             </span>
 
             <h1 className="font-display text-3xl sm:text-4xl font-bold mb-2">
@@ -286,6 +299,8 @@ export default function ResultScreen() {
                 const percentage = ((score - minScore) / (maxScore - minScore)) * 100;
                 const info = elementsInfo[element as keyof typeof elementsInfo];
                 const isLowest = element === result.lowestElement;
+                // Não mostra "Desalinhado" se todos estão equilibrados
+                const showMisaligned = isLowest && !isAllBalanced;
 
                 return (
                   <div key={element}>
@@ -293,9 +308,14 @@ export default function ResultScreen() {
                       <span className="flex items-center gap-2 text-sm font-medium text-warmGray-700">
                         <span>{info.icon}</span>
                         <span>{info.name}</span>
-                        {isLowest && (
+                        {showMisaligned && (
                           <span className="text-xs bg-red-100 text-red-600 px-2 py-0.5 rounded-full">
                             Desalinhado
+                          </span>
+                        )}
+                        {isAllBalanced && percentage >= 75 && (
+                          <span className="text-xs bg-green-100 text-green-600 px-2 py-0.5 rounded-full">
+                            Alinhado
                           </span>
                         )}
                       </span>
@@ -309,13 +329,15 @@ export default function ResultScreen() {
                         animate={{ width: `${Math.max(0, Math.min(100, percentage))}%` }}
                         transition={{ duration: 0.8, delay: 0.7 }}
                         className={`h-full rounded-full ${
-                          isLowest
-                            ? 'bg-red-400'
-                            : percentage >= 75
-                              ? 'bg-green-400'
-                              : percentage >= 50
-                                ? 'bg-yellow-400'
-                                : 'bg-orange-400'
+                          isAllBalanced
+                            ? 'bg-green-400'
+                            : isLowest
+                              ? 'bg-red-400'
+                              : percentage >= 75
+                                ? 'bg-green-400'
+                                : percentage >= 50
+                                  ? 'bg-yellow-400'
+                                  : 'bg-orange-400'
                         }`}
                       />
                     </div>
@@ -340,7 +362,10 @@ export default function ResultScreen() {
               </h2>
               <p className="text-warmGray-300 mb-6 max-w-lg mx-auto">
                 Nossa IA vai criar um plano de <strong>30 dias</strong> com exercícios práticos
-                específicos para realinhar o elemento <strong>{elementInfo.name}</strong> no seu relacionamento.
+                {isAllBalanced 
+                  ? ' para manter o equilíbrio perfeito dos 5 Elementos no seu relacionamento.'
+                  : ` específicos para realinhar o elemento <strong>${elementInfo.name}</strong> no seu relacionamento.`
+                }
               </p>
 
               <ul className="text-left max-w-md mx-auto mb-6 space-y-2">
