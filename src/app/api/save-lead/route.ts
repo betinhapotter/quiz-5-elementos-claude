@@ -14,6 +14,14 @@ export async function POST(request: NextRequest) {
 
     const supabase = createClient();
 
+    // Debug: log dos dados recebidos
+    console.log('Dados recebidos na API:', {
+      email,
+      lowestElement,
+      lowestScore,
+      pattern,
+    });
+
     // Insere o lead na tabela
     const { data, error } = await supabase
       .from('leads')
@@ -22,7 +30,7 @@ export async function POST(request: NextRequest) {
         name: name || null,
         user_id: userId || null,
         lowest_element: lowestElement || null,
-        lowest_score: lowestScore || null,
+        lowest_score: lowestScore ?? null,
         pattern: pattern || null,
       })
       .select()

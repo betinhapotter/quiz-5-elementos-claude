@@ -54,12 +54,20 @@ export default function EmailCaptureScreen() {
 
     try {
       // Salva o email na tabela de leads
+      // Debug: verifica se lowestScore existe
+      console.log('Enviando lead:', {
+        email,
+        lowestElement: result?.lowestElement,
+        lowestScore: result?.lowestScore,
+        pattern: result?.pattern,
+      });
+      
       await callAPI(API_ENDPOINTS.saveLead, {
         email,
         name: null,
         userId: user?.id || null,
         lowestElement: result?.lowestElement || null,
-        lowestScore: result?.lowestScore || null,
+        lowestScore: result?.lowestScore ?? null,
         pattern: result?.pattern || null,
       });
 
