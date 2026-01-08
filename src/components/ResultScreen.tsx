@@ -606,14 +606,14 @@ export default function ResultScreen() {
               {(Object.keys(result.scores) as Element[]).map((element) => {
                 const score = result.scores[element];
                 const maxScore = 25; // 5 perguntas × 5 pontos máximo
-                const minScore = 5;  // 5 perguntas × 1 ponto mínimo
+                const minPossibleScore = 5;  // 5 perguntas × 1 ponto mínimo
                 // Normaliza para 0-100% baseado na escala 5-25
-                const percentage = ((score - minScore) / (maxScore - minScore)) * 100;
+                const percentage = ((score - minPossibleScore) / (maxScore - minPossibleScore)) * 100;
                 const info = elementsInfo[element as keyof typeof elementsInfo];
                 // Detecta todos os elementos com o mesmo score mínimo (empates)
                 const allScores = Object.values(result.scores);
-                const minScore = Math.min(...allScores);
-                const isLowest = score === minScore;
+                const lowestScoreValue = Math.min(...allScores);
+                const isLowest = score === lowestScoreValue;
                 // Não mostra "Desalinhado" se todos estão equilibrados, em crise, ou mornos
                 // Se todos estão em crise, mostra "Em Crise" para todos, não apenas o lowest
                 // Se todos estão mornos, não mostra nenhum desalinhado
