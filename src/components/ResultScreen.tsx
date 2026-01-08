@@ -193,18 +193,38 @@ export default function ResultScreen() {
       const dpi = 300; // Alta resolução para melhor qualidade
       const scale = dpi / 96; // 96 DPI é o padrão de tela
 
+      // Garante que o elemento está visível e no topo da página
+      element.scrollIntoView({ behavior: 'instant', block: 'start' });
+      await new Promise(resolve => setTimeout(resolve, 300));
+      
+      // Força layout recalculation
+      element.offsetHeight;
+      
       // Aguarda um pouco mais para garantir que o conteúdo está renderizado
       await new Promise(resolve => setTimeout(resolve, 500));
 
       // Verifica se o elemento tem conteúdo antes de gerar o canvas
+      const hasContent = element.innerHTML.length > 0;
+      const hasVisibleContent = element.offsetWidth > 0 && element.offsetHeight > 0;
+      
       console.log('Elemento para PDF:', {
-        hasContent: element.innerHTML.length > 0,
+        hasContent,
+        hasVisibleContent,
         scrollWidth: element.scrollWidth,
         scrollHeight: element.scrollHeight,
         offsetWidth: element.offsetWidth,
         offsetHeight: element.offsetHeight,
+        computedDisplay: window.getComputedStyle(element).display,
+        computedVisibility: window.getComputedStyle(element).visibility,
         innerHTML: element.innerHTML.substring(0, 200) + '...'
       });
+
+      if (!hasContent || !hasVisibleContent) {
+        console.error('Elemento não tem conteúdo visível para PDF');
+        alert('Erro: O conteúdo do planner não está visível. Tente gerar o planner novamente.');
+        setIsGeneratingPDF(false);
+        return;
+      }
 
       const canvas = await html2canvas(element, {
         scale: scale,
@@ -221,6 +241,7 @@ export default function ResultScreen() {
           // O segundo parâmetro é o elemento clonado diretamente
           const htmlEl = clonedElement as HTMLElement;
           if (htmlEl) {
+            // Força estilos visíveis
             htmlEl.style.backgroundColor = '#ffffff';
             htmlEl.style.color = '#1f2937';
             htmlEl.style.display = 'block';
@@ -230,23 +251,41 @@ export default function ResultScreen() {
             htmlEl.style.height = 'auto';
             htmlEl.style.overflow = 'visible';
             htmlEl.style.position = 'relative';
+            htmlEl.style.maxWidth = 'none';
+            htmlEl.style.minHeight = 'auto';
+            
+            // Remove qualquer transformação que possa ocultar
+            htmlEl.style.transform = 'none';
+            htmlEl.style.clip = 'auto';
+            htmlEl.style.clipPath = 'none';
             
             // Garante que todos os elementos filhos estão visíveis
             const allChildren = htmlEl.querySelectorAll('*');
             allChildren.forEach((child) => {
               const childEl = child as HTMLElement;
               const computedStyle = window.getComputedStyle(childEl);
-              if (computedStyle.display === 'none' || computedStyle.visibility === 'hidden') {
-                childEl.style.visibility = 'visible';
-                childEl.style.opacity = '1';
-                childEl.style.display = computedStyle.display === 'none' ? 'block' : computedStyle.display;
+              
+              // Remove qualquer estilo que possa ocultar
+              if (computedStyle.display === 'none') {
+                childEl.style.display = 'block';
               }
+              if (computedStyle.visibility === 'hidden') {
+                childEl.style.visibility = 'visible';
+              }
+              if (computedStyle.opacity === '0') {
+                childEl.style.opacity = '1';
+              }
+              
+              // Garante que textos estão visíveis
+              childEl.style.color = computedStyle.color || '#1f2937';
+              childEl.style.backgroundColor = computedStyle.backgroundColor || 'transparent';
             });
             
             console.log('Elemento clonado preparado:', {
               hasContent: htmlEl.innerHTML.length > 0,
               width: htmlEl.offsetWidth,
-              height: htmlEl.offsetHeight
+              height: htmlEl.offsetHeight,
+              childrenCount: htmlEl.children.length
             });
           }
         }
@@ -274,10 +313,14 @@ export default function ResultScreen() {
 
       // Verifica se o canvas tem conteúdo (não está completamente branco)
       const ctx = canvas.getContext('2d');
+      let hasNonWhitePixels = false;
       if (ctx) {
-        const imageData = ctx.getImageData(0, 0, Math.min(canvas.width, 100), Math.min(canvas.height, 100));
+        // Verifica uma amostra maior do canvas
+        const sampleWidth = Math.min(canvas.width, 200);
+        const sampleHeight = Math.min(canvas.height, 200);
+        const imageData = ctx.getImageData(0, 0, sampleWidth, sampleHeight);
         const pixels = imageData.data;
-        let hasNonWhitePixels = false;
+        
         for (let i = 0; i < pixels.length; i += 4) {
           // Verifica se não é branco puro (RGB > 250)
           if (pixels[i] < 250 || pixels[i + 1] < 250 || pixels[i + 2] < 250) {
@@ -285,8 +328,12 @@ export default function ResultScreen() {
             break;
           }
         }
+        
         if (!hasNonWhitePixels) {
-          console.warn('Canvas parece estar vazio (apenas branco)');
+          console.error('Canvas está completamente branco - conteúdo não foi capturado');
+          alert('Erro: O PDF está sendo gerado em branco. Isso pode acontecer se o conteúdo não estiver totalmente carregado. Tente novamente em alguns segundos.');
+          setIsGeneratingPDF(false);
+          return;
         }
       }
 
