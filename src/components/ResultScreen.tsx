@@ -610,7 +610,10 @@ export default function ResultScreen() {
                 // Normaliza para 0-100% baseado na escala 5-25
                 const percentage = ((score - minScore) / (maxScore - minScore)) * 100;
                 const info = elementsInfo[element as keyof typeof elementsInfo];
-                const isLowest = element === result.lowestElement;
+                // Detecta todos os elementos com o mesmo score mínimo (empates)
+                const allScores = Object.values(result.scores);
+                const minScore = Math.min(...allScores);
+                const isLowest = score === minScore;
                 // Não mostra "Desalinhado" se todos estão equilibrados, em crise, ou mornos
                 // Se todos estão em crise, mostra "Em Crise" para todos, não apenas o lowest
                 // Se todos estão mornos, não mostra nenhum desalinhado
