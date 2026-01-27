@@ -15,7 +15,10 @@
       "Bash(wsl bash -c '~/.local/bin/coderabbit --help | head -20')",
       "Bash(wsl bash -c 'cd /mnt/c/Users/Jaya/Projetos/AulaAvancada/quiz-5-elementos && ~/.local/bin/coderabbit review --plain -t uncommitted 2>&1 | head -30')",
       "Bash(npm run lint)",
-      "Bash(wsl bash:*)"
+      "Bash(wsl bash:*)",
+      "Bash(gh pr list:*)",
+      "Bash(gh pr create --title \"chore: atualizar configurações, dependências e documentação DevOps\" --body \"$\\(cat <<''EOF''\n## Sumário\n\nConsolidação de todas as mudanças pendentes no projeto quiz-5-elementos:\n- Atualização de configurações do Claude Code e ambiente\n- Upgrade de dependências \\(package.json + lock\\)\n- Refatoração de componentes \\(ResultScreen com melhor exibição de padrões\\)\n- Melhorias na API route generate-planner\n- Documentação de workflows: COMO-CRIAR-PR.md e TEST-CODERABBIT.md\n\n## Mudanças\n- ✓ npm run lint PASSED\n- ✓ npm run build PASSED\n- ✓ Sem conflitos de merge\n- ✓ 10 arquivos alterados, +723 -474 linhas\n\n## Checklist de QA\n- [x] Lint passou\n- [x] Build passou\n- [x] Sem secrets\n- [x] Commits atômicos\n\n🤖 Gerado com Ayla \\(DevOps Agent\\)\nEOF\n\\)\")",
+      "Bash(git pull:*)"
     ],
     "deny": [],
     "ask": []
