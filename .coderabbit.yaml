@@ -1,0 +1,21 @@
+language: "pt-BR"
+
+reviews:
+  auto_review: true
+  request_changes_workflow: true
+  high_level_summary: true
+  poem: false
+  review_status: true
+  
+chat:
+  auto_reply: true
+
+tone_instructions: "Seja educado, construtivo e objetivo nas revisões. Use português brasileiro. Foque em melhorias práticas e explique o raciocínio por trás das sugestões."
+
+path_instructions:
+  - path: "src/**/*.ts"
+    instructions: "Verifique tipos TypeScript, segurança de tipos e boas práticas Next.js"
+  - path: "src/**/*.tsx"
+    instructions: "Revise componentes React, hooks, performance e acessibilidade"
+  - path: "**/*.sql"
+    instructions: "Analise queries SQL, índices, segurança e performance"
