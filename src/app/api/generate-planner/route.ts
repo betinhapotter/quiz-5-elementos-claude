@@ -306,7 +306,7 @@ FORMATO DE RESPOSTA (use EXATAMENTE esta estrutura):
     }
 
     const genAI = new GoogleGenerativeAI(apiKey);
-    const modelName = process.env.GEMINI_MODEL || 'gemini-1.5-flash';
+    const modelName = process.env.GEMINI_MODEL || 'gemini-2.0-flash';
     console.log('🤖 Usando modelo Gemini:', modelName);
     const model = genAI.getGenerativeModel({ model: modelName });
 
