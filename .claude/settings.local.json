@@ -9,7 +9,13 @@
       "Bash(firebase login:*)",
       "Bash(npm run build:*)",
       "Bash(firebase deploy:*)",
-      "Bash(curl:*)"
+      "Bash(curl:*)",
+      "Bash(wsl bash -c '~/.local/bin/coderabbit auth status')",
+      "Bash(wsl bash -c '~/.local/bin/coderabbit --version')",
+      "Bash(wsl bash -c '~/.local/bin/coderabbit --help | head -20')",
+      "Bash(wsl bash -c 'cd /mnt/c/Users/Jaya/Projetos/AulaAvancada/quiz-5-elementos && ~/.local/bin/coderabbit review --plain -t uncommitted 2>&1 | head -30')",
+      "Bash(npm run lint)",
+      "Bash(wsl bash:*)"
     ],
     "deny": [],
     "ask": []

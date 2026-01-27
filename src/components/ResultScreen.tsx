@@ -9,6 +9,7 @@ import { createClient } from '@/lib/supabase/client';
 import { elementsInfo, Element } from '@/types/quiz';
 import { generateResultExplanation, getResultSeverity } from '@/lib/quiz-logic';
 import { API_ENDPOINTS, callAPI } from '@/lib/api';
+import '@/styles/print.css';
 
 export default function ResultScreen() {
   const { result, resetQuiz, userData, answers } = useQuizStore();
@@ -19,7 +20,6 @@ export default function ResultScreen() {
   const [planner, setPlanner] = useState<string | null>(null);
   const [savedToDb, setSavedToDb] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
   const plannerRef = useRef<HTMLDivElement>(null);
 
   // Salva resultado no banco quando carrega
@@ -87,349 +87,30 @@ export default function ResultScreen() {
     }
   };
 
-  const handleDownloadPDF = async () => {
+  const handleDownloadPDF = () => {
     if (!plannerRef.current || !result || !planner) {
       alert('Planner não está disponível. Gere o planner primeiro.');
       return;
     }
 
-    setIsGeneratingPDF(true);
+    // Define o nome do arquivo baseado no tipo de planner
+    const fileName = isMorna
+      ? 'planner-despertar'
+      : isAllBalanced
+        ? 'planner-manutencao-equilibrio'
+        : `planner-30-dias-${result.lowestElement}`;
 
-    try {
-      const html2canvas = (await import('html2canvas')).default;
-      const { jsPDF } = await import('jspdf');
-      const element = plannerRef.current;
+    // Define o título para aparecer na impressão
+    const originalTitle = document.title;
+    document.title = fileName;
 
-      // Salva estilos originais do container
-      const originalContainerStyles = {
-        backgroundColor: element.style.backgroundColor,
-        padding: element.style.padding,
-        margin: element.style.margin,
-        width: element.style.width,
-        maxWidth: element.style.maxWidth,
-        fontSize: element.style.fontSize,
-        fontFamily: element.style.fontFamily,
-      };
+    // Usa a impressão nativa do navegador
+    window.print();
 
-      // Aplica estilos otimizados para PDF com fontes maiores
-      element.style.backgroundColor = '#ffffff';
-      element.style.padding = '15mm';
-      element.style.margin = '0';
-      element.style.width = '170mm'; // Largura menor para forçar texto maior
-      element.style.maxWidth = '170mm';
-      element.style.fontSize = '16pt'; // Fonte base maior
-      element.style.fontFamily = 'Arial, sans-serif';
-      element.style.color = '#1f2937';
-      element.style.lineHeight = '1.6';
-
-      // Ajusta fontes e espaçamentos para melhor legibilidade no PDF
-      const allElements = element.querySelectorAll('h1, h2, h3, h4, p, li, ul, ol, strong, em, span, div');
-      const originalStyles = new Map();
-
-      allElements.forEach((el) => {
-        const htmlEl = el as HTMLElement;
-        const computedStyle = window.getComputedStyle(htmlEl);
-        originalStyles.set(htmlEl, {
-          fontSize: htmlEl.style.fontSize || computedStyle.fontSize,
-          marginTop: htmlEl.style.marginTop || computedStyle.marginTop,
-          marginBottom: htmlEl.style.marginBottom || computedStyle.marginBottom,
-          padding: htmlEl.style.padding || computedStyle.padding,
-          lineHeight: htmlEl.style.lineHeight || computedStyle.lineHeight,
-          fontWeight: htmlEl.style.fontWeight || computedStyle.fontWeight,
-        });
-
-        // Ajusta tamanhos para PDF (usando pt maiores para melhor legibilidade)
-        if (el.tagName === 'H1') {
-          htmlEl.style.fontSize = '36pt';
-          htmlEl.style.marginTop = '24pt';
-          htmlEl.style.marginBottom = '18pt';
-          htmlEl.style.fontWeight = '700';
-          htmlEl.style.lineHeight = '1.2';
-          htmlEl.style.pageBreakAfter = 'avoid';
-          htmlEl.style.pageBreakInside = 'avoid';
-        } else if (el.tagName === 'H2') {
-          htmlEl.style.fontSize = '28pt';
-          htmlEl.style.marginTop = '22pt';
-          htmlEl.style.marginBottom = '16pt';
-          htmlEl.style.fontWeight = '600';
-          htmlEl.style.lineHeight = '1.3';
-          htmlEl.style.pageBreakAfter = 'avoid';
-          htmlEl.style.pageBreakInside = 'avoid';
-        } else if (el.tagName === 'H3') {
-          htmlEl.style.fontSize = '24pt';
-          htmlEl.style.marginTop = '20pt';
-          htmlEl.style.marginBottom = '14pt';
-          htmlEl.style.fontWeight = '600';
-          htmlEl.style.lineHeight = '1.4';
-          htmlEl.style.pageBreakAfter = 'avoid';
-          htmlEl.style.pageBreakInside = 'avoid';
-        } else if (el.tagName === 'P') {
-          htmlEl.style.fontSize = '17pt';
-          htmlEl.style.marginTop = '12pt';
-          htmlEl.style.marginBottom = '12pt';
-          htmlEl.style.lineHeight = '1.75';
-          htmlEl.style.pageBreakInside = 'avoid';
-        } else if (el.tagName === 'LI') {
-          htmlEl.style.fontSize = '17pt';
-          htmlEl.style.marginBottom = '8pt';
-          htmlEl.style.lineHeight = '1.7';
-          htmlEl.style.pageBreakInside = 'avoid';
-        } else if (el.tagName === 'UL' || el.tagName === 'OL') {
-          htmlEl.style.marginTop = '14pt';
-          htmlEl.style.marginBottom = '14pt';
-          htmlEl.style.paddingLeft = '28pt';
-          htmlEl.style.pageBreakInside = 'avoid';
-        }
-      });
-
-      // Aguarda um momento para os estilos serem aplicados
-      await new Promise(resolve => setTimeout(resolve, 500));
-
-      // Calcula dimensões ideais para o canvas
-      const a4WidthMM = 210;
-      const a4HeightMM = 297;
-      const marginMM = 15;
-      const contentWidthMM = a4WidthMM - (marginMM * 2);
-      const dpi = 300; // Alta resolução para melhor qualidade
-      const scale = dpi / 96; // 96 DPI é o padrão de tela
-
-      // Garante que o elemento está visível e no topo da página
-      element.scrollIntoView({ behavior: 'instant', block: 'start' });
-      await new Promise(resolve => setTimeout(resolve, 300));
-      
-      // Força layout recalculation
-      element.offsetHeight;
-      
-      // Aguarda um pouco mais para garantir que o conteúdo está renderizado
-      await new Promise(resolve => setTimeout(resolve, 500));
-
-      // Verifica se o elemento tem conteúdo antes de gerar o canvas
-      const hasContent = element.innerHTML.length > 0;
-      const hasVisibleContent = element.offsetWidth > 0 && element.offsetHeight > 0;
-      
-      console.log('Elemento para PDF:', {
-        hasContent,
-        hasVisibleContent,
-        scrollWidth: element.scrollWidth,
-        scrollHeight: element.scrollHeight,
-        offsetWidth: element.offsetWidth,
-        offsetHeight: element.offsetHeight,
-        computedDisplay: window.getComputedStyle(element).display,
-        computedVisibility: window.getComputedStyle(element).visibility,
-        innerHTML: element.innerHTML.substring(0, 200) + '...'
-      });
-
-      if (!hasContent || !hasVisibleContent) {
-        console.error('Elemento não tem conteúdo visível para PDF');
-        alert('Erro: O conteúdo do planner não está visível. Tente gerar o planner novamente.');
-        setIsGeneratingPDF(false);
-        return;
-      }
-
-      const canvas = await html2canvas(element, {
-        scale: scale,
-        useCORS: true,
-        logging: true, // Ativa logging para debug
-        backgroundColor: '#ffffff',
-        width: element.scrollWidth || element.offsetWidth,
-        height: element.scrollHeight || element.offsetHeight,
-        windowWidth: element.scrollWidth || element.offsetWidth,
-        windowHeight: element.scrollHeight || element.offsetHeight,
-        allowTaint: false,
-        foreignObjectRendering: true, // Ativa para melhor renderização de conteúdo HTML
-        onclone: (clonedDoc, clonedElement) => {
-          // O segundo parâmetro é o elemento clonado diretamente
-          const htmlEl = clonedElement as HTMLElement;
-          if (htmlEl) {
-            // Força estilos visíveis
-            htmlEl.style.backgroundColor = '#ffffff';
-            htmlEl.style.color = '#1f2937';
-            htmlEl.style.display = 'block';
-            htmlEl.style.visibility = 'visible';
-            htmlEl.style.opacity = '1';
-            htmlEl.style.width = 'auto';
-            htmlEl.style.height = 'auto';
-            htmlEl.style.overflow = 'visible';
-            htmlEl.style.position = 'relative';
-            htmlEl.style.maxWidth = 'none';
-            htmlEl.style.minHeight = 'auto';
-            
-            // Remove qualquer transformação que possa ocultar
-            htmlEl.style.transform = 'none';
-            htmlEl.style.clip = 'auto';
-            htmlEl.style.clipPath = 'none';
-            
-            // Garante que todos os elementos filhos estão visíveis
-            const allChildren = htmlEl.querySelectorAll('*');
-            allChildren.forEach((child) => {
-              const childEl = child as HTMLElement;
-              const computedStyle = window.getComputedStyle(childEl);
-              
-              // Remove qualquer estilo que possa ocultar
-              if (computedStyle.display === 'none') {
-                childEl.style.display = 'block';
-              }
-              if (computedStyle.visibility === 'hidden') {
-                childEl.style.visibility = 'visible';
-              }
-              if (computedStyle.opacity === '0') {
-                childEl.style.opacity = '1';
-              }
-              
-              // Garante que textos estão visíveis
-              childEl.style.color = computedStyle.color || '#1f2937';
-              childEl.style.backgroundColor = computedStyle.backgroundColor || 'transparent';
-            });
-            
-            console.log('Elemento clonado preparado:', {
-              hasContent: htmlEl.innerHTML.length > 0,
-              width: htmlEl.offsetWidth,
-              height: htmlEl.offsetHeight,
-              childrenCount: htmlEl.children.length
-            });
-          }
-        }
-      });
-
-      // Verifica se o canvas foi gerado corretamente
-      console.log('Canvas gerado:', {
-        width: canvas?.width,
-        height: canvas?.height,
-        hasData: canvas ? canvas.toDataURL().length > 100 : false
-      });
-
-      if (!canvas || canvas.width === 0 || canvas.height === 0) {
-        console.error('Canvas vazio ou inválido', { 
-          width: canvas?.width, 
-          height: canvas?.height,
-          elementWidth: element.scrollWidth,
-          elementHeight: element.scrollHeight,
-          elementInnerHTML: element.innerHTML.substring(0, 500)
-        });
-        alert('Erro ao gerar imagem do planner. O conteúdo pode não estar visível. Verifique o console para mais detalhes.');
-        setIsGeneratingPDF(false);
-        return;
-      }
-
-      // Verifica se o canvas tem conteúdo (não está completamente branco)
-      const ctx = canvas.getContext('2d');
-      let hasNonWhitePixels = false;
-      if (ctx) {
-        // Verifica uma amostra maior do canvas
-        const sampleWidth = Math.min(canvas.width, 200);
-        const sampleHeight = Math.min(canvas.height, 200);
-        const imageData = ctx.getImageData(0, 0, sampleWidth, sampleHeight);
-        const pixels = imageData.data;
-        
-        for (let i = 0; i < pixels.length; i += 4) {
-          // Verifica se não é branco puro (RGB > 250)
-          if (pixels[i] < 250 || pixels[i + 1] < 250 || pixels[i + 2] < 250) {
-            hasNonWhitePixels = true;
-            break;
-          }
-        }
-        
-        if (!hasNonWhitePixels) {
-          console.error('Canvas está completamente branco - conteúdo não foi capturado');
-          alert('Erro: O PDF está sendo gerado em branco. Isso pode acontecer se o conteúdo não estiver totalmente carregado. Tente novamente em alguns segundos.');
-          setIsGeneratingPDF(false);
-          return;
-        }
-      }
-
-      // Restaura estilos originais
-      element.style.backgroundColor = originalContainerStyles.backgroundColor;
-      element.style.padding = originalContainerStyles.padding;
-      element.style.margin = originalContainerStyles.margin;
-      element.style.width = originalContainerStyles.width;
-      element.style.maxWidth = originalContainerStyles.maxWidth;
-      element.style.fontSize = originalContainerStyles.fontSize;
-      element.style.fontFamily = originalContainerStyles.fontFamily;
-
-      allElements.forEach((el) => {
-        const htmlEl = el as HTMLElement;
-        const original = originalStyles.get(htmlEl);
-        if (original) {
-          htmlEl.style.fontSize = original.fontSize;
-          htmlEl.style.marginTop = original.marginTop;
-          htmlEl.style.marginBottom = original.marginBottom;
-          htmlEl.style.padding = original.padding;
-          htmlEl.style.lineHeight = original.lineHeight;
-          htmlEl.style.fontWeight = original.fontWeight;
-        }
-      });
-
-      const imgData = canvas.toDataURL('image/png', 1.0);
-      const pdf = new jsPDF({
-        orientation: 'portrait',
-        unit: 'mm',
-        format: 'a4',
-        compress: true,
-      });
-
-      const pdfWidth = pdf.internal.pageSize.getWidth();
-      const pdfHeight = pdf.internal.pageSize.getHeight();
-      const margin = marginMM;
-      const contentWidth = pdfWidth - (margin * 2);
-      const contentHeight = pdfHeight - (margin * 2);
-
-      // Converte pixels do canvas para mm considerando o scale aplicado
-      // O canvas foi gerado com scale, então precisamos ajustar a conversão
-      const pxToMm = 0.264583; // 1px = 0.264583mm a 96 DPI
-      // Como usamos scale, o canvas tem mais pixels, mas o conteúdo real é menor
-      const actualWidthMM = (canvas.width / scale) * pxToMm;
-      const actualHeightMM = (canvas.height / scale) * pxToMm;
-
-      // Calcula ratio para caber na largura disponível (sem reduzir muito)
-      const ratio = Math.min(contentWidth / actualWidthMM, 1.0); // Não reduz, apenas ajusta se necessário
-      const scaledWidth = actualWidthMM * ratio;
-      const scaledHeight = actualHeightMM * ratio;
-
-      const totalPages = Math.ceil(scaledHeight / contentHeight);
-
-      for (let page = 0; page < totalPages; page++) {
-        if (page > 0) pdf.addPage();
-        
-        const sourceY = (page * contentHeight) / ratio / pxToMm * scale;
-        const sourceHeight = Math.min((contentHeight / ratio / pxToMm) * scale, canvas.height - sourceY);
-        const destHeight = (sourceHeight / scale) * ratio * pxToMm;
-
-        // Cria um canvas temporário para cada página
-        const pageCanvas = document.createElement('canvas');
-        pageCanvas.width = canvas.width;
-        pageCanvas.height = sourceHeight;
-        const pageCtx = pageCanvas.getContext('2d');
-        
-        if (pageCtx && canvas.width > 0 && canvas.height > 0 && sourceHeight > 0) {
-          pageCtx.fillStyle = '#ffffff';
-          pageCtx.fillRect(0, 0, pageCanvas.width, pageCanvas.height);
-          
-          // Verifica se há conteúdo para desenhar
-          if (sourceY < canvas.height && sourceHeight > 0) {
-            pageCtx.drawImage(canvas, 0, sourceY, canvas.width, sourceHeight, 0, 0, canvas.width, sourceHeight);
-            const pageImgData = pageCanvas.toDataURL('image/png', 1.0);
-            
-            // Verifica se a imagem não está vazia (imagem válida tem mais de 100 caracteres)
-            if (pageImgData && pageImgData.length > 100) {
-              pdf.addImage(pageImgData, 'PNG', margin, margin, scaledWidth, destHeight);
-            }
-          }
-        }
-      }
-
-      // Define o nome do arquivo baseado no tipo de planner
-      const fileName = isMorna 
-        ? 'planner-despertar' 
-        : isAllBalanced 
-          ? 'planner-manutencao-equilibrio'
-          : `planner-30-dias-${result.lowestElement}`;
-      pdf.save(`${fileName}.pdf`);
-    } catch (err) {
-      console.error('Erro ao gerar PDF:', err);
-      alert('Erro ao gerar PDF. Tente novamente.');
-    } finally {
-      setIsGeneratingPDF(false);
-    }
+    // Restaura o título após a impressão
+    setTimeout(() => {
+      document.title = originalTitle;
+    }, 100);
   };
 
   if (!result) return null;
@@ -1079,20 +760,10 @@ export default function ResultScreen() {
               <div className="border-t border-warmGray-200 p-6 bg-warmGray-50 flex flex-wrap gap-4 justify-center">
                 <button
                   onClick={handleDownloadPDF}
-                  disabled={isGeneratingPDF}
-                  className="btn-primary bg-blue-600 hover:bg-blue-700 flex items-center gap-2 disabled:opacity-50"
+                  className="btn-primary bg-blue-600 hover:bg-blue-700 flex items-center gap-2"
                 >
-                  {isGeneratingPDF ? (
-                    <>
-                      <Loader2 className="w-4 h-4 animate-spin" />
-                      Gerando PDF...
-                    </>
-                  ) : (
-                    <>
-                      <Download className="w-4 h-4" />
-                      Baixar PDF
-                    </>
-                  )}
+                  <Download className="w-4 h-4" />
+                  Baixar PDF
                 </button>
                 <button
                   onClick={() => {

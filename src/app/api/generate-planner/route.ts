@@ -37,7 +37,7 @@ export async function POST(request: NextRequest) {
     // NOTA: Usamos scoresTyped e array manual para evitar type errors com Object.values
     type ScoresType = { terra: number; agua: number; ar: number; fogo: number; eter: number };
     const scoresTyped: ScoresType = scores as ScoresType;
-    
+
     // Cria array tipado manualmente para evitar problemas de type inference
     const allScores: number[] = [
       scoresTyped.terra,
@@ -46,7 +46,7 @@ export async function POST(request: NextRequest) {
       scoresTyped.fogo,
       scoresTyped.eter
     ];
-    
+
     const minScore: number = Math.min(...allScores);
     const maxScore: number = Math.max(...allScores);
     const scoreDifference: number = maxScore - minScore;
@@ -306,12 +306,16 @@ FORMATO DE RESPOSTA (use EXATAMENTE esta estrutura):
     }
 
     const genAI = new GoogleGenerativeAI(apiKey);
-    const model = genAI.getGenerativeModel({ model: 'gemini-2.5-pro' });
+    const modelName = process.env.GEMINI_MODEL || 'gemini-1.5-flash';
+    console.log('🤖 Usando modelo Gemini:', modelName);
+    const model = genAI.getGenerativeModel({ model: modelName });
 
+    console.log('📝 Gerando planner para elemento:', lowestElement);
     const result = await model.generateContent(prompt);
     const response = await result.response;
     const plannerContent = response.text();
 
+    console.log('✅ Planner gerado com sucesso!');
     return NextResponse.json({
       success: true,
       planner: plannerContent,
@@ -320,13 +324,37 @@ FORMATO DE RESPOSTA (use EXATAMENTE esta estrutura):
     });
 
   } catch (error: any) {
-    console.error('Erro ao gerar planner:', error);
+    console.error('❌ Erro ao gerar planner:', error);
+    console.error('Detalhes completos do erro:', {
+      message: error.message,
+      stack: error.stack,
+      name: error.name,
+      status: error.status,
+      errorCode: error.code
+    });
+
+    // Identificar tipo de erro para mensagem melhor
+    let userMessage = 'Erro ao gerar planner';
+    let statusCode = 500;
+
+    if (error.message?.includes('API key')) {
+      userMessage = 'Chave Gemini inválida ou não configurada';
+      statusCode = 503;
+    } else if (error.message?.includes('quota') || error.status === 429) {
+      userMessage = 'Limite de requisições atingido. Tente novamente em alguns minutos';
+      statusCode = 429;
+    } else if (error.message?.includes('UNAUTHENTICATED')) {
+      userMessage = 'Autenticação Gemini falhou. Chave pode estar expirada';
+      statusCode = 401;
+    }
+
     return NextResponse.json(
       {
-        error: 'Erro ao gerar planner',
-        details: error.message
+        error: userMessage,
+        details: error.message,
+        errorType: error.name
       },
-      { status: 500 }
+      { status: statusCode }
     );
   }
 }

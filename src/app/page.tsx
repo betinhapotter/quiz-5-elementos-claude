@@ -35,12 +35,12 @@ export default function Home() {
     );
   }
 
-  // Se não está autenticado OU não tem usuário, mostra tela de login
+  // Verifica se o usuário está autenticado
   if (!isAuthenticated || !user) {
     return <LoginScreen />;
   }
 
-  // Fluxo normal do quiz para usuários autenticados
+  // Fluxo do quiz para usuários autenticados
   return (
     <div className="flex-1">
       {currentStep === 'landing' && <LandingScreen />}
