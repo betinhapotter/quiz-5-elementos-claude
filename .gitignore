@@ -69,3 +69,74 @@ node_modules/
 .dataconnect
 .vercel
 .env*.local
+
+# Environment & Secrets (AIOS)
+.env.local
+.env.*.local
+*.key
+*.pem
+
+# Dependencies (AIOS)
+node_modules
+
+# Build & Logs (AIOS)
+dist/
+build/
+logs/
+
+# IDE & OS (AIOS)
+.DS_Store
+Thumbs.db
+.idea/
+*.swp
+
+# AIOS Local (AIOS)
+.aios-core/local/
+.claude/settings.local.json
+.aios/install-log.txt
+
+# Next.js
+.next/
+out/
+
+# AI Assistants & IDE Configs
+.agent/
+.aios/
+.aios-core/
+.antigravity/
+.claude/
+.cline/
+.cursor/
+.gemini/
+.roo/
+.trae/
+.windsurf/
+.windsurfrules
+.mcp.json
+
+# Supabase Local
+.supabase-cli/
+supabase/
+.env.supabase
+docker-compose.yml.backup
+
+# Local Documentation & Scripts
+CODERABBIT-*.md
+COMO-INICIAR.md
+INICIAR-SUPABASE.md
+Instalar-Supabase-CLI.ps1
+Configurar-CodeRabbit-Token.ps1
+SUCESSO-INSTALACAO.md
+SUPABASE_*.md
+STARTUP_INSTRUCTIONS.md
+RESTART_AND_START.bat
+start-supabase.*
+start.ps1
+check-*.mjs
+nul
+
+# Project-specific
+aios-squads/
+docs/
+ide-configs/
+src/styles/
