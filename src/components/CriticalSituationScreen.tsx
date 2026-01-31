@@ -3,7 +3,7 @@
 import { motion } from 'framer-motion';
 import { MessageCircle, AlertTriangle, Phone, Heart } from 'lucide-react';
 import { useQuizStore } from '@/hooks/useQuizStore';
-import { THRESHOLDS } from '@/lib/quiz-logic';
+import { THRESHOLDS } from '@/lib/quiz-constants';
 
 export default function CriticalSituationScreen() {
   const { result } = useQuizStore();
@@ -35,13 +35,13 @@ export default function CriticalSituationScreen() {
             <div className="inline-block bg-pink-500 rounded-lg px-4 py-2 mb-6">
               <span className="text-white font-bold text-lg">SOS</span>
             </div>
-            
+
             <h1 className="font-display text-3xl sm:text-4xl md:text-5xl font-bold mb-4">
               Identificamos uma situação que precisa de atenção especial
             </h1>
-            
+
             <p className="text-lg sm:text-xl text-red-100 max-w-2xl mx-auto">
-              Seu relacionamento está passando por um momento crítico em múltiplas dimensões. 
+              Seu relacionamento está passando por um momento crítico em múltiplas dimensões.
               Isso não é o fim — mas precisa de cuidado profissional.
             </p>
           </motion.div>
@@ -60,19 +60,19 @@ export default function CriticalSituationScreen() {
           <h2 className="font-display text-2xl font-bold text-white mb-4">
             O que isso significa
           </h2>
-          
+
           <div className="bg-warmGray-800 rounded-xl p-6 sm:p-8 text-warmGray-100 space-y-4">
             <p className="leading-relaxed">
-              Quando todos os elementos estão em níveis baixos simultaneamente, geralmente indica uma 
+              Quando todos os elementos estão em níveis baixos simultaneamente, geralmente indica uma
               <strong className="text-white"> crise sistêmica no relacionamento</strong>. Isso pode ser resultado de:
             </p>
-            
+
             <ul className="list-disc list-inside space-y-2 ml-4">
               <li>Um evento específico que abalou a base do relacionamento</li>
               <li>Acúmulo de tensões não resolvidas ao longo do tempo</li>
               <li>Uma incompatibilidade fundamental que precisa ser endereçada</li>
             </ul>
-            
+
             <div className="mt-6 p-4 bg-warmGray-700 rounded-lg border-l-4 border-yellow-400">
               <p className="text-white font-semibold mb-2">
                 ⚠️ Um quiz não substitui o olhar profissional
@@ -119,7 +119,7 @@ export default function CriticalSituationScreen() {
             <MessageCircle className="w-6 h-6" />
             Falar com Jaya no WhatsApp
           </a>
-          
+
           <p className="text-warmGray-400 text-sm mt-4">
             Respondo em até 24h úteis. Sessões online ou presenciais em Brasília.
           </p>

@@ -2,8 +2,6 @@
 
 export const API_ENDPOINTS = {
   generatePlanner: '/api/generate-planner',
-  saveResult: '/api/save-result',
-  submitQuiz: '/api/submit-quiz',
   saveLead: '/api/save-lead',
 };
 

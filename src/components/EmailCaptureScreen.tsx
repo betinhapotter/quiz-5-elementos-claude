@@ -6,7 +6,7 @@ import { Mail, Lock, AlertTriangle } from 'lucide-react';
 import { useQuizStore } from '@/hooks/useQuizStore';
 import { useAuth } from '@/hooks/useAuth';
 import { elementsInfo } from '@/types/quiz';
-import { THRESHOLDS } from '@/lib/quiz-logic';
+import { THRESHOLDS } from '@/lib/quiz-constants';
 import { API_ENDPOINTS, callAPI } from '@/lib/api';
 
 export default function EmailCaptureScreen() {
@@ -23,19 +23,19 @@ export default function EmailCaptureScreen() {
   const minScore = Math.min(...allScores);
   const maxScore = Math.max(...allScores);
   const scoreDifference = maxScore - minScore;
-  const isAllBalanced = (minScore >= 18 && scoreDifference <= 3) || 
-                        result.pattern?.includes('equilibrio_geral') || 
-                        result.pattern?.includes('equilibrio_perfeito'); // THRESHOLDS.BALANCED_HIGH = 18
-  const isPerfectBalance = (minScore === 25 && maxScore === 25) || 
-                          result.pattern?.includes('equilibrio_perfeito');
-  
+  const isAllBalanced = (minScore >= THRESHOLDS.BALANCED_HIGH && scoreDifference <= 3) ||
+    result.pattern?.includes('equilibrio_geral') ||
+    result.pattern?.includes('equilibrio_perfeito');
+  const isPerfectBalance = (minScore === 25 && maxScore === 25) ||
+    result.pattern?.includes('equilibrio_perfeito');
+
   // Verifica se é situação crítica
-  const isAllInCrisis = allScores.every(score => score <= 8); // THRESHOLDS.CRISIS = 8
-  const isAllLow = allScores.every(score => score <= 12); // THRESHOLDS.LOW = 12
+  const isAllInCrisis = allScores.every(score => score <= THRESHOLDS.CRISIS);
+  const isAllLow = allScores.every(score => score <= THRESHOLDS.LOW);
   const isCriticalSituation = isAllInCrisis || isAllLow || result.pattern?.includes('alerta_vermelho');
-  
+
   // Verifica se é situação "morna" - todos na faixa média (13-17)
-  const isAllMedium = minScore >= 13 && maxScore <= 17 && scoreDifference <= 3; // THRESHOLDS.BALANCED_LOW = 13
+  const isAllMedium = minScore >= THRESHOLDS.BALANCED_LOW && maxScore <= 17 && scoreDifference <= 3;
   const isMorna = isAllMedium || result.pattern?.includes('relacao_morna');
 
   const elementInfo = elementsInfo[result.lowestElement as keyof typeof elementsInfo];
@@ -113,7 +113,7 @@ export default function EmailCaptureScreen() {
                 </h2>
 
                 <p className="text-warmGray-600 mb-8 max-w-md mx-auto">
-                  Múltiplos elementos do seu relacionamento estão em crise. 
+                  Múltiplos elementos do seu relacionamento estão em crise.
                   Esta situação requer atenção profissional urgente.
                 </p>
               </>
@@ -128,7 +128,7 @@ export default function EmailCaptureScreen() {
                 </h2>
 
                 <p className="text-warmGray-600 mb-8 max-w-md mx-auto">
-                  Seu relacionamento não morreu — está esperando ser despertado. 
+                  Seu relacionamento não morreu — está esperando ser despertado.
                   Receba seu Planner Despertar para reacender a brasa.
                 </p>
               </>
@@ -143,7 +143,7 @@ export default function EmailCaptureScreen() {
                 </h2>
 
                 <p className="text-warmGray-600 mb-8 max-w-md mx-auto">
-                  Parabéns! Todos os elementos estão perfeitamente alinhados no seu relacionamento. 
+                  Parabéns! Todos os elementos estão perfeitamente alinhados no seu relacionamento.
                   Receba seu planner de manutenção para continuar nutrindo esse equilíbrio.
                 </p>
               </>
