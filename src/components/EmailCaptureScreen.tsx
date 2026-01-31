@@ -6,7 +6,7 @@ import { Mail, Lock, AlertTriangle } from 'lucide-react';
 import { useQuizStore } from '@/hooks/useQuizStore';
 import { useAuth } from '@/hooks/useAuth';
 import { elementsInfo } from '@/types/quiz';
-import { THRESHOLDS } from '@/lib/quiz-constants';
+import { classifyResult } from '@/lib/quiz-logic';
 import { API_ENDPOINTS, callAPI } from '@/lib/api';
 
 export default function EmailCaptureScreen() {
@@ -18,25 +18,8 @@ export default function EmailCaptureScreen() {
 
   if (!result) return null;
 
-  // Verifica se todos estão equilibrados
-  const allScores = Object.values(result.scores);
-  const minScore = Math.min(...allScores);
-  const maxScore = Math.max(...allScores);
-  const scoreDifference = maxScore - minScore;
-  const isAllBalanced = (minScore >= THRESHOLDS.BALANCED_HIGH && scoreDifference <= 3) ||
-    result.pattern?.includes('equilibrio_geral') ||
-    result.pattern?.includes('equilibrio_perfeito');
-  const isPerfectBalance = (minScore === 25 && maxScore === 25) ||
-    result.pattern?.includes('equilibrio_perfeito');
-
-  // Verifica se é situação crítica
-  const isAllInCrisis = allScores.every(score => score <= THRESHOLDS.CRISIS);
-  const isAllLow = allScores.every(score => score <= THRESHOLDS.LOW);
-  const isCriticalSituation = isAllInCrisis || isAllLow || result.pattern?.includes('alerta_vermelho');
-
-  // Verifica se é situação "morna" - todos na faixa média (13-17)
-  const isAllMedium = minScore >= THRESHOLDS.BALANCED_LOW && maxScore <= 17 && scoreDifference <= 3;
-  const isMorna = isAllMedium || result.pattern?.includes('relacao_morna');
+  // Usa função centralizada de classificação
+  const { isBalanced: isAllBalanced, isPerfectBalance, isMorna, isCritical: isCriticalSituation } = classifyResult(result);
 
   const elementInfo = elementsInfo[result.lowestElement as keyof typeof elementsInfo];
 

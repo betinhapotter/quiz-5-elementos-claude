@@ -1,0 +1,37 @@
+name: Weekly Code Story
+
+on:
+  schedule:
+    # Sexta-feira às 21:00 UTC (18:00 Horário de Brasília)
+    - cron: '0 21 * * 5'
+  workflow_dispatch: # Permite rodar manualmente para testes
+
+jobs:
+  generate-story:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # Necessário para fazer commit do relatório
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Garante que todo o histórico seja baixado para análise
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Generate Weekly Log
+        run: node scripts/weekly-report.js
+
+      - name: Commit and Push Report
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          git add WEEKLY_STORY.md
+          git commit -m "docs: gerar relatório semanal de Code Story [skip ci]" || echo "Nenhuma mudança para commitar"
+          git push
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

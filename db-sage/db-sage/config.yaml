@@ -1,0 +1,110 @@
+name: db-sage
+version: "1.1.0"
+slashPrefix: db-sage
+title: "Database Architect & Operations Engineer"
+description: "Expert database agent for PostgreSQL and Supabase - schema design, migrations, RLS policies, performance tuning"
+author: "AIOS Team"
+icon: "🗄️"
+type: specialist
+
+# IMPORTANT: External Dependencies
+dependencies:
+  required:
+    - name: PostgreSQL
+      version: ">=13.0"
+      description: "Database server"
+      install: "https://www.postgresql.org/download/"
+    - name: Supabase CLI
+      version: ">=1.0"
+      description: "For Supabase projects (optional if using raw PostgreSQL)"
+      install: "npm install -g supabase"
+  optional:
+    - name: psql
+      description: "PostgreSQL command-line client"
+    - name: pg_dump
+      description: "Database backup utility"
+
+# Environment variables
+environment:
+  required:
+    - name: DATABASE_URL
+      description: "PostgreSQL connection string"
+      example: "postgresql://user:pass@host:5432/dbname"
+    - name: SUPABASE_DB_URL
+      description: "Supabase database URL (alternative to DATABASE_URL)"
+      example: "postgresql://postgres:pass@db.xxx.supabase.co:5432/postgres"
+  optional:
+    - name: SUPABASE_PROJECT_REF
+      description: "Supabase project reference ID"
+
+agents:
+  - db-sage
+
+tasks:
+  - db-analyze-hotpaths
+  - db-apply-migration
+  - db-bootstrap
+  - db-domain-modeling
+  - db-dry-run
+  - db-env-check
+  - db-squad-integration
+  - db-explain
+  - db-impersonate
+  - db-load-csv
+  - db-policy-apply
+  - db-rls-audit
+  - db-rollback
+  - db-run-sql
+  - db-schema-audit
+  - db-seed
+  - db-smoke-test
+  - db-snapshot
+  - db-supabase-setup
+  - db-verify-order
+  - domain-modeling
+  - query-optimization
+  - schema-audit
+  - supabase-setup
+  - create-doc
+  - execute-checklist
+
+templates:
+  - db-analysis-template
+  - db-index-strategy-tmpl
+  - db-migration-plan-tmpl
+  - db-rls-policies-tmpl
+  - db-schema-design-tmpl
+  - index-strategy-tmpl
+  - migration-plan-tmpl
+  - rls-policies-tmpl
+  - schema-design-tmpl
+
+checklists:
+  - database-design-checklist
+  - database-migration-documentation-checklist
+  - db-design-checklist
+  - db-kiss-validation-checklist
+  - dba-predeploy-checklist
+  - dba-rollback-checklist
+  - migration-validation-checklist
+
+workflows:
+  - analyze-data-workflow
+  - backup-restore-workflow
+  - kiss-gate-workflow
+  - modify-schema-workflow
+  - performance-tuning-workflow
+  - query-database-workflow
+  - setup-database-workflow
+
+tags:
+  - database
+  - postgresql
+  - supabase
+  - migrations
+  - rls
+  - security
+  - dba
+
+independence: false
+independence_reason: "Requires PostgreSQL database and optionally Supabase"

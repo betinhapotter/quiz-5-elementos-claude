@@ -380,3 +380,56 @@ export function getResultSeverity(result: {
   if (result.lowestScore <= THRESHOLDS.LOW) return 'atencao';
   return 'normal';
 }
+
+/**
+ * Classifica o resultado em uma categoria (critical, balanced, morna, normal)
+ * Centraliza toda lógica de classificação que estava duplicada em 4 arquivos
+ */
+export function classifyResult(result: {
+  scores: { terra: number; agua: number; ar: number; fogo: number; eter: number };
+  pattern?: string;
+}): {
+  isCritical: boolean;
+  isBalanced: boolean;
+  isPerfectBalance: boolean;
+  isMorna: boolean;
+  classification: 'critical' | 'balanced' | 'morna' | 'normal';
+} {
+  const allScores = Object.values(result.scores);
+  const minScore = Math.min(...allScores);
+  const maxScore = Math.max(...allScores);
+  const scoreDifference = maxScore - minScore;
+
+  // Crítico: todos em crise ou padrão de alerta vermelho
+  const isAllInCrisis = allScores.every(score => score <= THRESHOLDS.CRISIS);
+  const isAllLow = allScores.every(score => score <= THRESHOLDS.LOW);
+  const isCritical = isAllInCrisis || isAllLow || result.pattern?.includes('alerta_vermelho');
+
+  // Equilibrado: scores altos e próximos entre si
+  const isAllBalanced = (minScore >= THRESHOLDS.BALANCED_HIGH && scoreDifference <= 3) ||
+    result.pattern?.includes('equilibrio_geral') ||
+    result.pattern?.includes('equilibrio_perfeito');
+
+  // Perfeito: todos máximo ou padrão de equilíbrio perfeito
+  const isPerfectBalance = (minScore === 25 && maxScore === 25) ||
+    result.pattern?.includes('equilibrio_perfeito');
+
+  // Morna: todos na faixa média (13-17)
+  const isAllMedium = minScore >= THRESHOLDS.BALANCED_LOW && maxScore <= 17 && scoreDifference <= 3;
+  const isMorna = isAllMedium || result.pattern?.includes('relacao_morna');
+
+  // Determina classificação final
+  let classification: 'critical' | 'balanced' | 'morna' | 'normal';
+  if (isCritical) classification = 'critical';
+  else if (isAllBalanced) classification = 'balanced';
+  else if (isMorna) classification = 'morna';
+  else classification = 'normal';
+
+  return {
+    isCritical,
+    isBalanced: isAllBalanced,
+    isPerfectBalance,
+    isMorna,
+    classification
+  };
+}

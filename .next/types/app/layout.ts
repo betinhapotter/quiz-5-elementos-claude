@@ -1,4 +1,4 @@
-// File: C:\Users\Jaya\.claude\Projetos\Quiz\quiz-5-elementos-v3-completo\src\app\layout.tsx
+// File: C:\Users\Jaya\Projetos\AulaAvancada\quiz-5-elementos\src\app\layout.tsx
 import * as entry from '../../../src/app/layout.js'
 import type { ResolvingMetadata, ResolvingViewport } from 'next/dist/lib/metadata/types/metadata-interface.js'
 

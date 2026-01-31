@@ -1,4 +1,4 @@
-// File: C:\Users\Jaya\.claude\Projetos\Quiz\quiz-5-elementos-v3-completo\src\app\api\generate-planner\route.ts
+// File: C:\Users\Jaya\Projetos\AulaAvancada\quiz-5-elementos\src\app\api\generate-planner\route.ts
 import * as entry from '../../../../../src/app/api/generate-planner/route.js'
 import type { NextRequest } from 'next/server.js'
 

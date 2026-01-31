@@ -8,7 +8,7 @@ import { useQuizStore } from '@/hooks/useQuizStore';
 import { useAuth } from '@/hooks/useAuth';
 import { createClient } from '@/lib/supabase/client';
 import { elementsInfo, Element } from '@/types/quiz';
-import { generateResultExplanation, getResultSeverity } from '@/lib/quiz-logic';
+import { generateResultExplanation, getResultSeverity, classifyResult } from '@/lib/quiz-logic';
 import { THRESHOLDS } from '@/lib/quiz-constants';
 import { API_ENDPOINTS, callAPI } from '@/lib/api';
 import '@/styles/print.css';
@@ -131,25 +131,8 @@ export default function ResultScreen() {
 
   if (!result) return null;
 
-  // Verifica se todos estão equilibrados
-  const allScores = Object.values(result.scores);
-  const minScore = Math.min(...allScores);
-  const maxScore = Math.max(...allScores);
-  const scoreDifference = maxScore - minScore;
-  const isAllBalanced = (minScore >= THRESHOLDS.BALANCED_HIGH && scoreDifference <= 3) ||
-    result.pattern?.includes('equilibrio_geral') ||
-    result.pattern?.includes('equilibrio_perfeito');
-  const isPerfectBalance = (minScore === 25 && maxScore === 25) ||
-    result.pattern?.includes('equilibrio_perfeito');
-
-  // Verifica se todos estão em crise (alerta vermelho)
-  const isAllInCrisis = allScores.every(score => score <= THRESHOLDS.CRISIS);
-  const isAllLow = allScores.every(score => score <= THRESHOLDS.LOW);
-  const isCriticalSituation = isAllInCrisis || isAllLow || result.pattern?.includes('alerta_vermelho');
-
-  // Verifica se é situação "morna" - todos na faixa média (13-17)
-  const isAllMedium = minScore >= THRESHOLDS.BALANCED_LOW && maxScore <= 17 && scoreDifference <= 3;
-  const isMorna = isAllMedium || result.pattern?.includes('relacao_morna');
+  // Usa função centralizada de classificação
+  const { isBalanced: isAllBalanced, isPerfectBalance, isMorna, isCritical: isCriticalSituation } = classifyResult(result);
 
   const elementInfo = elementsInfo[result.lowestElement as keyof typeof elementsInfo];
   const explanation = generateResultExplanation(result);

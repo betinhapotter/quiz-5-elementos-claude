@@ -3,18 +3,15 @@
 import { motion } from 'framer-motion';
 import { MessageCircle, AlertTriangle, Phone, Heart } from 'lucide-react';
 import { useQuizStore } from '@/hooks/useQuizStore';
-import { THRESHOLDS } from '@/lib/quiz-constants';
+import { classifyResult } from '@/lib/quiz-logic';
 
 export default function CriticalSituationScreen() {
   const { result } = useQuizStore();
 
   if (!result) return null;
 
-  // Verifica se é situação crítica
-  const allScores = Object.values(result.scores);
-  const isAllInCrisis = allScores.every(score => score <= THRESHOLDS.CRISIS);
-  const isAllLow = allScores.every(score => score <= THRESHOLDS.LOW);
-  const isCriticalSituation = isAllInCrisis || isAllLow || result.pattern?.includes('alerta_vermelho');
+  // Usa função centralizada de classificação
+  const { isCritical: isCriticalSituation } = classifyResult(result);
 
   if (!isCriticalSituation) return null;
 

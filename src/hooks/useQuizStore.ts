@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { Answer, QuizResult, QuizState, UserData } from '@/types/quiz';
 import { questions } from '@/data/questions';
-import { calculateResult } from '@/lib/quiz-logic';
+import { calculateResult, classifyResult } from '@/lib/quiz-logic';
 import { THRESHOLDS } from '@/lib/quiz-constants';
 
 interface QuizStore extends QuizState {
@@ -71,13 +71,17 @@ export const useQuizStore = create<QuizStore>((set, get) => ({
       });
 
       // Simula cálculo (UX de valor percebido)
-      setTimeout(() => {
+      // Cleanup: guarda o timeout ID para limpar se o componente desmontar
+      const timeoutId = setTimeout(() => {
         const result = calculateResult(newAnswers);
         set({
           result,
           currentStep: 'email-capture',
         });
       }, 8000);
+
+      // Retorna função cleanup para Zustand (caso seja necessário)
+      return () => clearTimeout(timeoutId);
     } else {
       // Próxima pergunta
       set({
@@ -110,11 +114,8 @@ export const useQuizStore = create<QuizStore>((set, get) => ({
       return;
     }
 
-    // Verifica se é situação crítica
-    const allScores = Object.values(state.result.scores);
-    const isAllInCrisis = allScores.every(score => score <= THRESHOLDS.CRISIS);
-    const isAllLow = allScores.every(score => score <= THRESHOLDS.LOW);
-    const isCriticalSituation = isAllInCrisis || isAllLow || state.result.pattern?.includes('alerta_vermelho');
+    // Usa função centralizada de classificação
+    const { isCritical } = classifyResult(state.result);
 
     set({
       userData: {
@@ -122,7 +123,7 @@ export const useQuizStore = create<QuizStore>((set, get) => ({
         name,
         createdAt: new Date(),
       },
-      currentStep: isCriticalSituation ? 'critical' : 'result',
+      currentStep: isCritical ? 'critical' : 'result',
     });
   },
 
