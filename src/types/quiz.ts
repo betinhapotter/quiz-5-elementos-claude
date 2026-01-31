@@ -7,7 +7,7 @@ export type DisasterType = 'terremoto' | 'tsunami' | 'tornado' | 'incendio' | 'v
 // Opção de resposta
 export interface QuestionOption {
   text: string;
-  value: 4 | 3 | 2 | 1;
+  value: 1 | 2 | 3 | 4 | 5;
 }
 
 // Estrutura de uma pergunta

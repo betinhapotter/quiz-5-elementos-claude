@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import { Answer, QuizResult, QuizState, UserData } from '@/types/quiz';
 import { questions } from '@/data/questions';
 import { calculateResult } from '@/lib/quiz-logic';
+import { THRESHOLDS } from '@/lib/quiz-constants';
 
 interface QuizStore extends QuizState {
   // Planner state
@@ -111,8 +112,8 @@ export const useQuizStore = create<QuizStore>((set, get) => ({
 
     // Verifica se é situação crítica
     const allScores = Object.values(state.result.scores);
-    const isAllInCrisis = allScores.every(score => score <= 8); // THRESHOLDS.CRISIS = 8
-    const isAllLow = allScores.every(score => score <= 12); // THRESHOLDS.LOW = 12
+    const isAllInCrisis = allScores.every(score => score <= THRESHOLDS.CRISIS);
+    const isAllLow = allScores.every(score => score <= THRESHOLDS.LOW);
     const isCriticalSituation = isAllInCrisis || isAllLow || state.result.pattern?.includes('alerta_vermelho');
 
     set({
