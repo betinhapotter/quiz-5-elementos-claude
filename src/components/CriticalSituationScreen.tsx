@@ -18,7 +18,7 @@ export default function CriticalSituationScreen() {
 
   if (!isCriticalSituation) return null;
 
-  const whatsappNumber = '+5561999263455'; // Brasília
+  const whatsappNumber = '+556192634557'; // Brasília
   const whatsappMessage = encodeURIComponent('Olá Jaya, acabei de fazer o Quiz dos 5 Elementos e identifiquei uma situação crítica. Preciso de ajuda urgente.');
   const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${whatsappMessage}`;
 
