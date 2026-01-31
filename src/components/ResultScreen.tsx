@@ -1,8 +1,9 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { ArrowRight, Instagram, RefreshCw, Sparkles, Download, Loader2, LogOut } from 'lucide-react';
+import DOMPurify from 'dompurify';
 import { useQuizStore } from '@/hooks/useQuizStore';
 import { useAuth } from '@/hooks/useAuth';
 import { createClient } from '@/lib/supabase/client';
@@ -12,6 +13,15 @@ import { THRESHOLDS } from '@/lib/quiz-constants';
 import { API_ENDPOINTS, callAPI } from '@/lib/api';
 import '@/styles/print.css';
 
+// Sanitize markdown-parsed HTML to prevent XSS
+function sanitizeMarkdownHtml(text: string): string {
+  return DOMPurify.sanitize(text, {
+    ALLOWED_TAGS: ['strong', 'em', 'b', 'i'],
+    ALLOWED_ATTR: ['style'],
+    KEEP_CONTENT: true
+  });
+}
+
 export default function ResultScreen() {
   const { result, resetQuiz, userData, answers } = useQuizStore();
   const { user, signOut } = useAuth();
@@ -20,21 +30,16 @@ export default function ResultScreen() {
   const [isGeneratingPlanner, setIsGeneratingPlanner] = useState(false);
   const [planner, setPlanner] = useState<string | null>(null);
   const [savedToDb, setSavedToDb] = useState(false);
+  const [quizResultId, setQuizResultId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const plannerRef = useRef<HTMLDivElement>(null);
 
   // Salva resultado no banco quando carrega
-  useEffect(() => {
-    if (result && user && !savedToDb) {
-      saveResultToDb();
-    }
-  }, [result, user]);
-
-  const saveResultToDb = async () => {
+  const saveResultToDb = useCallback(async () => {
     if (!result || !user) return;
 
     try {
-      const { error } = await supabase.from('quiz_results').insert({
+      const { data, error } = await supabase.from('quiz_results').insert({
         user_id: user.id,
         terra_score: result.scores.terra,
         agua_score: result.scores.agua,
@@ -46,14 +51,23 @@ export default function ResultScreen() {
         second_lowest_element: result.secondLowestElement || null,
         pattern: result.pattern || null,
         raw_answers: answers,
-      });
+      }).select('id').single();
 
       if (error) throw error;
+      if (data?.id) {
+        setQuizResultId(data.id);
+      }
       setSavedToDb(true);
     } catch (err) {
       console.error('Erro ao salvar resultado:', err);
     }
-  };
+  }, [result, user, answers, supabase]);
+
+  useEffect(() => {
+    if (result && user && !savedToDb) {
+      saveResultToDb();
+    }
+  }, [result, user, savedToDb, saveResultToDb]);
 
   const handleGeneratePlanner = async () => {
     if (!result) return;
@@ -73,24 +87,13 @@ export default function ResultScreen() {
       setPlanner(data.planner);
 
       // Salva o planner no banco vinculado ao resultado do quiz
-      if (user && savedToDb) {
-        // Busca o quiz_result_id mais recente do usuário
-        const { data: latestResult } = await supabase
-          .from('quiz_results')
-          .select('id')
-          .eq('user_id', user.id)
-          .order('created_at', { ascending: false })
-          .limit(1)
-          .single();
-
-        if (latestResult) {
-          await supabase.from('planners').insert({
-            user_id: user.id,
-            quiz_result_id: latestResult.id,
-            element_focus: result.lowestElement,
-            content: data.planner,
-          });
-        }
+      if (user && quizResultId) {
+        await supabase.from('planners').insert({
+          user_id: user.id,
+          quiz_result_id: quizResultId,
+          element_focus: result.lowestElement,
+          content: data.planner,
+        });
       }
     } catch (err) {
       setError('Erro ao gerar seu planner. Tente novamente.');
@@ -537,7 +540,7 @@ export default function ResultScreen() {
                                     paddingLeft: '0.5rem'
                                   }}>
                                     <span dangerouslySetInnerHTML={{
-                                      __html: item.replace(/\*\*([^*]+)\*\*/g, '<strong style="color: #111827; font-weight: 600;">$1</strong>').replace(/\*([^*]+)\*/g, '<em style="color: #6b7280;">$1</em>')
+                                      __html: sanitizeMarkdownHtml(item.replace(/\*\*([^*]+)\*\*/g, '<strong style="color: #111827; font-weight: 600;">$1</strong>').replace(/\*([^*]+)\*/g, '<em style="color: #6b7280;">$1</em>'))
                                     }} />
                                   </li>
                                 ))}
@@ -584,7 +587,7 @@ export default function ResultScreen() {
                                     paddingLeft: '0.5rem'
                                   }}>
                                     <span dangerouslySetInnerHTML={{
-                                      __html: item.replace(/\*\*([^*]+)\*\*/g, '<strong style="color: #111827; font-weight: 600;">$1</strong>').replace(/\*([^*]+)\*/g, '<em style="color: #6b7280;">$1</em>')
+                                      __html: sanitizeMarkdownHtml(item.replace(/\*\*([^*]+)\*\*/g, '<strong style="color: #111827; font-weight: 600;">$1</strong>').replace(/\*([^*]+)\*/g, '<em style="color: #6b7280;">$1</em>'))
                                     }} />
                                   </li>
                                 ))}
@@ -637,7 +640,7 @@ export default function ResultScreen() {
                                     paddingLeft: '0.5rem'
                                   }}>
                                     <span dangerouslySetInnerHTML={{
-                                      __html: item.replace(/\*\*([^*]+)\*\*/g, '<strong style="color: #111827; font-weight: 600;">$1</strong>').replace(/\*([^*]+)\*/g, '<em style="color: #6b7280;">$1</em>')
+                                      __html: sanitizeMarkdownHtml(item.replace(/\*\*([^*]+)\*\*/g, '<strong style="color: #111827; font-weight: 600;">$1</strong>').replace(/\*([^*]+)\*/g, '<em style="color: #6b7280;">$1</em>'))
                                     }} />
                                   </li>
                                 ))}
@@ -694,7 +697,7 @@ export default function ResultScreen() {
                                     paddingLeft: '0.5rem'
                                   }}>
                                     <span dangerouslySetInnerHTML={{
-                                      __html: item.replace(/\*\*([^*]+)\*\*/g, '<strong style="color: #111827; font-weight: 600;">$1</strong>').replace(/\*([^*]+)\*/g, '<em style="color: #6b7280;">$1</em>')
+                                      __html: sanitizeMarkdownHtml(item.replace(/\*\*([^*]+)\*\*/g, '<strong style="color: #111827; font-weight: 600;">$1</strong>').replace(/\*([^*]+)\*/g, '<em style="color: #6b7280;">$1</em>'))
                                     }} />
                                   </li>
                                 ))}
@@ -737,9 +740,9 @@ export default function ResultScreen() {
                               pageBreakInside: 'avoid'
                             }}
                             dangerouslySetInnerHTML={{
-                              __html: trimmed
+                              __html: sanitizeMarkdownHtml(trimmed
                                 .replace(/\*\*([^*]+)\*\*/g, '<strong style="color: #111827; font-weight: 600;">$1</strong>')
-                                .replace(/\*([^*]+)\*/g, '<em style="color: #6b7280;">$1</em>')
+                                .replace(/\*([^*]+)\*/g, '<em style="color: #6b7280;">$1</em>'))
                             }}
                           />
                         );
@@ -752,7 +755,7 @@ export default function ResultScreen() {
                             {currentList.map((item, i) => (
                               <li key={i} style={{ marginBottom: '0.5rem', fontSize: '16px', lineHeight: '1.6' }}>
                                 <span dangerouslySetInnerHTML={{
-                                  __html: item.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>').replace(/\*([^*]+)\*/g, '<em>$1</em>')
+                                  __html: sanitizeMarkdownHtml(item.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>').replace(/\*([^*]+)\*/g, '<em>$1</em>'))
                                 }} />
                               </li>
                             ))}

@@ -19,25 +19,25 @@ git rm --cached .env.local
 As seguintes credenciais foram **expostas no GitHub** e precisam ser **revogadas imediatamente**:
 
 #### 1. Google Gemini API Key
-- **Key exposta**: `AIzaSyA3SEwUvT21nZG7b93S8n25GJ3HqKiaR3A`
-- **Ação**: 
-  1. Acesse: https://makersuite.google.com/app/apikey
+- **Key exposta**: `REDACTED`
+- **Ação**:
+  1. Acesse: [Google Maker Suite API Key page](https://makersuite.google.com/app/apikey)
   2. Revogue a key antiga
   3. Crie uma nova key
   4. Atualize no `.env.local` (local only)
 
 #### 2. Resend API Key
-- **Key exposta**: `re_6NTRUyqp_N1g4jy3CB1oXFnMBKHuEWGEh`
+- **Key exposta**: `REDACTED`
 - **Ação**:
-  1. Acesse: https://resend.com/api-keys
+  1. Acesse: [Resend API Keys page](https://resend.com/api-keys)
   2. Revogue a key antiga
   3. Crie uma nova key
   4. Atualize no `.env.local` (local only)
 
 #### 3. Vercel OIDC Token
-- **Token exposto**: (token JWT completo)
+- **Token exposto**: `REDACTED`
 - **Ação**:
-  1. Acesse: https://vercel.com/betinhapotters-projects/quiz-5-elementos-claude/settings
+  1. Acesse: [Vercel Project Settings](https://vercel.com/betinhapotters-projects/quiz-5-elementos-claude/settings)
   2. Revogue o token se possível
   3. Gere um novo token
   4. Atualize no `.env.local` (local only)

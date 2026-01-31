@@ -4,10 +4,13 @@ export type Element = 'terra' | 'agua' | 'ar' | 'fogo' | 'eter';
 // Desastres naturais correspondentes
 export type DisasterType = 'terremoto' | 'tsunami' | 'tornado' | 'incendio' | 'vazio';
 
+// Tipo reutilizável para valores de resposta
+export type AnswerValue = 1 | 2 | 3 | 4 | 5;
+
 // Opção de resposta
 export interface QuestionOption {
   text: string;
-  value: 1 | 2 | 3 | 4 | 5;
+  value: AnswerValue;
 }
 
 // Estrutura de uma pergunta
@@ -22,7 +25,7 @@ export interface Question {
 export interface Answer {
   questionId: string;
   element: Element;
-  value: number;
+  value: AnswerValue;
 }
 
 // Scores calculados
