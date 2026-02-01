@@ -110,14 +110,6 @@ export default function LoginScreen() {
 
         {/* Card de Login */}
         <Card variant="elevated">
-          {/* Por que login primeiro? */}
-          <div className="bg-blue-50 rounded-lg p-4 mb-6 border-l-4 border-blue-400">
-            <p className="text-sm text-blue-800">
-              <strong>Por que login primeiro?</strong> Seu resultado é salvo
-              automaticamente para você acessar sempre que quiser.
-            </p>
-          </div>
-
           <h2 className="text-xl font-semibold text-warmGray-900 text-center mb-6">
             Entre para começar
           </h2>
