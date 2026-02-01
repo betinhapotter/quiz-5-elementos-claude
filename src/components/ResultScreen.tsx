@@ -9,7 +9,6 @@ import { createClient } from '@/lib/supabase/client';
 import { elementsInfo, Element } from '@/types/quiz';
 import { generateResultExplanation, getResultSeverity, classifyResult } from '@/lib/quiz-logic';
 import ScoreMap from '@/components/ScoreMap';
-import PlannerSection from '@/components/PlannerSection';
 import ResultLayout from '@/components/ResultLayout';
 import '@/styles/print.css';
 
@@ -212,23 +211,11 @@ export default function ResultScreen() {
           <ScoreMap scores={result.scores} lowestElement={result.lowestElement} result={result} />
         </motion.section>
 
-        {/* CTA Principal - Comprar Planner de 30 Dias (Hotmart) */}
-        {!isCriticalSituation && (
-          <motion.section
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.8 }}
-            className="mb-10"
-          >
-            <PlannerSection result={result} quizResultId={quizResultId} user={user} />
-          </motion.section>
-        )}
-
         {/* CTA Hotmart - Comprar Planner de 30 Dias */}
         <motion.section
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.9 }}
+          transition={{ delay: 0.8 }}
           className="mb-10 p-8 bg-gradient-to-r from-emerald-50 to-teal-50 rounded-xl border border-emerald-200"
         >
           <div className="text-center">
