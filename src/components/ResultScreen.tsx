@@ -212,7 +212,7 @@ export default function ResultScreen() {
           <ScoreMap scores={result.scores} lowestElement={result.lowestElement} result={result} />
         </motion.section>
 
-        {/* CTA Principal - Gerar Planner com IA (não mostra se for situação crítica) */}
+        {/* CTA Principal - Comprar Planner de 30 Dias (Hotmart) */}
         {!isCriticalSituation && (
           <motion.section
             initial={{ opacity: 0, y: 20 }}
@@ -224,30 +224,30 @@ export default function ResultScreen() {
           </motion.section>
         )}
 
-        {/* P0-003: Upgrade Section - Opcional login para salvar resultado */}
-        {!isAuthenticated && (
-          <motion.section
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.95 }}
-            className="mb-10 p-8 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl border border-blue-200"
-          >
-            <div className="text-center">
-              <h3 className="text-xl font-bold text-warmGray-900 mb-2">
-                Salve seu resultado e planner
-              </h3>
-              <p className="text-warmGray-600 mb-4">
-                Faça login para guardar sua análise completa e acompanhar sua evolução ao longo do tempo.
-              </p>
-              <button
-                onClick={() => window.location.href = '/auth/login'}
-                className="btn-primary"
-              >
-                Fazer Login
-              </button>
-            </div>
-          </motion.section>
-        )}
+        {/* CTA Hotmart - Comprar Planner de 30 Dias */}
+        <motion.section
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.9 }}
+          className="mb-10 p-8 bg-gradient-to-r from-emerald-50 to-teal-50 rounded-xl border border-emerald-200"
+        >
+          <div className="text-center">
+            <h3 className="text-xl font-bold text-warmGray-900 mb-2">
+              Aprofunde seu Conhecimento
+            </h3>
+            <p className="text-warmGray-600 mb-6">
+              O Planner de 30 Dias oferece exercícios diários personalizados para realinhar seu relacionamento nos 5 Elementos.
+            </p>
+            <a
+              href="https://hotmart.com/pt/marketplace/produtos"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="btn-primary inline-block"
+            >
+              Comprar Planner de 30 Dias
+            </a>
+          </div>
+        </motion.section>
 
         {/* Footer / Ações secundárias */}
         <motion.div

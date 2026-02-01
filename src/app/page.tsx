@@ -6,7 +6,6 @@ import LoginScreen from '@/components/LoginScreen';
 import LandingScreen from '@/components/LandingScreen';
 import QuizScreen from '@/components/QuizScreen';
 import CalculatingScreen from '@/components/CalculatingScreen';
-import EmailCaptureScreen from '@/components/EmailCaptureScreen';
 import ResultScreen from '@/components/ResultScreen';
 import CriticalSituationScreen from '@/components/CriticalSituationScreen';
 
@@ -32,14 +31,18 @@ export default function Home() {
     );
   }
 
-  // Fluxo do quiz: anônimo ou autenticado
-  // P0-003: Removido auth gate para permitir fluxo anônimo completo
+  // Auth é obrigatório (lead capture)
+  // P0-003 (refactored): Auth vem PRIMEIRO como lead capture
+  if (!isAuthenticated || !user) {
+    return <LoginScreen />;
+  }
+
+  // Fluxo do quiz para usuários autenticados
   return (
     <div className="flex-1">
       {currentStep === 'landing' && <LandingScreen />}
       {currentStep === 'quiz' && <QuizScreen />}
       {currentStep === 'calculating' && <CalculatingScreen />}
-      {currentStep === 'email-capture' && <EmailCaptureScreen />}
       {currentStep === 'critical' && <CriticalSituationScreen />}
       {currentStep === 'result' && <ResultScreen />}
     </div>
