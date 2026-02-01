@@ -13,6 +13,7 @@ export default function EmailCaptureScreen() {
   const { result, submitEmail } = useQuizStore();
   const { user } = useAuth();
   const [email, setEmail] = useState('');
+  const [name, setName] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
 
@@ -39,7 +40,7 @@ export default function EmailCaptureScreen() {
       // Salva o email na tabela de leads
       await callAPI(API_ENDPOINTS.saveLead, {
         email,
-        name: null,
+        name: name || null,
         userId: user?.id || null,
         lowestElement: result?.lowestElement || null,
         lowestScore: result?.lowestScore ?? null,
@@ -47,12 +48,12 @@ export default function EmailCaptureScreen() {
       });
 
       // Continua com o fluxo normal
-      submitEmail(email);
+      submitEmail(email, name || undefined);
     } catch (err: any) {
       console.error('Erro ao salvar lead:', err);
       // Mesmo com erro, continua o fluxo para não bloquear o usuário
       // Mas loga o erro para monitoramento
-      submitEmail(email);
+      submitEmail(email, name || undefined);
     } finally {
       setIsSubmitting(false);
     }
@@ -235,6 +236,17 @@ export default function EmailCaptureScreen() {
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="Seu melhor email"
                   className="input-email pl-12"
+                  disabled={isSubmitting}
+                />
+              </div>
+
+              <div className="relative mb-4">
+                <input
+                  type="text"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  placeholder="Seu nome (opcional)"
+                  className="input-email"
                   disabled={isSubmitting}
                 />
               </div>

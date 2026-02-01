@@ -15,7 +15,7 @@ import '@/styles/print.css';
 
 export default function ResultScreen() {
   const { result, resetQuiz, userData, answers } = useQuizStore();
-  const { user, signOut } = useAuth();
+  const { user, signOut, isAuthenticated } = useAuth();
   const supabase = createClient();
 
   const [savedToDb, setSavedToDb] = useState(false);
@@ -221,6 +221,31 @@ export default function ResultScreen() {
             className="mb-10"
           >
             <PlannerSection result={result} quizResultId={quizResultId} user={user} />
+          </motion.section>
+        )}
+
+        {/* P0-003: Upgrade Section - Opcional login para salvar resultado */}
+        {!isAuthenticated && (
+          <motion.section
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.95 }}
+            className="mb-10 p-8 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl border border-blue-200"
+          >
+            <div className="text-center">
+              <h3 className="text-xl font-bold text-warmGray-900 mb-2">
+                Salve seu resultado e planner
+              </h3>
+              <p className="text-warmGray-600 mb-4">
+                Faça login para guardar sua análise completa e acompanhar sua evolução ao longo do tempo.
+              </p>
+              <button
+                onClick={() => window.location.href = '/login'}
+                className="btn-primary"
+              >
+                Fazer Login
+              </button>
+            </div>
           </motion.section>
         )}
 

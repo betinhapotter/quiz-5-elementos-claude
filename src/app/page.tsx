@@ -14,9 +14,6 @@ export default function Home() {
   const { user, loading, isAuthenticated } = useAuth();
   const currentStep = useQuizStore((state) => state.currentStep);
 
-  // Debug: log do estado de autenticação
-  console.log('Auth state:', { user: !!user, loading, isAuthenticated });
-
   // Loading state
   if (loading) {
     return (
@@ -35,12 +32,8 @@ export default function Home() {
     );
   }
 
-  // Verifica se o usuário está autenticado
-  if (!isAuthenticated || !user) {
-    return <LoginScreen />;
-  }
-
-  // Fluxo do quiz para usuários autenticados
+  // Fluxo do quiz: anônimo ou autenticado
+  // P0-003: Removido auth gate para permitir fluxo anônimo completo
   return (
     <div className="flex-1">
       {currentStep === 'landing' && <LandingScreen />}
