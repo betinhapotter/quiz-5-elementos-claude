@@ -240,7 +240,7 @@ export default function ResultScreen() {
                 Faça login para guardar sua análise completa e acompanhar sua evolução ao longo do tempo.
               </p>
               <button
-                onClick={() => window.location.href = '/login'}
+                onClick={() => window.location.href = '/auth/login'}
                 className="btn-primary"
               >
                 Fazer Login
