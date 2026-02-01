@@ -74,9 +74,10 @@ export const useQuizStore = create<QuizStore>((set, get) => ({
       // Cleanup: guarda o timeout ID para limpar se o componente desmontar
       const timeoutId = setTimeout(() => {
         const result = calculateResult(newAnswers);
+        const { isCritical } = classifyResult(result);
         set({
           result,
-          currentStep: 'email-capture',
+          currentStep: isCritical ? 'critical' : 'result',
         });
       }, 8000);
 

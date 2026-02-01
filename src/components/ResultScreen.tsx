@@ -232,20 +232,40 @@ export default function ResultScreen() {
           className="mb-10 p-8 bg-gradient-to-r from-emerald-50 to-teal-50 rounded-xl border border-emerald-200"
         >
           <div className="text-center">
-            <h3 className="text-xl font-bold text-warmGray-900 mb-2">
-              Aprofunde seu Conhecimento
+            <h3 className="text-xl font-bold text-warmGray-900 mb-4">
+              Você viu o problema. Agora é hora de resolver.
             </h3>
             <p className="text-warmGray-600 mb-6">
-              O Planner de 30 Dias oferece exercícios diários personalizados para realinhar seu relacionamento nos 5 Elementos.
+              O <strong>Planner de 30 Dias</strong> oferece:
             </p>
-            <a
-              href="https://hotmart.com/pt/marketplace/produtos"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="btn-primary inline-block"
-            >
-              Comprar Planner de 30 Dias
-            </a>
+            <ul className="text-warmGray-600 mb-6 space-y-2 inline-block text-left">
+              <li className="flex items-center gap-2">
+                <span className="text-green-500">✓</span>
+                30 exercícios práticos focados no seu elemento crítico
+              </li>
+              <li className="flex items-center gap-2">
+                <span className="text-green-500">✓</span>
+                Conversas guiadas para você e seu(sua) parceiro(a)
+              </li>
+              <li className="flex items-center gap-2">
+                <span className="text-green-500">✓</span>
+                Acompanhamento de progresso diário
+              </li>
+              <li className="flex items-center gap-2">
+                <span className="text-green-500">✓</span>
+                Garantia de 7 dias (não funcionou? Devolvemos)
+              </li>
+            </ul>
+            <div className="mt-8">
+              <a
+                href="https://hotmart.com/pt/marketplace/produtos"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="btn-primary inline-block"
+              >
+                Garantir Meu Planner de 30 Dias
+              </a>
+            </div>
           </div>
         </motion.section>
 
