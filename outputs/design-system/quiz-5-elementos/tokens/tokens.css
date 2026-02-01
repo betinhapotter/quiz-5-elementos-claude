@@ -1,0 +1,175 @@
+/**
+ * Design Tokens - Quiz 5 Elementos
+ * Generated: 2026-01-31
+ * Workflow: brownfield-complete Step 3 - Tokenize
+ * Format: CSS Custom Properties
+ */
+
+:root {
+    /* ==========================================================================
+   * COLOR TOKENS - Elements
+   * ========================================================================== */
+
+    /* Terra */
+    --color-terra: #8B7355;
+    --color-terra-light: #A89076;
+    --color-terra-dark: #6B5544;
+
+    /* Água */
+    --color-agua: #4A90A4;
+    --color-agua-light: #6BA8BC;
+    --color-agua-dark: #3A7286;
+
+    /* Ar */
+    --color-ar: #87CEEB;
+    --color-ar-light: #B0E0F0;
+    --color-ar-dark: #5FAED1;
+
+    /* Fogo (Primary) */
+    --color-fogo: #E25822;
+    --color-fogo-light: #F07850;
+    --color-fogo-dark: #C04010;
+
+    /* Éter */
+    --color-eter: #9B59B6;
+    --color-eter-light: #B07CC6;
+    --color-eter-dark: #7D4694;
+
+    /* ==========================================================================
+   * COLOR TOKENS - Base
+   * ========================================================================== */
+    --color-cream: #FDF8F3;
+    --color-white: #FFFFFF;
+    --color-black: #000000;
+
+    /* ==========================================================================
+   * COLOR TOKENS - Warm Gray Scale
+   * ========================================================================== */
+    --color-gray-50: #FAF9F7;
+    --color-gray-100: #F5F3EF;
+    --color-gray-200: #E8E4DD;
+    --color-gray-300: #D4CEC3;
+    --color-gray-400: #B5ADA0;
+    --color-gray-500: #958B7B;
+    --color-gray-600: #766C5E;
+    --color-gray-700: #5A524A;
+    --color-gray-800: #3D3833;
+    --color-gray-900: #252220;
+
+    /* ==========================================================================
+   * COLOR TOKENS - Semantic
+   * ========================================================================== */
+    --color-success: #22C55E;
+    --color-success-light: #4ADE80;
+    --color-success-dark: #16A34A;
+
+    --color-warning: #F59E0B;
+    --color-warning-light: #FBBF24;
+    --color-warning-dark: #D97706;
+
+    --color-danger: #EF4444;
+    --color-danger-light: #F87171;
+    --color-danger-dark: #DC2626;
+
+    --color-info: #3B82F6;
+    --color-info-light: #60A5FA;
+    --color-info-dark: #2563EB;
+
+    /* ==========================================================================
+   * TYPOGRAPHY TOKENS
+   * ========================================================================== */
+    --font-sans: var(--font-inter), system-ui, sans-serif;
+    --font-display: var(--font-playfair), Georgia, serif;
+
+    --font-size-xs: 0.75rem;
+    --font-size-sm: 0.875rem;
+    --font-size-base: 1rem;
+    --font-size-lg: 1.125rem;
+    --font-size-xl: 1.25rem;
+    --font-size-2xl: 1.5rem;
+    --font-size-3xl: 1.875rem;
+    --font-size-4xl: 2.25rem;
+    --font-size-5xl: 3rem;
+
+    --font-weight-normal: 400;
+    --font-weight-medium: 500;
+    --font-weight-semibold: 600;
+    --font-weight-bold: 700;
+
+    --line-height-xs: 1rem;
+    --line-height-sm: 1.25rem;
+    --line-height-base: 1.5rem;
+    --line-height-lg: 1.75rem;
+    --line-height-xl: 1.75rem;
+    --line-height-2xl: 2rem;
+    --line-height-3xl: 2.25rem;
+    --line-height-4xl: 2.5rem;
+    --line-height-5xl: 1;
+
+    /* ==========================================================================
+   * SPACING TOKENS
+   * ========================================================================== */
+    --spacing-0: 0;
+    --spacing-1: 0.25rem;
+    --spacing-2: 0.5rem;
+    --spacing-3: 0.75rem;
+    --spacing-4: 1rem;
+    --spacing-5: 1.25rem;
+    --spacing-6: 1.5rem;
+    --spacing-8: 2rem;
+    --spacing-10: 2.5rem;
+    --spacing-12: 3rem;
+    --spacing-16: 4rem;
+    --spacing-20: 5rem;
+    --spacing-24: 6rem;
+
+    /* ==========================================================================
+   * BORDER TOKENS
+   * ========================================================================== */
+    --radius-none: 0;
+    --radius-sm: 0.125rem;
+    --radius-base: 0.25rem;
+    --radius-md: 0.375rem;
+    --radius-lg: 0.5rem;
+    --radius-xl: 0.75rem;
+    --radius-2xl: 1rem;
+    --radius-full: 9999px;
+
+    --border-0: 0;
+    --border-1: 1px;
+    --border-2: 2px;
+    --border-4: 4px;
+
+    /* ==========================================================================
+   * SHADOW TOKENS
+   * ========================================================================== */
+    --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+    --shadow-base: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+    --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+    --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+    --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+
+    /* ==========================================================================
+   * ANIMATION TOKENS
+   * ========================================================================== */
+    --duration-fast: 150ms;
+    --duration-base: 200ms;
+    --duration-slow: 300ms;
+    --duration-slower: 500ms;
+
+    --easing-linear: linear;
+    --easing-ease: ease;
+    --easing-ease-in: ease-in;
+    --easing-ease-out: ease-out;
+    --easing-ease-in-out: ease-in-out;
+
+    /* ==========================================================================
+   * Z-INDEX TOKENS
+   * ========================================================================== */
+    --z-0: 0;
+    --z-10: 10;
+    --z-20: 20;
+    --z-30: 30;
+    --z-40: 40;
+    --z-50: 50;
+}

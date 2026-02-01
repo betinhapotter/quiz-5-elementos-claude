@@ -1,0 +1,224 @@
+# Design System Consolidation Decisions
+# Generated: 2026-01-31
+# Workflow: brownfield-complete Step 2 - Consolidate
+
+consolidation:
+  project: quiz-5-elementos
+  timestamp: "2026-01-31T00:17:00-03:00"
+  source: audit/inventory.yaml
+
+# =============================================================================
+# CLUSTERING DECISIONS
+# =============================================================================
+
+# -----------------------------------------------------------------------------
+# BUTTON CONSOLIDATION
+# -----------------------------------------------------------------------------
+buttons:
+  decision: "Consolidate 4 button patterns into 2 base components with variants"
+  
+  clusters:
+    - id: Button
+      name: "Primary Button"
+      base_classes: "inline-flex items-center justify-center gap-2 rounded-xl font-semibold transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+      variants:
+        - name: primary
+          classes: "bg-fogo text-white shadow-lg hover:bg-fogo-dark hover:shadow-xl hover:-translate-y-0.5"
+          sizes:
+            - sm: "px-4 py-2 text-sm"
+            - md: "px-6 py-3 text-base"
+            - lg: "px-8 py-4 text-lg"
+            - xl: "px-10 py-5 text-xl"
+        - name: secondary
+          classes: "border-2 border-warmGray-300 bg-white text-warmGray-700 hover:border-warmGray-400 hover:bg-warmGray-50"
+        - name: success
+          classes: "bg-green-500 text-white hover:bg-green-600"
+        - name: danger
+          classes: "bg-red-600 text-white hover:bg-red-700"
+        - name: info
+          classes: "bg-blue-600 text-white hover:bg-blue-700"
+      
+    - id: IconButton
+      name: "Icon Button"
+      base_classes: "p-2 rounded-lg transition-colors"
+      variants:
+        - name: ghost
+          classes: "text-warmGray-500 hover:text-warmGray-700 hover:bg-warmGray-100"
+        - name: danger
+          classes: "text-red-500 hover:text-red-700 hover:bg-red-50"
+
+  reduction:
+    before: 4
+    after: 2
+    percentage: "50%"
+
+# -----------------------------------------------------------------------------
+# CARD CONSOLIDATION
+# -----------------------------------------------------------------------------
+cards:
+  decision: "Consolidate 4 card patterns into 2 base components"
+  
+  clusters:
+    - id: Card
+      name: "Base Card"
+      base_classes: "rounded-xl bg-white border border-warmGray-100"
+      variants:
+        - name: default
+          classes: "p-6 shadow-sm"
+        - name: elevated
+          classes: "p-6 sm:p-8 shadow-lg"
+        - name: interactive
+          classes: "p-4 border-2 border-warmGray-200 cursor-pointer hover:border-fogo hover:shadow-md transition-all"
+        - name: selected
+          classes: "p-4 border-2 border-fogo bg-fogo/5 shadow-md"
+          
+    - id: GradientCard
+      name: "Gradient Card"
+      base_classes: "rounded-2xl p-8 text-white"
+      variants:
+        - name: dark
+          classes: "bg-gradient-to-br from-warmGray-900 to-warmGray-800"
+        - name: fogo
+          classes: "bg-gradient-to-r from-fogo to-fogo-dark"
+        - name: success
+          classes: "bg-gradient-to-r from-green-500 to-emerald-600"
+        - name: element
+          classes: "bg-gradient-to-r"
+          dynamic: true
+          prop: "elementGradient"
+
+  reduction:
+    before: 4
+    after: 2
+    percentage: "50%"
+
+# -----------------------------------------------------------------------------
+# BADGE CONSOLIDATION
+# -----------------------------------------------------------------------------
+badges:
+  decision: "Consolidate to single Badge component with element variants"
+  
+  clusters:
+    - id: Badge
+      name: "Badge"
+      base_classes: "inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-sm font-medium"
+      variants:
+        - name: terra
+          classes: "bg-terra/10 text-terra-dark"
+        - name: agua
+          classes: "bg-agua/10 text-agua-dark"
+        - name: ar
+          classes: "bg-ar/20 text-ar-dark"
+        - name: fogo
+          classes: "bg-fogo/10 text-fogo-dark"
+        - name: eter
+          classes: "bg-eter/10 text-eter-dark"
+        - name: promo
+          classes: "bg-fogo/10 text-fogo-dark"
+        - name: success
+          classes: "bg-green-100 text-green-800"
+        - name: warning
+          classes: "bg-orange-100 text-orange-800"
+        - name: danger
+          classes: "bg-red-100 text-red-800"
+
+  reduction:
+    before: 2
+    after: 1
+    percentage: "50%"
+
+# -----------------------------------------------------------------------------
+# INPUT CONSOLIDATION
+# -----------------------------------------------------------------------------
+inputs:
+  decision: "Create single Input component with icon support"
+  
+  clusters:
+    - id: Input
+      name: "Text Input"
+      base_classes: "w-full rounded-xl border-2 border-warmGray-200 bg-white px-4 py-3 text-lg placeholder:text-warmGray-400 focus:border-fogo focus:outline-none focus:ring-2 focus:ring-fogo/20 transition-all duration-200"
+      props:
+        - leftIcon: "optional Lucide icon"
+        - rightIcon: "optional Lucide icon"
+        - error: "boolean for error state"
+      states:
+        error: "border-red-500 focus:border-red-500 focus:ring-red-200"
+
+  reduction:
+    before: 1
+    after: 1
+    percentage: "0%"
+    note: "Already optimized, adding icon prop support"
+
+# -----------------------------------------------------------------------------
+# ANIMATION CONSOLIDATION
+# -----------------------------------------------------------------------------
+animations:
+  decision: "Create AnimatedContainer wrapper for common patterns"
+  
+  clusters:
+    - id: AnimatedContainer
+      name: "Animated Container"
+      description: "Framer Motion wrapper for common animations"
+      presets:
+        - name: fadeSlideUp
+          initial: "{ opacity: 0, y: 20 }"
+          animate: "{ opacity: 1, y: 0 }"
+        - name: fadeSlideRight
+          initial: "{ opacity: 0, x: -20 }"
+          animate: "{ opacity: 1, x: 0 }"
+        - name: scaleIn
+          initial: "{ opacity: 0, scale: 0.8 }"
+          animate: "{ opacity: 1, scale: 1 }"
+        - name: fadeIn
+          initial: "{ opacity: 0 }"
+          animate: "{ opacity: 1 }"
+
+  reduction:
+    before: "15+ inline usages"
+    after: "1 component with presets"
+    percentage: "80%"
+
+# =============================================================================
+# CONSOLIDATION METRICS
+# =============================================================================
+metrics:
+  total_patterns_before: 47
+  total_patterns_after: 31
+  reduction_percentage: "34%"
+  
+  component_reduction:
+    buttons: "4 → 2"
+    cards: "4 → 2"
+    badges: "2 → 1"
+    inputs: "1 → 1"
+    animations: "15+ → 1"
+
+  code_deduplication:
+    lines_removed_estimate: 150
+    files_simplified: 8
+
+# =============================================================================
+# MIGRATION PRIORITY
+# =============================================================================
+migration_priority:
+  1:
+    component: Button
+    reason: "28 usages, high impact"
+    effort: "low"
+  2:
+    component: Card
+    reason: "12 usages, significant dedup"
+    effort: "medium"
+  3:
+    component: Badge
+    reason: "3 usages, easy consolidation"
+    effort: "low"
+  4:
+    component: AnimatedContainer
+    reason: "15 usages, biggest code reduction"
+    effort: "medium"
+  5:
+    component: Input
+    reason: "1 usage, but adds icon support"
+    effort: "low"

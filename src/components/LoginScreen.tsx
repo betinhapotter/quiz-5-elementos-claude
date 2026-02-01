@@ -1,9 +1,9 @@
 'use client';
 
 import { useState } from 'react';
-import { motion } from 'framer-motion';
 import { createClient } from '@/lib/supabase/client';
 import { elementsInfo } from '@/types/quiz';
+import { Button, AnimatedContainer, Card, StaggerContainer, StaggerItem } from '@/components/ui';
 
 export default function LoginScreen({ onSkip }: { onSkip?: () => void }) {
   const [isLoading, setIsLoading] = useState(false);
@@ -20,7 +20,7 @@ export default function LoginScreen({ onSkip }: { onSkip?: () => void }) {
         options: {
           redirectTo: `${window.location.origin}/`,
           queryParams: {
-            prompt: 'select_account', // Força seleção de conta ao invés de auto-login
+            prompt: 'select_account',
           },
         },
       });
@@ -41,27 +41,16 @@ export default function LoginScreen({ onSkip }: { onSkip?: () => void }) {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-cream to-warmGray-100 flex items-center justify-center px-4">
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-        className="w-full max-w-md"
-      >
+      <AnimatedContainer preset="fadeSlideUp" className="w-full max-w-md">
         {/* Logo/Brand */}
         <div className="text-center mb-8">
-          <div className="flex justify-center gap-2 mb-4">
-            {elements.map((el, i) => (
-              <motion.span
-                key={el.name}
-                initial={{ opacity: 0, scale: 0 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ delay: i * 0.1 }}
-                className="text-2xl"
-              >
-                {el.icon}
-              </motion.span>
+          <StaggerContainer staggerDelay={0.1} className="flex justify-center gap-2 mb-4">
+            {elements.map((el) => (
+              <StaggerItem key={el.name}>
+                <span className="text-2xl">{el.icon}</span>
+              </StaggerItem>
             ))}
-          </div>
+          </StaggerContainer>
           <h1 className="font-display text-2xl sm:text-3xl font-bold text-warmGray-900 mb-2">
             Quiz dos 5 Elementos
           </h1>
@@ -71,7 +60,7 @@ export default function LoginScreen({ onSkip }: { onSkip?: () => void }) {
         </div>
 
         {/* Card de Login */}
-        <div className="bg-white rounded-2xl shadow-lg border border-warmGray-100 p-8">
+        <Card variant="elevated">
           <h2 className="text-xl font-semibold text-warmGray-900 text-center mb-6">
             Entre para começar
           </h2>
@@ -93,18 +82,14 @@ export default function LoginScreen({ onSkip }: { onSkip?: () => void }) {
           </ul>
 
           {/* Botão de Login com Google */}
-          <button
+          <Button
+            variant="secondary"
+            size="lg"
             onClick={handleGoogleLogin}
-            disabled={isLoading}
-            className="w-full flex items-center justify-center gap-3 bg-white border-2 border-warmGray-200 
-                     rounded-xl px-6 py-4 text-warmGray-700 font-medium
-                     hover:bg-warmGray-50 hover:border-warmGray-300 
-                     transition-all duration-200
-                     disabled:opacity-50 disabled:cursor-not-allowed"
+            isLoading={isLoading}
+            className="w-full"
           >
-            {isLoading ? (
-              <div className="w-5 h-5 border-2 border-warmGray-300 border-t-warmGray-600 rounded-full animate-spin" />
-            ) : (
+            {!isLoading && (
               <svg className="w-5 h-5" viewBox="0 0 24 24">
                 <path
                   fill="#4285F4"
@@ -125,7 +110,7 @@ export default function LoginScreen({ onSkip }: { onSkip?: () => void }) {
               </svg>
             )}
             {isLoading ? 'Conectando...' : 'Continuar com Google'}
-          </button>
+          </Button>
 
           {error && (
             <p className="mt-4 text-center text-sm text-red-500">{error}</p>
@@ -133,14 +118,15 @@ export default function LoginScreen({ onSkip }: { onSkip?: () => void }) {
 
           {/* Opção de pular (opcional) */}
           {onSkip && (
-            <button
+            <Button
+              variant="ghost"
               onClick={onSkip}
-              className="w-full mt-4 text-sm text-warmGray-500 hover:text-warmGray-700 transition-colors"
+              className="w-full mt-4"
             >
               Fazer sem cadastro (resultado não será salvo)
-            </button>
+            </Button>
           )}
-        </div>
+        </Card>
 
         {/* Footer */}
         <p className="text-center text-xs text-warmGray-400 mt-6">
@@ -153,7 +139,7 @@ export default function LoginScreen({ onSkip }: { onSkip?: () => void }) {
         <p className="text-center text-sm text-warmGray-500 mt-8">
           Por <strong>Jaya Roberta</strong> | Terapeuta Integrativa
         </p>
-      </motion.div>
+      </AnimatedContainer>
     </div>
   );
 }

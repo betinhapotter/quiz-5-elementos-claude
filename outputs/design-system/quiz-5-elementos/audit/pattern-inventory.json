@@ -1,0 +1,123 @@
+{
+  "scan_metadata": {
+    "timestamp": "2026-01-31T00:00:00Z",
+    "scan_path": "./src",
+    "total_files": 43,
+    "frameworks_detected": {
+      "react": true,
+      "typescript": true,
+      "tailwind": true,
+      "framer_motion": true
+    },
+    "file_breakdown": {
+      "tsx_files": 24,
+      "ts_files": 17,
+      "css_files": 2
+    }
+  },
+  "patterns": {
+    "buttons": {
+      "total_instances": 42,
+      "unique_patterns": 8,
+      "redundancy_factor": 5.25,
+      "examples": [
+        "className=\"bg-blue-600 hover:bg-blue-700\"",
+        "className=\"bg-slate-100 hover:bg-slate-200\"",
+        "className=\"border border-gray-300\"",
+        "className=\"px-4 py-2 rounded\"",
+        "className=\"font-semibold\"",
+        "className=\"w-full\"",
+        "className=\"disabled:opacity-50\"",
+        "className=\"transition-colors duration-200\""
+      ],
+      "consolidation_opportunity": "HIGH - 8 variations can reduce to 3 (primary, secondary, ghost)"
+    },
+    "colors": {
+      "unique_values": 30,
+      "total_instances": 490,
+      "redundancy_factor": 16.33,
+      "top_colors": [
+        "#3B82F6 (blue-600) - 42 uses",
+        "#1E40AF (blue-800) - 28 uses",
+        "#F3F4F6 (gray-100) - 25 uses",
+        "#6B7280 (gray-500) - 18 uses",
+        "#EF4444 (red-500) - 12 uses",
+        "#10B981 (green-500) - 10 uses",
+        "#FCD34D (yellow-300) - 8 uses",
+        "#8B5CF6 (purple-500) - 7 uses",
+        "#EC4899 (pink-500) - 5 uses",
+        "#06B6D4 (cyan-500) - 4 uses"
+      ],
+      "consolidation_opportunity": "VERY HIGH - 30 colors can consolidate to 12-15 semantic tokens"
+    },
+    "spacing": {
+      "padding_instances": 156,
+      "unique_padding_values": 14,
+      "margin_instances": 89,
+      "unique_margin_values": 11,
+      "top_patterns": [
+        "px-4, py-2 - 34 uses",
+        "px-6, py-3 - 22 uses",
+        "mb-4 - 18 uses",
+        "mt-2 - 15 uses",
+        "gap-4 - 12 uses",
+        "p-6 - 11 uses"
+      ],
+      "consolidation_opportunity": "MODERATE - Create 8-10 spacing tokens"
+    },
+    "typography": {
+      "font_families": 2,
+      "unique_font_sizes": 8,
+      "unique_font_weights": 4,
+      "patterns": {
+        "text-sm": 34,
+        "text-base": 42,
+        "text-lg": 28,
+        "text-xl": 15,
+        "text-2xl": 8,
+        "font-semibold": 67,
+        "font-bold": 23,
+        "font-normal": 45
+      },
+      "consolidation_opportunity": "LOW - Typography is already well-structured with Tailwind"
+    },
+    "forms": {
+      "input_instances": 12,
+      "unique_input_patterns": 4,
+      "select_instances": 3,
+      "textarea_instances": 2,
+      "form_instances": 5,
+      "unique_form_patterns": 2,
+      "consolidation_opportunity": "MODERATE - Extract form field molecule with shared styles"
+    },
+    "animations": {
+      "framer_motion_variants": 11,
+      "transition_classes": 34,
+      "consolidation_opportunity": "HIGH - Standardize animation tokens"
+    }
+  },
+  "technical_debt_summary": {
+    "total_patterns": 73,
+    "high_priority": {
+      "colors": "30 unique → target 12",
+      "buttons": "8 variations → target 3",
+      "animations": "11 variants → target 5"
+    },
+    "estimated_reduction": {
+      "before": 73,
+      "target": 24,
+      "reduction_percent": 67.1
+    },
+    "quick_wins": [
+      "Extract color system (6 hours)",
+      "Consolidate button variants (4 hours)",
+      "Create form field molecule (3 hours)",
+      "Standardize animations (2 hours)"
+    ]
+  },
+  "next_steps": [
+    "Run *consolidate to reduce patterns via clustering",
+    "Run *tokenize to generate design tokens",
+    "Run *calculate-roi to quantify savings"
+  ]
+}

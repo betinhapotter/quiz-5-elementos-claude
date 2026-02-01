@@ -1,0 +1,324 @@
+# Design System Audit - Quiz 5 Elementos
+# Generated: 2026-01-31
+# Workflow: brownfield-complete Step 1 - Audit
+
+audit:
+  project: quiz-5-elementos
+  timestamp: "2026-01-31T00:15:00-03:00"
+  total_components: 13
+  total_patterns: 47
+
+# =============================================================================
+# COLOR PATTERNS
+# =============================================================================
+colors:
+  elements:
+    terra:
+      default: "#8B7355"
+      light: "#A89076"
+      dark: "#6B5544"
+      usage_count: 13
+      locations:
+        - tailwind.config.ts
+        - globals.css (.element-badge.terra)
+    agua:
+      default: "#4A90A4"
+      light: "#6BA8BC"
+      dark: "#3A7286"
+      usage_count: 11
+    ar:
+      default: "#87CEEB"
+      light: "#B0E0F0"
+      dark: "#5FAED1"
+      usage_count: 9
+    fogo:
+      default: "#E25822"
+      light: "#F07850"
+      dark: "#C04010"
+      usage_count: 28
+      note: "Primary action color, most used"
+    eter:
+      default: "#9B59B6"
+      light: "#B07CC6"
+      dark: "#7D4694"
+      usage_count: 8
+
+  base:
+    cream:
+      value: "#FDF8F3"
+      usage: "background"
+      usage_count: 15
+    warmGray:
+      50: "#FAF9F7"
+      100: "#F5F3EF"
+      200: "#E8E4DD"
+      300: "#D4CEC3"
+      400: "#B5ADA0"
+      500: "#958B7B"
+      600: "#766C5E"
+      700: "#5A524A"
+      800: "#3D3833"
+      900: "#252220"
+      usage_count: 87
+      note: "Primary text and UI color scale"
+
+  semantic:
+    success: "green-500"
+    error: "red-500"
+    warning: "orange-600"
+    info: "blue-600"
+
+# =============================================================================
+# BUTTON PATTERNS (Redundancy Analysis)
+# =============================================================================
+buttons:
+  patterns:
+    - id: btn-primary
+      defined_in: globals.css
+      classes: "inline-flex items-center justify-center rounded-xl bg-fogo px-8 py-4 text-lg font-semibold text-white shadow-lg"
+      usage_count: 7
+      variations:
+        - "bg-fogo hover:bg-fogo-dark" # Default
+        - "bg-blue-600 hover:bg-blue-700" # Download PDF
+        - "bg-green-500 hover:bg-green-600" # Success
+      redundancy_score: 0.7
+      note: "Color variants should be extracted as props"
+
+    - id: btn-secondary
+      defined_in: globals.css
+      classes: "inline-flex items-center justify-center rounded-xl border-2 border-warmGray-300 bg-white px-6 py-3"
+      usage_count: 4
+
+    - id: btn-icon-only
+      inline: true
+      classes: "p-2 rounded-lg text-warmGray-500 hover:text-warmGray-700 hover:bg-warmGray-100"
+      usage_count: 5
+      locations:
+        - QuizScreen (back, logout)
+        - LandingScreen (logout)
+
+    - id: btn-google-login
+      inline: true
+      classes: "w-full flex items-center justify-center gap-3 bg-white border-2 border-warmGray-200 rounded-xl px-6 py-4"
+      usage_count: 1
+      location: LoginScreen
+
+# =============================================================================
+# CARD PATTERNS
+# =============================================================================
+cards:
+  patterns:
+    - id: option-card
+      defined_in: globals.css
+      classes: "relative w-full rounded-xl border-2 border-warmGray-200 bg-white p-4"
+      states:
+        - selected: "border-fogo bg-fogo/5 shadow-md"
+        - hover: "border-fogo shadow-md"
+      usage_count: 1
+      location: QuizScreen
+
+    - id: content-card
+      inline: true
+      classes: "bg-white rounded-xl p-6 shadow-sm border border-warmGray-100"
+      usage_count: 12
+      locations:
+        - ResultScreen (sections)
+        - EmailCaptureScreen (form)
+        - LoginScreen (card)
+
+    - id: element-card
+      inline: true
+      classes: "flex flex-col items-center p-4 rounded-xl bg-white shadow-sm border border-warmGray-100"
+      usage_count: 1
+      location: LandingScreen
+
+    - id: gradient-card
+      inline: true
+      classes: "bg-gradient-to-br from-warmGray-900 to-warmGray-800 rounded-2xl p-8 text-white"
+      usage_count: 1
+      location: PlannerSection
+
+# =============================================================================
+# INPUT PATTERNS
+# =============================================================================
+inputs:
+  patterns:
+    - id: input-email
+      defined_in: globals.css
+      classes: "w-full rounded-xl border-2 border-warmGray-200 bg-white px-4 py-3 text-lg"
+      states:
+        - focus: "border-fogo ring-2 ring-fogo/20"
+      usage_count: 1
+      location: EmailCaptureScreen
+
+# =============================================================================
+# BADGE PATTERNS
+# =============================================================================
+badges:
+  patterns:
+    - id: element-badge
+      defined_in: globals.css
+      classes: "inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-sm font-medium"
+      variants:
+        - terra: "bg-terra/10 text-terra-dark"
+        - agua: "bg-agua/10 text-agua-dark"
+        - ar: "bg-ar/20 text-ar-dark"
+        - fogo: "bg-fogo/10 text-fogo-dark"
+        - eter: "bg-eter/10 text-eter-dark"
+      usage_count: 3
+
+    - id: promo-badge
+      inline: true
+      classes: "inline-block rounded-full bg-fogo/10 px-4 py-1.5 text-sm font-medium text-fogo-dark"
+      usage_count: 1
+      location: LandingScreen
+
+# =============================================================================
+# LAYOUT PATTERNS
+# =============================================================================
+layouts:
+  containers:
+    - id: container-quiz
+      defined_in: globals.css
+      classes: "mx-auto max-w-2xl px-4 sm:px-6"
+      usage_count: 11
+
+  backgrounds:
+    - id: bg-gradient-cream
+      classes: "bg-gradient-to-b from-cream to-warmGray-100"
+      usage_count: 5
+
+    - id: bg-cream-solid
+      classes: "bg-cream"
+      usage_count: 3
+
+    - id: bg-hero-gradient
+      inline: true
+      dynamic: true
+      note: "Element-specific gradients for hero sections"
+      variants:
+        - terra: "from-terra to-terra-dark"
+        - agua: "from-agua to-agua-dark"
+        - balanced: "from-green-500 to-emerald-600"
+      usage_count: 2
+
+# =============================================================================
+# TYPOGRAPHY PATTERNS
+# =============================================================================
+typography:
+  fonts:
+    - id: font-sans
+      value: "var(--font-inter), system-ui, sans-serif"
+      usage: "body text"
+    - id: font-display
+      value: "var(--font-playfair), Georgia, serif"
+      usage: "headings"
+
+  text_classes:
+    - id: text-gradient
+      defined_in: globals.css
+      classes: "bg-gradient-to-r from-fogo via-eter to-agua bg-clip-text text-transparent"
+      usage_count: 1
+
+  headings:
+    - h1: "font-display text-3xl sm:text-4xl md:text-5xl font-bold"
+    - h2: "font-display text-2xl font-bold text-warmGray-900"
+    - h3: "font-semibold text-warmGray-900 text-lg"
+
+# =============================================================================
+# ANIMATION PATTERNS
+# =============================================================================
+animations:
+  tailwind:
+    - id: fade-in
+      keyframes: "0% opacity:0 → 100% opacity:1"
+      duration: 0.5s
+    - id: slide-up
+      keyframes: "0% opacity:0, translateY:20px → 100% opacity:1, translateY:0"
+      duration: 0.5s
+    - id: pulse-slow
+      duration: 3s
+      infinite: true
+
+  framer_motion:
+    - id: fade-slide-in
+      initial: "{ opacity: 0, y: 20 }"
+      animate: "{ opacity: 1, y: 0 }"
+      usage_count: 15
+      note: "Most common entry animation"
+    - id: scale-in
+      initial: "{ scale: 0.8, opacity: 0 }"
+      animate: "{ scale: 1, opacity: 1 }"
+      usage_count: 3
+    - id: rotate-infinite
+      animate: "{ rotate: 360 }"
+      transition: "{ duration: 3, repeat: Infinity }"
+      usage_count: 1
+      location: CalculatingScreen
+
+  custom:
+    - id: loading-spinner
+      defined_in: globals.css
+      classes: "inline-block h-8 w-8 animate-spin rounded-full border-4 border-warmGray-200 border-t-fogo"
+      usage_count: 2
+
+    - id: elementPulse
+      defined_in: globals.css
+      keyframes: "scale:1→1.05→1, opacity:1→0.9→1"
+      duration: 3s
+
+# =============================================================================
+# PROGRESS PATTERNS
+# =============================================================================
+progress:
+  - id: progress-bar
+    defined_in: globals.css
+    container: "h-2 rounded-full bg-warmGray-200 overflow-hidden"
+    fill: "h-full rounded-full bg-gradient-to-r from-terra via-agua to-fogo"
+    usage_count: 1
+    location: QuizScreen
+
+# =============================================================================
+# ICON PATTERNS
+# =============================================================================
+icons:
+  library: lucide-react
+  icons_used:
+    - ChevronLeft
+    - LogOut
+    - Mail
+    - Lock
+    - AlertTriangle
+    - Sparkles
+    - Download
+    - Loader2
+    - Instagram
+    - RefreshCw
+  emoji_elements:
+    terra: "🌍"
+    agua: "💧"
+    ar: "🌬️"
+    fogo: "🔥"
+    eter: "✨"
+
+# =============================================================================
+# REDUNDANCY SUMMARY
+# =============================================================================
+redundancy_summary:
+  high_redundancy:
+    - pattern: "rounded-xl border-2 border-warmGray-* bg-white p-*"
+      count: 14
+      recommendation: "Extract as Card component"
+    - pattern: "text-warmGray-* text-sm"
+      count: 23
+      recommendation: "Create Text variants"
+    - pattern: "motion.div with fade-slide-in"
+      count: 15
+      recommendation: "Create AnimatedContainer component"
+
+  consolidation_opportunities:
+    - buttons: "3 color variants → should be props"
+    - cards: "4 patterns → consolidate to 2"
+    - badges: "2 patterns → consolidate to 1 with variants"
+
+  estimated_reduction: "35%"

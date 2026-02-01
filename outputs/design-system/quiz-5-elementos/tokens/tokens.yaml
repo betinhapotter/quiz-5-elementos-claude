@@ -1,0 +1,309 @@
+# Design Tokens - Quiz 5 Elementos
+# Generated: 2026-01-31
+# Workflow: brownfield-complete Step 3 - Tokenize
+# Format: YAML (source of truth)
+
+tokens:
+  version: "1.0.0"
+  project: quiz-5-elementos
+  timestamp: "2026-01-31T00:18:00-03:00"
+
+# =============================================================================
+# COLOR TOKENS
+# =============================================================================
+colors:
+  # 5 Elements Palette
+  elements:
+    terra:
+      default:
+        value: "#8B7355"
+        description: "Terra element - stability, grounding"
+      light:
+        value: "#A89076"
+      dark:
+        value: "#6B5544"
+    agua:
+      default:
+        value: "#4A90A4"
+        description: "Água element - emotions, flow"
+      light:
+        value: "#6BA8BC"
+      dark:
+        value: "#3A7286"
+    ar:
+      default:
+        value: "#87CEEB"
+        description: "Ar element - communication, thought"
+      light:
+        value: "#B0E0F0"
+      dark:
+        value: "#5FAED1"
+    fogo:
+      default:
+        value: "#E25822"
+        description: "Fogo element - passion, action (primary)"
+      light:
+        value: "#F07850"
+      dark:
+        value: "#C04010"
+    eter:
+      default:
+        value: "#9B59B6"
+        description: "Éter element - spirituality, purpose"
+      light:
+        value: "#B07CC6"
+      dark:
+        value: "#7D4694"
+
+  # Base Colors
+  base:
+    cream:
+      value: "#FDF8F3"
+      description: "Background color"
+    white:
+      value: "#FFFFFF"
+    black:
+      value: "#000000"
+
+  # Warm Gray Scale
+  gray:
+    50:
+      value: "#FAF9F7"
+    100:
+      value: "#F5F3EF"
+    200:
+      value: "#E8E4DD"
+    300:
+      value: "#D4CEC3"
+    400:
+      value: "#B5ADA0"
+    500:
+      value: "#958B7B"
+    600:
+      value: "#766C5E"
+    700:
+      value: "#5A524A"
+    800:
+      value: "#3D3833"
+    900:
+      value: "#252220"
+
+  # Semantic Colors
+  semantic:
+    success:
+      default:
+        value: "#22C55E"
+      light:
+        value: "#4ADE80"
+      dark:
+        value: "#16A34A"
+    warning:
+      default:
+        value: "#F59E0B"
+      light:
+        value: "#FBBF24"
+      dark:
+        value: "#D97706"
+    danger:
+      default:
+        value: "#EF4444"
+      light:
+        value: "#F87171"
+      dark:
+        value: "#DC2626"
+    info:
+      default:
+        value: "#3B82F6"
+      light:
+        value: "#60A5FA"
+      dark:
+        value: "#2563EB"
+
+# =============================================================================
+# TYPOGRAPHY TOKENS
+# =============================================================================
+typography:
+  fonts:
+    sans:
+      value: "var(--font-inter), system-ui, sans-serif"
+      fallback: "system-ui, sans-serif"
+    display:
+      value: "var(--font-playfair), Georgia, serif"
+      fallback: "Georgia, serif"
+
+  sizes:
+    xs:
+      value: "0.75rem"
+      lineHeight: "1rem"
+    sm:
+      value: "0.875rem"
+      lineHeight: "1.25rem"
+    base:
+      value: "1rem"
+      lineHeight: "1.5rem"
+    lg:
+      value: "1.125rem"
+      lineHeight: "1.75rem"
+    xl:
+      value: "1.25rem"
+      lineHeight: "1.75rem"
+    2xl:
+      value: "1.5rem"
+      lineHeight: "2rem"
+    3xl:
+      value: "1.875rem"
+      lineHeight: "2.25rem"
+    4xl:
+      value: "2.25rem"
+      lineHeight: "2.5rem"
+    5xl:
+      value: "3rem"
+      lineHeight: "1"
+
+  weights:
+    normal:
+      value: "400"
+    medium:
+      value: "500"
+    semibold:
+      value: "600"
+    bold:
+      value: "700"
+
+# =============================================================================
+# SPACING TOKENS
+# =============================================================================
+spacing:
+  0:
+    value: "0"
+  1:
+    value: "0.25rem"
+  2:
+    value: "0.5rem"
+  3:
+    value: "0.75rem"
+  4:
+    value: "1rem"
+  5:
+    value: "1.25rem"
+  6:
+    value: "1.5rem"
+  8:
+    value: "2rem"
+  10:
+    value: "2.5rem"
+  12:
+    value: "3rem"
+  16:
+    value: "4rem"
+  20:
+    value: "5rem"
+  24:
+    value: "6rem"
+
+# =============================================================================
+# BORDER TOKENS
+# =============================================================================
+borders:
+  radius:
+    none:
+      value: "0"
+    sm:
+      value: "0.125rem"
+    base:
+      value: "0.25rem"
+    md:
+      value: "0.375rem"
+    lg:
+      value: "0.5rem"
+    xl:
+      value: "0.75rem"
+    2xl:
+      value: "1rem"
+    full:
+      value: "9999px"
+
+  width:
+    0:
+      value: "0"
+    1:
+      value: "1px"
+    2:
+      value: "2px"
+    4:
+      value: "4px"
+
+# =============================================================================
+# SHADOW TOKENS
+# =============================================================================
+shadows:
+  sm:
+    value: "0 1px 2px 0 rgb(0 0 0 / 0.05)"
+  base:
+    value: "0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1)"
+  md:
+    value: "0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)"
+  lg:
+    value: "0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1)"
+  xl:
+    value: "0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1)"
+
+# =============================================================================
+# ANIMATION TOKENS
+# =============================================================================
+animations:
+  duration:
+    fast:
+      value: "150ms"
+    base:
+      value: "200ms"
+    slow:
+      value: "300ms"
+    slower:
+      value: "500ms"
+
+  easing:
+    linear:
+      value: "linear"
+    ease:
+      value: "ease"
+    easeIn:
+      value: "ease-in"
+    easeOut:
+      value: "ease-out"
+    easeInOut:
+      value: "ease-in-out"
+
+# =============================================================================
+# BREAKPOINT TOKENS
+# =============================================================================
+breakpoints:
+  sm:
+    value: "640px"
+  md:
+    value: "768px"
+  lg:
+    value: "1024px"
+  xl:
+    value: "1280px"
+  2xl:
+    value: "1536px"
+
+# =============================================================================
+# Z-INDEX TOKENS
+# =============================================================================
+zIndex:
+  auto:
+    value: "auto"
+  0:
+    value: "0"
+  10:
+    value: "10"
+  20:
+    value: "20"
+  30:
+    value: "30"
+  40:
+    value: "40"
+  50:
+    value: "50"

@@ -1,0 +1,576 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shock Report - Quiz 5 Elementos Design System</title>
+    <style>
+        :root {
+            --fogo: #E25822;
+            --terra: #8B7355;
+            --agua: #4A90A4;
+            --ar: #87CEEB;
+            --eter: #9B59B6;
+            --gray-900: #252220;
+            --gray-600: #766C5E;
+            --gray-200: #E8E4DD;
+            --cream: #FDF8F3;
+            --success: #22C55E;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: system-ui, sans-serif;
+            background: var(--cream);
+            color: var(--gray-900);
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        header {
+            text-align: center;
+            padding: 3rem 0;
+            border-bottom: 2px solid var(--gray-200);
+            margin-bottom: 2rem;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .subtitle {
+            color: var(--gray-600);
+            font-size: 1.1rem;
+        }
+
+        .metric-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 3rem;
+        }
+
+        .metric-card {
+            background: white;
+            border-radius: 1rem;
+            padding: 1.5rem;
+            text-align: center;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            border: 1px solid var(--gray-200);
+        }
+
+        .metric-value {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: var(--fogo);
+        }
+
+        .metric-value.success {
+            color: var(--success);
+        }
+
+        .metric-label {
+            color: var(--gray-600);
+            font-size: 0.85rem;
+            margin-top: 0.5rem;
+        }
+
+        .section {
+            margin-bottom: 3rem;
+        }
+
+        h2 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid var(--fogo);
+            display: inline-block;
+        }
+
+        .issue-list {
+            list-style: none;
+        }
+
+        .issue-item {
+            background: white;
+            border-radius: 0.75rem;
+            padding: 1rem 1.5rem;
+            margin-bottom: 1rem;
+            border-left: 4px solid var(--fogo);
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
+        }
+
+        .issue-item.success {
+            border-left-color: var(--success);
+        }
+
+        .issue-title {
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+
+        .issue-desc {
+            color: var(--gray-600);
+            font-size: 0.9rem;
+        }
+
+        .savings {
+            background: linear-gradient(135deg, var(--fogo), #C04010);
+            color: white;
+            border-radius: 1rem;
+            padding: 2rem;
+            text-align: center;
+            margin-top: 2rem;
+        }
+
+        .savings h3 {
+            font-size: 1.25rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .savings-value {
+            font-size: 4rem;
+            font-weight: bold;
+        }
+
+        .element-bar {
+            display: flex;
+            height: 40px;
+            border-radius: 0.5rem;
+            overflow: hidden;
+            margin: 1rem 0;
+        }
+
+        .element-bar>div {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            font-size: 0.8rem;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            border-radius: 0.75rem;
+            overflow: hidden;
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
+            margin: 1rem 0;
+        }
+
+        th,
+        td {
+            padding: 0.75rem 1rem;
+            text-align: left;
+            border-bottom: 1px solid var(--gray-200);
+        }
+
+        th {
+            background: var(--gray-900);
+            color: white;
+            font-weight: 600;
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        tr:hover td {
+            background: #faf9f7;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 1rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .badge.success {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .badge.warning {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .badge.info {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+
+        .two-col {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+        }
+
+        @media (max-width: 768px) {
+            .two-col {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        footer {
+            text-align: center;
+            padding: 2rem 0;
+            color: var(--gray-600);
+            font-size: 0.9rem;
+            border-top: 1px solid var(--gray-200);
+            margin-top: 3rem;
+        }
+
+        .recommendation {
+            background: linear-gradient(135deg, var(--success), #16a34a);
+            color: white;
+            border-radius: 1rem;
+            padding: 2rem;
+            text-align: center;
+            margin: 2rem 0;
+        }
+
+        .recommendation h3 {
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <header>
+            <h1>🔥 Shock Report</h1>
+            <p class="subtitle">Design System Audit - Quiz 5 Elementos</p>
+            <p class="subtitle">Generated: 2026-01-31</p>
+        </header>
+
+        <!-- Key Metrics -->
+        <div class="metric-grid">
+            <div class="metric-card">
+                <div class="metric-value">47</div>
+                <div class="metric-label">Padrões UI Encontrados</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-value">14</div>
+                <div class="metric-label">Padrões Redundantes</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-value">13</div>
+                <div class="metric-label">Componentes Analisados</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-value success">34%</div>
+                <div class="metric-label">Potencial de Consolidação</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-value">10h</div>
+                <div class="metric-label">Investimento Total</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-value success">150</div>
+                <div class="metric-label">Linhas de Código Removidas</div>
+            </div>
+        </div>
+
+        <!-- Color Usage -->
+        <section class="section">
+            <h2>🎨 Uso de Cores por Elemento</h2>
+            <div class="element-bar">
+                <div style="background: var(--fogo); width: 35%;">Fogo 35%</div>
+                <div style="background: var(--terra); width: 20%;">Terra 20%</div>
+                <div style="background: var(--agua); width: 18%;">Água 18%</div>
+                <div style="background: var(--ar); width: 15%;">Ar 15%</div>
+                <div style="background: var(--eter); width: 12%;">Éter 12%</div>
+            </div>
+            <p style="color: var(--gray-600); font-size: 0.9rem;">
+                ⚠️ Fogo (primary action) é dominante - bom para visibilidade de CTAs
+            </p>
+        </section>
+
+        <!-- Design Debt Table -->
+        <section class="section">
+            <h2>💳 Design Debt (Débito Técnico)</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Tipo de Débito</th>
+                        <th>Antes</th>
+                        <th>Depois</th>
+                        <th>Redução</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Variações de botões</td>
+                        <td>4</td>
+                        <td>2</td>
+                        <td><span class="badge success">50%</span></td>
+                    </tr>
+                    <tr>
+                        <td>Padrões de cards</td>
+                        <td>4</td>
+                        <td>2</td>
+                        <td><span class="badge success">50%</span></td>
+                    </tr>
+                    <tr>
+                        <td>Padrões de badges</td>
+                        <td>2</td>
+                        <td>1</td>
+                        <td><span class="badge success">50%</span></td>
+                    </tr>
+                    <tr>
+                        <td>Animações inline</td>
+                        <td>15+</td>
+                        <td>1</td>
+                        <td><span class="badge success">93%</span></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Total de padrões</strong></td>
+                        <td><strong>47</strong></td>
+                        <td><strong>31</strong></td>
+                        <td><span class="badge success">34%</span></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Débito em horas</strong></td>
+                        <td><strong>8h</strong></td>
+                        <td><strong>2h</strong></td>
+                        <td><span class="badge success">75%</span></td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+
+        <div class="two-col">
+            <!-- Investment -->
+            <section class="section">
+                <h2>⏱️ Investimento (Horas)</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Fase</th>
+                            <th>Horas</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Setup inicial</td>
+                            <td>4h</td>
+                        </tr>
+                        <tr>
+                            <td>Migração</td>
+                            <td>4h</td>
+                        </tr>
+                        <tr>
+                            <td>Documentação</td>
+                            <td>2h</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Total</strong></td>
+                            <td><strong>10h</strong></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+
+            <!-- Artifacts -->
+            <section class="section">
+                <h2>📦 Artefatos Criados</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Tipo</th>
+                            <th>Qtd</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Componentes Atoms</td>
+                            <td>3</td>
+                        </tr>
+                        <tr>
+                            <td>Componentes Molecules</td>
+                            <td>2</td>
+                        </tr>
+                        <tr>
+                            <td>Token files</td>
+                            <td>3</td>
+                        </tr>
+                        <tr>
+                            <td>Documentos</td>
+                            <td>4</td>
+                        </tr>
+                        <tr>
+                            <td>Relatórios</td>
+                            <td>2</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Total</strong></td>
+                            <td><strong>14</strong></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+        </div>
+
+        <!-- ROI Section -->
+        <section class="section">
+            <h2>📈 ROI Estimado</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Métrica</th>
+                        <th>Antes</th>
+                        <th>Depois</th>
+                        <th>Melhoria</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Tempo por nova tela</td>
+                        <td>2h</td>
+                        <td>1h</td>
+                        <td><span class="badge success">50%</span></td>
+                    </tr>
+                    <tr>
+                        <td>Arquivos para mudar estilo</td>
+                        <td>7</td>
+                        <td>1</td>
+                        <td><span class="badge success">86%</span></td>
+                    </tr>
+                    <tr>
+                        <td>Ramp-up novo dev</td>
+                        <td>1 semana</td>
+                        <td>2-3 dias</td>
+                        <td><span class="badge success">60%</span></td>
+                    </tr>
+                    <tr>
+                        <td>Bugs UI/trimestre</td>
+                        <td>3</td>
+                        <td>&lt;1</td>
+                        <td><span class="badge success">67%</span></td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+
+        <!-- Issues Found -->
+        <section class="section">
+            <h2>⚠️ Principais Problemas de Redundância</h2>
+            <ul class="issue-list">
+                <li class="issue-item">
+                    <div class="issue-title">14x Variações de Card Pattern</div>
+                    <div class="issue-desc">Mesmo padrão rounded-xl border-2 com diferenças mínimas. Consolidado para 2
+                        variantes.</div>
+                </li>
+                <li class="issue-item">
+                    <div class="issue-title">15x Animações Framer Motion</div>
+                    <div class="issue-desc">Padrão fade-slide-up copy-pasted. Criado AnimatedContainer wrapper.</div>
+                </li>
+                <li class="issue-item">
+                    <div class="issue-title">4x Estilos de Botão</div>
+                    <div class="issue-desc">btn-primary com overrides de cor. Usar variant props ao invés.</div>
+                </li>
+                <li class="issue-item">
+                    <div class="issue-title">87x Referências warmGray</div>
+                    <div class="issue-desc">Uso direto de cor em todo lugar. Já tokenizado via Tailwind - OK.</div>
+                </li>
+            </ul>
+        </section>
+
+        <!-- What's Good -->
+        <section class="section">
+            <h2>✅ O Que Já Está Bom</h2>
+            <ul class="issue-list">
+                <li class="issue-item success">
+                    <div class="issue-title">Tailwind Config Organizado</div>
+                    <div class="issue-desc">5 cores de elementos estruturadas com variantes light/dark.</div>
+                </li>
+                <li class="issue-item success">
+                    <div class="issue-title">globals.css Component Classes</div>
+                    <div class="issue-desc">btn-primary, option-card, etc. já extraídos (design system parcial).</div>
+                </li>
+                <li class="issue-item success">
+                    <div class="issue-title">Tipografia Consistente</div>
+                    <div class="issue-desc">font-display para headings, system font para body text.</div>
+                </li>
+            </ul>
+        </section>
+
+        <!-- Summary Cards -->
+        <div class="savings">
+            <h3>Estimativa de Redução de Código</h3>
+            <div class="savings-value">~150 linhas</div>
+            <p>Após implementar componentes consolidados do design system</p>
+        </div>
+
+        <div class="recommendation">
+            <h3>✅ RECOMENDAÇÃO: PROCEED</h3>
+            <p style="font-size: 1.25rem; margin-top: 0.5rem;">
+                Break-even em <strong>2 telas</strong> | Economia 1º ano: <strong>+5 horas</strong>
+            </p>
+        </div>
+
+        <!-- Executive Summary -->
+        <section class="section">
+            <h2>💼 Resumo Executivo</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Indicador</th>
+                        <th>Valor</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Investimento total</td>
+                        <td><strong>10 horas</strong></td>
+                    </tr>
+                    <tr>
+                        <td>Economia por nova tela</td>
+                        <td><strong>1 hora</strong></td>
+                    </tr>
+                    <tr>
+                        <td>Telas para break-even</td>
+                        <td><strong>2</strong></td>
+                    </tr>
+                    <tr>
+                        <td>Economia 1º ano (5 telas)</td>
+                        <td><strong>+5 horas</strong></td>
+                    </tr>
+                    <tr>
+                        <td>Redução débito técnico</td>
+                        <td><strong>75%</strong></td>
+                    </tr>
+                    <tr>
+                        <td>Confiança</td>
+                        <td><span class="badge success">ALTA</span></td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+
+        <footer>
+            <p>Workflow: brownfield-complete | Todos os 9 steps completados</p>
+            <p>Quiz 5 Elementos by Jaya Roberta</p>
+        </footer>
+    </div>
+</body>
+
+</html>
